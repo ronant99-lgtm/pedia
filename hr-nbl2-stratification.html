@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>HR-NBL2 · Neuroblastome Haut Risque — Stratification</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── VARIABLES ── */
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1c2330;
+      --surface3: #21262d;
+      --border:   #2a3441;
+      --border2:  #30363d;
+      --text:     #e6edf3;
+      --text2:    #8b949e;
+      --text3:    #6e7681;
+      --hr:       #f85149;
+      --sr:       #388bfd;
+      --lr:       #3fb950;
+      --special:  #d29922;
+      --purple:   #a371f7;
+      --orange:   #f0883e;
+      --cyan:     #39c5cf;
+      --accent:   #388bfd;
+      --radius:   10px;
+    }
+
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .hdr-logo {
+      width: 34px; height: 34px;
+      border: 1.5px solid var(--hr);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px; font-weight: 500;
+      color: var(--hr);
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
+    }
+    .hdr-info { flex: 1; min-width: 0; }
+    .hdr-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .hdr-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; color: var(--text3);
+      margin-top: 1px;
+    }
+    .hdr-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(248,81,73,0.1);
+      border: 1px solid rgba(248,81,73,0.35);
+      color: var(--hr);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 36px 24px 80px;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-wrap {
+      margin-bottom: 32px;
+    }
+    .progress-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; color: var(--text3);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex; justify-content: space-between;
+    }
+    .progress-bar-bg {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--hr);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── STEP CARD ── */
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease;
+    }
+    .step-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--hr);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .step-card.hidden { display: none; }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .step-question {
+      font-family: 'DM Serif Display', serif;
+      font-size: 19px;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+    .step-hint {
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 22px;
+    }
+
+    /* ── OPTIONS ── */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .option-btn::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--hr);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease;
+    }
+    .option-btn:hover {
+      border-color: var(--hr);
+      background: rgba(248,81,73,0.06);
+    }
+    .option-btn:hover::before { transform: scaleX(1); }
+    .option-btn .opt-main { font-weight: 500; }
+    .option-btn .opt-sub {
+      display: block;
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 3px;
+      font-weight: 300;
+    }
+
+    /* ── BACK BTN ── */
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 6px;
+      transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    /* ── RESULT CARD ── */
+    .result-card {
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.35s ease;
+    }
+    .result-card.arm-a {
+      border: 1px solid var(--sr);
+      border-left: 3px solid var(--sr);
+      background: rgba(56,139,253,0.04);
+    }
+    .result-card.arm-b {
+      border: 1px solid var(--orange);
+      border-left: 3px solid var(--orange);
+      background: rgba(240,136,62,0.04);
+    }
+    .result-card.arm-c {
+      border: 1px solid var(--purple);
+      border-left: 3px solid var(--purple);
+      background: rgba(163,113,247,0.04);
+    }
+    .result-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 24px; gap: 16px;
+    }
+    .result-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--text);
+    }
+    .result-subtitle {
+      font-size: 13px; color: var(--text2); margin-top: 4px;
+    }
+    .result-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-sr { background: rgba(56,139,253,0.15); border: 1px solid rgba(56,139,253,0.4); color: var(--sr); }
+    .badge-orange { background: rgba(240,136,62,0.15); border: 1px solid rgba(240,136,62,0.4); color: var(--orange); }
+    .badge-purple { background: rgba(163,113,247,0.15); border: 1px solid rgba(163,113,247,0.4); color: var(--purple); }
+
+    /* ── RESULT SECTIONS ── */
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 600px) { .result-grid { grid-template-columns: 1fr; } }
+
+    .res-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .res-block-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+    .res-block-content {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .res-block-content strong { color: var(--text); font-weight: 600; }
+    .res-block-content .chip {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      margin: 2px 2px 2px 0;
+    }
+    .res-block-content .val-sr { color: var(--sr); font-weight: 600; }
+    .res-block-content .val-orange { color: var(--orange); font-weight: 600; }
+    .res-block-content .val-purple { color: var(--purple); font-weight: 600; }
+    .res-block-content .val-lr { color: var(--lr); font-weight: 600; }
+
+    /* ── RT BLOCK ── */
+    .rt-block {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--sr);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 14px;
+      background: var(--surface2);
+    }
+    .rt-block-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--sr);
+      margin-bottom: 14px;
+    }
+    .rt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 600px) { .rt-grid { grid-template-columns: 1fr; } }
+    .rt-item { }
+    .rt-item-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+    .rt-item-val {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .rt-dose { color: var(--sr); font-family: 'DM Mono', monospace; font-size: 11px; }
+    .rt-dose.esc { color: var(--orange); }
+    .rt-dose.highesc { color: var(--hr); }
+
+    /* ── OUTCOME BLOCK ── */
+    .outcome-block {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: var(--surface2);
+    }
+    .outcome-block-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 12px;
+    }
+    .outcome-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .outcome-row:last-child { border-bottom: none; }
+    .outcome-label { color: var(--text2); }
+    .outcome-val { font-family: 'DM Mono', monospace; font-size: 11px; }
+    .outcome-good { color: var(--lr); }
+    .outcome-mid  { color: var(--orange); }
+    .outcome-warn { color: var(--hr); }
+
+    /* ── TOXICITY BLOCK ── */
+    .tox-block {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--special);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: var(--surface2);
+    }
+    .tox-block-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--special);
+      margin-bottom: 12px;
+    }
+    .tox-item {
+      display: flex;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .tox-item:last-child { border-bottom: none; }
+    .tox-organ {
+      min-width: 120px;
+      color: var(--text2);
+      font-size: 11px;
+    }
+    .tox-val { color: var(--text); flex: 1; line-height: 1.5; }
+    sup.ref-sup {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: var(--text3);
+      cursor: pointer;
+    }
+    sup.ref-sup:hover { color: var(--accent); }
+
+    /* ── RESET BTN ── */
+    .btn-reset-result {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: var(--text2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-right: 10px;
+    }
+    .btn-reset-result:hover {
+      border-color: var(--text2);
+      color: var(--text);
+    }
+
+    /* ── PDF BTN ── */
+    .btn-pdf {
+      background: none;
+      border: 1px solid var(--sr);
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: var(--sr);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-pdf:hover {
+      background: rgba(56,139,253,0.08);
+    }
+
+    /* ── REFS SECTION ── */
+    .refs-section {
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+    .refs-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 16px;
+    }
+    .ref-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+    }
+    .ref-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text3);
+      min-width: 20px;
+      padding-top: 2px;
+    }
+    .ref-body { flex: 1; }
+    .ref-authors { font-weight: 500; color: var(--text); }
+    .ref-title { color: var(--text); margin-top: 2px; }
+    .ref-journal { color: var(--text2); font-size: 11px; margin-top: 1px; }
+    .ref-doi a {
+      color: var(--accent);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      text-decoration: none;
+    }
+    .ref-doi a:hover { text-decoration: underline; }
+    .ref-note { color: var(--text3); font-size: 11px; font-style: italic; margin-top: 2px; }
+
+    /* ── PRINT FOOTER ── */
+    .print-footer { display: none; }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+      header { position: static !important; background: #fff !important; border-bottom: 1px solid #ccc !important; }
+      .btn-pdf, .btn-reset-result, .progress-wrap, .back-btn { display: none !important; }
+      .step-card { display: none !important; }
+      .result-card {
+        border: 1.5px solid #333 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        color: #000 !important;
+      }
+      .res-block, .rt-block, .outcome-block, .tox-block {
+        background: #f9f9f9 !important;
+        border-color: #ccc !important;
+        color: #000 !important;
+      }
+      .refs-section { break-before: auto; }
+      .print-footer { display: block; font-size: 8pt; color: #999; margin-top: 24px; border-top: 1px solid #ddd; padding-top: 8px; }
+    }
+
+    /* ── NCT BADGE ── */
+    .nct-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .nct-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="hdr-logo">NB</div>
+  <div class="hdr-info">
+    <div class="hdr-title">HR-NBL2 / SIOPEN — Neuroblastome Haut Risque</div>
+    <div class="hdr-sub">SIOPEN · v4.1 (08/03/2024) · Outil de stratification thérapeutique · Répondre aux questions pour guider la prise en charge</div>
+  </div>
+  <span class="hdr-badge">HR-NBL2 · SIOPEN</span>
+</header>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="container">
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label">
+      <span id="stepLabel">Étape 1 / 7</span>
+      <span id="stepPct">14%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill" style="width:14%"></div>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 1 — ÉLIGIBILITÉ ═══════ -->
+  <div class="step-card" id="step1">
+    <div class="section-label">Critères d'inclusion · HR-NBL2</div>
+    <div class="step-question">Le patient répond-il aux critères d'inclusion HR-NBL2 ?</div>
+    <div class="step-hint">
+      HR-NBL2 inclut : <strong>Stade M > 12 mois</strong> (tout statut MYCN) · <strong>L2, M ou Ms tout âge avec amplification MYCN</strong> ou amplification focale MYC/MYCL · <strong>Ms 12–18 mois</strong> tout statut MYCN.<br>
+      Pas de chimiothérapie antérieure (ou ≤ 1 cycle Carbo-VP16 d'urgence toléré).<br>
+      <em>* En Allemagne : M sans ampli MYCN < 18 mois exclu.</em>
+    </div>
+    <div class="options-list">
+      <button class="option-btn" onclick="go(2)">
+        <span class="opt-main">✅ Oui — le patient est éligible</span>
+        <span class="opt-sub">Critères diagnostiques, stade, MYCN conformes</span>
+      </button>
+      <button class="option-btn" onclick="showResult('ineligible')">
+        <span class="opt-main">❌ Non — critères non remplis</span>
+        <span class="opt-sub">Prise en charge hors protocole HR-NBL2</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 2 — RANDOMISATION INDUCTION R-I ═══════ -->
+  <div class="step-card hidden" id="step2">
+    <div class="section-label">Phase d'induction · Randomisation R-I</div>
+    <div class="step-question">Randomisation R-I : quel régime d'induction ?</div>
+    <div class="step-hint">
+      Le patient est randomisé entre les 2 régimes. Ou sélectionner si le bras est déjà attribué ou en cas de refus de randomisation (standard : RAPID COJEC).
+    </div>
+    <div class="options-list">
+      <button class="option-btn" onclick="setArm('cojec'); go(3)">
+        <span class="opt-main">🔵 RAPID COJEC (SIOPEN)</span>
+        <span class="opt-sub">8 cours × 10 j — Carboplatine, Cisplatine, Vincristine, Étoposide, Cyclophosphamide · Évaluation J80</span>
+      </button>
+      <button class="option-btn" onclick="setArm('gpoh'); go(3)">
+        <span class="opt-main">🟠 GPOH (N5/N6)</span>
+        <span class="opt-sub">6 cycles N5/N6 — Cisplatine, Étoposide, Vindesine, Ifosfamide, Vincristine, Dacarbazine, Doxorubicine · Évaluation J126</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 3 — RÉPONSE MÉTASTATIQUE ═══════ -->
+  <div class="step-card hidden" id="step3">
+    <div class="section-label">Évaluation fin d'induction · Réponse métastatique</div>
+    <div class="step-question">Quelle est la réponse métastatique en fin d'induction ?</div>
+    <div class="step-hint">
+      <strong>Réponse suffisante :</strong> Score SIOPEN ≤ 3 ET ≥ 50% de réduction du score mIBG (ou ≤ 3 lésions osseuses + ≥ 50% réduction FDG-PET pour tumeurs mIBG-négatives) ET moelle : RC ou maladie minimale.<br>
+      <strong>Réponse insuffisante :</strong> Score SIOPEN > 3 OU < 50% de réduction, OU moelle : SD, OU autres sites métastatiques en SD.
+    </div>
+    <div class="options-list">
+      <button class="option-btn" onclick="setResponse('sufficient'); go(4)">
+        <span class="opt-main">✅ Réponse SUFFISANTE</span>
+        <span class="opt-sub">Score SIOPEN ≤ 3 + ≥ 50% réduction mIBG + moelle RC/MD → éligible R-HDC</span>
+      </button>
+      <button class="option-btn" onclick="setResponse('insufficient'); go(6)">
+        <span class="opt-main">⚠️ Réponse INSUFFISANTE (maladie réfractaire)</span>
+        <span class="opt-sub">Score SIOPEN > 3 OU < 50% réduction OU moelle SD → bras chemoimmunothérapie TEMIRI/DB</span>
+      </button>
+      <button class="option-btn" onclick="setResponse('special'); go(7)">
+        <span class="opt-main">🔵 Cas particulier : Stade M 12–18 mois, non-MYCN amplifié, altérations chromosomiques numériques seulement</span>
+        <span class="opt-sub">En RC complète → arrêt traitement après induction + chirurgie</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 4 — R-HDC ═══════ -->
+  <div class="step-card hidden" id="step4">
+    <div class="section-label">Phase de consolidation · Randomisation R-HDC</div>
+    <div class="step-question">Randomisation R-HDC : quelle stratégie de chimiothérapie haute dose ?</div>
+    <div class="step-hint">
+      Randomisation après évaluation de fin d'induction et chirurgie du site primitif. Stratifiée sur : âge, stade, MYCN, induction reçue, réponse à l'induction, pays.<br>
+      <em>En cas de refus de randomisation : HDC simple Bu-Mel.</em>
+    </div>
+    <div class="options-list">
+      <button class="option-btn" onclick="setHDC('bumel'); go(5)">
+        <span class="opt-main">🔵 HDC simple — Bu-Mel</span>
+        <span class="opt-sub">Busulfan + Melphalan 140 mg/m² → ASCR (bras standard)</span>
+      </button>
+      <button class="option-btn" onclick="setHDC('tandem'); go(5)">
+        <span class="opt-main">🟠 Tandem HDC — Thiotepa 900 mg/m² → Bu-Mel</span>
+        <span class="opt-sub">Thiotepa d'abord → ASCR (≥8 sem interval) → Bu-Mel → ASCR · Intervalle ASCR1→Bu-Mel ≤ J90</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 5 — R-RTx (réponse suffisante) ═══════ -->
+  <div class="step-card hidden" id="step5">
+    <div class="section-label">Traitement local · Randomisation R-RTx</div>
+    <div class="step-question">Quel est le statut du résidu tumoral local après HDC/ASCR et chirurgie ?</div>
+    <div class="step-hint">
+      Évaluation par IRM (ou TDM) + scintigraphie mIBG/TEP après HDC. Le statut "résidu macroscopique" est retenu si : IRM positive ET/OU mIBG positive ET/OU rapport chirurgical mentionnant un résidu.<br>
+      RT débutée entre J60 et J90 après ASCR.
+    </div>
+    <div class="options-list">
+      <button class="option-btn" onclick="showResult('sufficient_noresidu')">
+        <span class="opt-main">✅ Pas de résidu macroscopique</span>
+        <span class="opt-sub">IRM négative + mIBG négative + résection complète → RT 21.6 Gy standard, pas de R-RTx</span>
+      </button>
+      <button class="option-btn" onclick="showResult('sufficient_residu')">
+        <span class="opt-main">⚠️ Résidu macroscopique confirmé</span>
+        <span class="opt-sub">→ Éligible R-RTx (randomisation dose RT) si pas de progression après HDC</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 6 — TEMIRI/DB (réponse insuffisante) ═══════ -->
+  <div class="step-card hidden" id="step6">
+    <div class="section-label">Bras chemoimmunothérapie · Réponse insuffisante</div>
+    <div class="step-question">Évaluation après 4 cycles TEMIRI/DB : quelle réponse ?</div>
+    <div class="step-hint">
+      TEMIRI/DB = Témozolomide + Irinotécan + Dinutuximab bêta × 4 cycles (évaluation après C2 et C4).<br>
+      Suivi : tandem HDC Thiotepa + Bu-Mel → ASCR → chirurgie (si non réalisée) → RT → maintenance.
+    </div>
+    <div class="options-list">
+      <button class="option-btn" onclick="showResult('insufficient_noresidu')">
+        <span class="opt-main">Après tandem HDC : pas de résidu macroscopique local</span>
+        <span class="opt-sub">→ RT 21.6 Gy standard sur lit tumoral pré-opératoire</span>
+      </button>
+      <button class="option-btn" onclick="showResult('insufficient_residu')">
+        <span class="opt-main">Après tandem HDC : résidu macroscopique local persistant</span>
+        <span class="opt-sub">→ Éligible R-RTx (randomisation dose RT)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 7 — CAS PARTICULIER ═══════ -->
+  <div class="step-card hidden" id="step7">
+    <div class="section-label">Cas particulier · M 12–18 mois non-MYCN amplifié</div>
+    <div class="step-question">Quel est le statut de réponse après induction + chirurgie ?</div>
+    <div class="step-hint">
+      Stade M, 12–18 mois, non-MYCN amplifié, altérations chromosomiques numériques seulement : pronostic intermédiaire, déescalade thérapeutique si RC complète.
+    </div>
+    <div class="options-list">
+      <button class="option-btn" onclick="showResult('special_cr')">
+        <span class="opt-main">✅ Réponse complète (RC) après induction + chirurgie</span>
+        <span class="opt-sub">→ Arrêt traitement après chirurgie. Pas de HDC ni RT.</span>
+      </button>
+      <button class="option-btn" onclick="go(4)">
+        <span class="opt-main">⚠️ Réponse incomplète</span>
+        <span class="opt-sub">→ Appeler coordinateur national. Probable poursuite vers R-HDC.</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- RÉSULTATS -->
+  <!-- ═══════════════════════════════════════════════ -->
+
+  <!-- INÉLIGIBLE -->
+  <div class="result-card arm-c hidden" id="result-ineligible">
+    <div class="result-header">
+      <div>
+        <div class="result-title">Patient non éligible HR-NBL2</div>
+        <div class="result-subtitle">Les critères d'inclusion ne sont pas remplis</div>
+      </div>
+      <span class="result-badge badge-purple">HORS PROTOCOLE</span>
+    </div>
+    <div class="res-block">
+      <div class="res-block-title">Conduite à tenir</div>
+      <div class="res-block-content">
+        Prise en charge selon les recommandations nationales en vigueur.<br>
+        Contacter le coordinateur national SIOPEN pour discussion de cas.<br>
+        Envisager une inclusion dans d'autres protocoles adaptés au profil.
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <button class="btn-reset-result" onclick="reset()">⟳ Nouvelle stratification</button>
+    </div>
+  </div>
+
+  <!-- CAS PARTICULIER — RC ═══════ -->
+  <div class="result-card arm-a hidden" id="result-special_cr">
+    <div class="result-header">
+      <div>
+        <div class="result-title">Arrêt de traitement — Déescalade</div>
+        <div class="result-subtitle">M 12–18 mois · Non-MYCN amplifié · Altérations numériques · RC</div>
+      </div>
+      <span class="result-badge badge-sr">DÉESCALADE</span>
+    </div>
+    <div class="result-grid">
+      <div class="res-block">
+        <div class="res-block-title">Traitement</div>
+        <div class="res-block-content">
+          <strong>Induction</strong> + <strong>Chirurgie</strong> uniquement.<br>
+          Pas de HDC, pas de RT, pas de maintenance immunothérapie.
+        </div>
+      </div>
+      <div class="res-block">
+        <div class="res-block-title">Suivi</div>
+        <div class="res-block-content">
+          Suivi clinique et imagerie selon protocole HR-NBL2.<br>
+          En cas de rechute : discuter avec coordinateur national.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <button class="btn-reset-result" onclick="reset()">⟳ Nouvelle stratification</button>
+    </div>
+  </div>
+
+  <!-- RÉPONSE SUFFISANTE — SANS RÉSIDU ═══════ -->
+  <div class="result-card arm-a hidden" id="result-sufficient_noresidu">
+    <div class="result-header">
+      <div>
+        <div class="result-title" id="title-sufficient_noresidu">Réponse suffisante — Pas de résidu macroscopique</div>
+        <div class="result-subtitle" id="subtitle-sufficient_noresidu">RT standard 21.6 Gy + Maintenance</div>
+      </div>
+      <span class="result-badge badge-sr" id="badge-sufficient_noresidu">RÉPONSE SUFFISANTE</span>
+    </div>
+
+    <div class="result-grid">
+      <div class="res-block">
+        <div class="res-block-title">Induction</div>
+        <div class="res-block-content" id="induction-block-snr"></div>
+      </div>
+      <div class="res-block">
+        <div class="res-block-title">Consolidation HDC</div>
+        <div class="res-block-content" id="hdc-block-snr"></div>
+      </div>
+    </div>
+
+    <!-- RT Block -->
+    <div class="rt-block">
+      <div class="rt-block-title">Radiothérapie — Timing · Volumes · Doses</div>
+      <div class="rt-grid">
+        <div class="rt-item">
+          <div class="rt-item-label">Indication</div>
+          <div class="rt-item-val">RT standard — pas de résidu macroscopique.<br>Pas de randomisation R-RTx.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Timing</div>
+          <div class="rt-item-val">J60–J90 après ASCR Bu-Mel · Avant maintenance.<br>Si > J90 pour récupération hématologique : RT maintenue.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Volume</div>
+          <div class="rt-item-val">GTV_préop (tumeur post-chimio + ADP adjacentes) → CTV (après ajustement chirurgical) → PTV (marge 0,5–1 cm)<br>Trimmer les organes sains déplacés par chirurgie.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Dose</div>
+          <div class="rt-item-val"><span class="rt-dose">21.6 Gy / 12 fr × 1,8 Gy</span><br>≤ 17 jours au total.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maintenance -->
+    <div class="res-block" style="margin-bottom:14px;">
+      <div class="res-block-title">Maintenance</div>
+      <div class="res-block-content">
+        <strong>13-cis-RA</strong> 160 mg/m²/j × 14j · 6 cycles total (1 cycle avant immunothérapie, puis 5 cycles après DB)<br>
+        <strong>Dinutuximab bêta (LTI)</strong> 10 mg/m²/j × 10 j en perfusion continue · 5 cycles × 35 j<br>
+        Commencer ≤ J120 post-ASCR · Doit débuter ≥ 1 sem après fin RT
+      </div>
+    </div>
+
+    <!-- Outcomes -->
+    <div class="outcome-block">
+      <div class="outcome-block-title">Données d'efficacité — HR-NBL1/SIOPEN <sup class="ref-sup">[1,2]</sup></div>
+      <div class="outcome-row">
+        <span class="outcome-label">EFS 3 ans (RAPID COJEC + immunothérapie)</span>
+        <span class="outcome-val outcome-mid">49 %</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">EFS 5 ans</span>
+        <span class="outcome-val outcome-mid">49 %</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">EFS 10 ans</span>
+        <span class="outcome-val outcome-warn">42 %</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">Bu-Mel vs CEM — EFS 3 ans (HR-NBL1 R1) <sup class="ref-sup">[2]</sup></span>
+        <span class="outcome-val outcome-good">49 % vs 33 % (p&lt;0.001)</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">n (cohorte)</span>
+        <span class="outcome-val">1 456 pts (RAPID COJEC) · 563 pts (R1)</span>
+      </div>
+    </div>
+
+    <!-- Toxicité PENTEC -->
+    <div class="tox-block">
+      <div class="tox-block-title">Toxicités tardives — PENTEC 2024 / SIOPE <sup class="ref-sup">[3,4,5]</sup></div>
+      <div class="tox-item">
+        <div class="tox-organ">Rein (21.6 Gy)</div>
+        <div class="tox-val">IRC gr.2 : risque 5% si rein entier = 10,2 Gy · HTA : 5% si rein entier = 9,6 Gy<br><em>⚠ Interaction ifosfamide : V10 > 40% → risque IRC gr.2 × 2</em></div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Foie (21.6 Gy)</div>
+        <div class="tox-val">SOS/VOD : 14,5% si D100% = 20 Gy · 6,1% si D100% = 10 Gy<br><em>⚠ Enfants &lt; 20 ans plus à risque · Busulfan aggrave la toxicité hépatique</em></div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Rate (incidente)</div>
+        <div class="tox-val">Neuroblastome 21.6 Gy : Dmoy rate ≈ 8,4 Gy (5,4–18,5) · Risque OPSI × 2–5,5<br><em>⚠ SIOPE 2021 : délinéer systématiquement la rate. Vaccinations antipneumococcique, méningocoque, Hib</em></div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Vertèbres</div>
+        <div class="tox-val">Scoliose si gradient > 5 Gy G-D (2 ans → puberté) · Irradier en symétrie<br><em>SIOPE 2019 : Δ &lt; 5 Gy chez 2 ans → fin puberté pour champs paravertébraux</em></div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Gonades (filles)</div>
+        <div class="tox-val">Alkylants HR-NBL2 : AOF 6–13% si CED élevée + RT > 2 Gy ovaire · POI &gt; 50% si CED ≥ 20 g/m² + RT > 10 Gy</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Cœur</div>
+        <div class="tox-val">Anthracyclines (doxo GPOH/GPOH) + RT : +10,5 Gy dose cœur équivalente par tranche de 100 mg/m²</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Poumon</div>
+        <div class="tox-val">V12 &lt; 50% + V15 &lt; 25% + D50% ≤ 20 Gy les deux poumons (interaction Busulfan++)</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <button class="btn-reset-result" onclick="reset()">⟳ Nouvelle stratification</button>
+      <button class="btn-pdf" onclick="printResult('result-sufficient_noresidu')">⬇ Exporter PDF</button>
+    </div>
+  </div>
+
+  <!-- RÉPONSE SUFFISANTE — AVEC RÉSIDU ═══════ -->
+  <div class="result-card arm-b hidden" id="result-sufficient_residu">
+    <div class="result-header">
+      <div>
+        <div class="result-title" id="title-sufficient_residu">Réponse suffisante — Résidu macroscopique</div>
+        <div class="result-subtitle">Randomisation R-RTx : 21.6 Gy vs 21.6 + 14.4 Gy boost</div>
+      </div>
+      <span class="result-badge badge-orange">R-RTx</span>
+    </div>
+
+    <div class="result-grid">
+      <div class="res-block">
+        <div class="res-block-title">Induction</div>
+        <div class="res-block-content" id="induction-block-sr"></div>
+      </div>
+      <div class="res-block">
+        <div class="res-block-title">Consolidation HDC</div>
+        <div class="res-block-content" id="hdc-block-sr"></div>
+      </div>
+    </div>
+
+    <!-- RT Block résidu -->
+    <div class="rt-block">
+      <div class="rt-block-title">Radiothérapie R-RTx — Timing · Volumes · Doses</div>
+      <div class="rt-grid">
+        <div class="rt-item">
+          <div class="rt-item-label">Indication / Randomisation</div>
+          <div class="rt-item-val">
+            RT randomisée (R-RTx) sur résidu macroscopique confirmé en RCP + évaluation équipe RT.<br>
+            <em>En cas de refus : bras 21.6 Gy standard.</em>
+          </div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Timing</div>
+          <div class="rt-item-val">J60–J90 après ASCR Bu-Mel · Avant maintenance · Si > J90 : RT maintenue quand même.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Volume PTV1 (Phase 1)</div>
+          <div class="rt-item-val">GTV_préop → CTV (trimmer organes sains déplacés) → PTV1 (marge 0,5–1 cm)<br>Inclure surface organe si contact avec capsule.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Volume PTVb (Boost)</div>
+          <div class="rt-item-val">GTVb = résidu au moment RT (imagerie post-HDC)<br>CTVb = GTVb (pas de marge supplémentaire)<br>PTVb = CTVb + 10 mm</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Dose — Bras 1 (standard)</div>
+          <div class="rt-item-val"><span class="rt-dose">21.6 Gy / 12 fr × 1,8 Gy</span><br>Sur tout le lit tumoral pré-opératoire incluant le résidu.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Dose — Bras 2 (boost)</div>
+          <div class="rt-item-val">
+            <span class="rt-dose">21.6 Gy / 12 fr</span> (PTV1) puis <span class="rt-dose esc">+ 14.4 Gy / 8 fr × 1,8 Gy</span> (PTVb)<br>
+            = <span class="rt-dose highesc">36 Gy total</span> sur le résidu macroscopique.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maintenance -->
+    <div class="res-block" style="margin-bottom:14px;">
+      <div class="res-block-title">Maintenance</div>
+      <div class="res-block-content">
+        <strong>13-cis-RA</strong> 160 mg/m²/j × 14j · 6 cycles · <strong>Dinutuximab bêta (LTI)</strong> 10 mg/m²/j × 10j · 5 cycles × 35j
+      </div>
+    </div>
+
+    <!-- Outcomes -->
+    <div class="outcome-block">
+      <div class="outcome-block-title">Données d'efficacité — R-RTx <sup class="ref-sup">[1,2]</sup></div>
+      <div class="outcome-row">
+        <span class="outcome-label">EFS 3 ans estimée (bras 21.6 Gy)</span>
+        <span class="outcome-val outcome-warn">38 %</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">EFS 3 ans attendue (bras 36 Gy boost)</span>
+        <span class="outcome-val outcome-mid">53 % (objectif)</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">Puissance R-RTx</span>
+        <span class="outcome-val">226 pts · 4 ans recrutement · 4 ans suivi · 80%</span>
+      </div>
+    </div>
+
+    <!-- Toxicités PENTEC -->
+    <div class="tox-block">
+      <div class="tox-block-title">Toxicités tardives — PENTEC 2024 / SIOPE <sup class="ref-sup">[3,4,5]</sup></div>
+      <div class="tox-item">
+        <div class="tox-organ">Rein (21.6–36 Gy)</div>
+        <div class="tox-val">IRC gr.2 5% si rein entier = 10,2 Gy · Tolérance 1 rein à 21.6 Gy acceptable si rein controlat. fonctionnel<br>Rein au-delà : discuter avec Radiotherapy Panel SIOPEN</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Moelle épinière (36 Gy)</div>
+        <div class="tox-val">Myélopathie rare si D0,03cc &lt; 50,4 Gy sans chimio · <em>Busulfan sensibilise ++ → objectif D0,03cc &lt; 30 Gy dans bras boost</em></div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Foie</div>
+        <div class="tox-val">SOS : 14,5% si D100% = 20 Gy · Max foie entier 19 Gy · 50% foie : max 21 Gy<br>⚠ Busulfan fortement synergique avec RT hépatique</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Rate</div>
+        <div class="tox-val">36 Gy sur neuroblastome : Dmoy rate ≈ 14,4 Gy (3,9–31,4) · Risque OPSI × 5,5–6<br>⚠ Vaccinations obligatoires. Prophylaxie pénicilline V à discuter.</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Vertèbres (boost)</div>
+        <div class="tox-val">Maintenir gradient G-D &lt; 5 Gy si ≥ 2 ans. Si dose > 40 Gy : vertèbres ≥ 36 Gy minimum<br>Irradier vertèbres entières en symétrie.</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Sarcomes secondaires</div>
+        <div class="tox-val">EAR à 50 ans : 0,2% après 20 Gy → 0,3% après 50 Gy · Anthracyclines + alkylants × OR ≈ 2</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <button class="btn-reset-result" onclick="reset()">⟳ Nouvelle stratification</button>
+      <button class="btn-pdf" onclick="printResult('result-sufficient_residu')">⬇ Exporter PDF</button>
+    </div>
+  </div>
+
+  <!-- RÉPONSE INSUFFISANTE — SANS RÉSIDU ═══════ -->
+  <div class="result-card arm-c hidden" id="result-insufficient_noresidu">
+    <div class="result-header">
+      <div>
+        <div class="result-title">Réponse insuffisante — TEMIRI/DB · Pas de résidu local</div>
+        <div class="result-subtitle">Tandem HDC Thiotepa + Bu-Mel · RT 21.6 Gy standard · Maintenance</div>
+      </div>
+      <span class="result-badge badge-purple">INSUFFISANT · TEMIRI/DB</span>
+    </div>
+
+    <div class="result-grid">
+      <div class="res-block">
+        <div class="res-block-title">Chemoimmunothérapie (4 cycles)</div>
+        <div class="res-block-content">
+          <strong>TEMIRI/DB</strong> × 4 cycles<br>
+          Témozolomide + Irinotécan + Dinutuximab bêta<br>
+          Évaluation après C2 et C4.<br>
+          <em>Critère primaire : taux de réponse métastatique après 4 cycles (objectif ≥ 35%)</em>
+        </div>
+      </div>
+      <div class="res-block">
+        <div class="res-block-title">Consolidation</div>
+        <div class="res-block-content">
+          <strong>Tandem HDC</strong> obligatoire :<br>
+          Thiotepa 900 mg/m² → ASCR1<br>
+          (≥ 8 sem) → Bu-Mel → ASCR2<br>
+          Pas d'âge limite pour le tandem.
+        </div>
+      </div>
+    </div>
+
+    <div class="rt-block">
+      <div class="rt-block-title">Radiothérapie — Pas de résidu macroscopique</div>
+      <div class="rt-grid">
+        <div class="rt-item">
+          <div class="rt-item-label">Indication</div>
+          <div class="rt-item-val">RT standard — pas de résidu. Pas de R-RTx.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Timing</div>
+          <div class="rt-item-val">J60–J90 après ASCR Bu-Mel. Avant maintenance.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Volume</div>
+          <div class="rt-item-val">Lit tumoral pré-opératoire · GTV_préop → CTV → PTV (0,5–1 cm)</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Dose</div>
+          <div class="rt-item-val"><span class="rt-dose">21.6 Gy / 12 fr × 1,8 Gy</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="res-block" style="margin-bottom:14px;">
+      <div class="res-block-title">Maintenance</div>
+      <div class="res-block-content">
+        <strong>Dinutuximab bêta</strong> + <strong>13-cis-RA</strong> · Même schéma que bras réponse suffisante.
+      </div>
+    </div>
+
+    <div class="outcome-block">
+      <div class="outcome-block-title">Données d'efficacité — Chemoimmunothérapie <sup class="ref-sup">[1]</sup></div>
+      <div class="outcome-row">
+        <span class="outcome-label">Objectif taux de réponse TEMIRI/DB</span>
+        <span class="outcome-val outcome-mid">≥ 35 % (H1) vs &lt; 20 % (H0)</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">n estimé bras TEMIRI/DB</span>
+        <span class="outcome-val">93 patients</span>
+      </div>
+      <div class="outcome-row">
+        <span class="outcome-label">Tandem HDC — EFS 3 ans (données préliminaires)</span>
+        <span class="outcome-val outcome-warn">37 % (cohorte VHR-NBL pilote)</span>
+      </div>
+    </div>
+
+    <div class="tox-block">
+      <div class="tox-block-title">Toxicités tardives — PENTEC 2024 / SIOPE <sup class="ref-sup">[3,4,5]</sup></div>
+      <div class="tox-item">
+        <div class="tox-organ">Rein</div>
+        <div class="tox-val">IRC gr.2 : 5% si rein entier = 10,2 Gy · Ifosfamide (GPOH) + RT → risque majoré</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Rate</div>
+        <div class="tox-val">21.6 Gy : Dmoy ≈ 8,4 Gy · Risque OPSI × 2 · Délinéer + vaccinations</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Gonades (filles)</div>
+        <div class="tox-val">Tandem HDC (alkylants cumulés) : risque AOF/POI très élevé si ovaires dans champ RT</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <button class="btn-reset-result" onclick="reset()">⟳ Nouvelle stratification</button>
+      <button class="btn-pdf" onclick="printResult('result-insufficient_noresidu')">⬇ Exporter PDF</button>
+    </div>
+  </div>
+
+  <!-- RÉPONSE INSUFFISANTE — AVEC RÉSIDU ═══════ -->
+  <div class="result-card arm-c hidden" id="result-insufficient_residu">
+    <div class="result-header">
+      <div>
+        <div class="result-title">Réponse insuffisante — TEMIRI/DB · Résidu macroscopique</div>
+        <div class="result-subtitle">Tandem HDC · R-RTx (21.6 Gy vs 36 Gy) · Maintenance</div>
+      </div>
+      <span class="result-badge badge-purple">INSUFFISANT · R-RTx</span>
+    </div>
+
+    <div class="result-grid">
+      <div class="res-block">
+        <div class="res-block-title">Chemoimmunothérapie</div>
+        <div class="res-block-content">
+          <strong>TEMIRI/DB</strong> × 4 cycles puis<br>
+          <strong>Tandem HDC</strong> : Thiotepa → Bu-Mel → ASCR
+        </div>
+      </div>
+      <div class="res-block">
+        <div class="res-block-title">Chirurgie</div>
+        <div class="res-block-content">
+          Si non réalisée avant tandem HDC : chirurgie après tandem HDC si faisable.<br>
+          Marquer résidu non résécable avec clips IRM-compatibles.
+        </div>
+      </div>
+    </div>
+
+    <div class="rt-block">
+      <div class="rt-block-title">Radiothérapie R-RTx — Résidu macroscopique persistant</div>
+      <div class="rt-grid">
+        <div class="rt-item">
+          <div class="rt-item-label">Randomisation R-RTx</div>
+          <div class="rt-item-val">Éligible R-RTx si : pas de progression après tandem HDC · PS ≥ 50% · Hémato correct · Délai 60–90 j post-ASCR.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Volumes</div>
+          <div class="rt-item-val">Idem bras réponse suffisante avec résidu.<br>GTVb = résidu visible à l'imagerie au moment RT.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Dose — Bras 1</div>
+          <div class="rt-item-val"><span class="rt-dose">21.6 Gy / 12 fr</span> sur tout le lit pré-opératoire.</div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-item-label">Dose — Bras 2 (boost)</div>
+          <div class="rt-item-val"><span class="rt-dose">21.6 Gy / 12 fr</span> + <span class="rt-dose esc">14.4 Gy / 8 fr</span> boost sur résidu = <span class="rt-dose highesc">36 Gy total</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="res-block" style="margin-bottom:14px;">
+      <div class="res-block-title">Maintenance</div>
+      <div class="res-block-content">
+        <strong>Dinutuximab bêta</strong> + <strong>13-cis-RA</strong> · Même schéma.
+      </div>
+    </div>
+
+    <div class="tox-block">
+      <div class="tox-block-title">Toxicités tardives — PENTEC 2024 / SIOPE <sup class="ref-sup">[3,4,5]</sup></div>
+      <div class="tox-item">
+        <div class="tox-organ">Moelle épinière (36 Gy)</div>
+        <div class="tox-val">Busulfan (× 2 cycles tandem) → seuil myélopathie abaissé. Objectif D0,03cc &lt; 30 Gy dans bras boost.</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Rein + Foie</div>
+        <div class="tox-val">Risques majorés par les deux cycles de busulfan (tandem HDC). Surveillance étroite SOS hépatique.</div>
+      </div>
+      <div class="tox-item">
+        <div class="tox-organ">Rate (36 Gy)</div>
+        <div class="tox-val">Dmoy ≈ 14,4 Gy · Risque OPSI × 5,5–6 · Vaccinations + pénicilline V prophylactique à discuter.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <button class="btn-reset-result" onclick="reset()">⟳ Nouvelle stratification</button>
+      <button class="btn-pdf" onclick="printResult('result-insufficient_residu')">⬇ Exporter PDF</button>
+    </div>
+  </div>
+
+  <!-- ═══════ RÉFÉRENCES ═══════ -->
+  <div class="refs-section" id="refsSection">
+    <div class="refs-title">Références</div>
+
+    <div class="ref-item">
+      <span class="ref-num">1</span>
+      <div class="ref-body">
+        <div class="ref-authors">Pasqualini C, Chaltiel D, Le Teuff G, et al. (SIOPEN)</div>
+        <div class="ref-title">HR-NBL2: High-risk neuroblastoma study 2.0 of SIOP-Europe-Neuroblastoma/SIOPEN — Protocol v4.1</div>
+        <div class="ref-journal">Gustave Roussy · EudraCT 2019-001068-31 · 08/03/2024</div>
+        <div class="ref-doi"><a href="https://clinicaltrials.gov/study/NCT04221035" target="_blank">NCT04221035 — clinicaltrials.gov</a></div>
+        <div class="ref-note">Essai de phase III international ouvert à 26 pays, 3 randomisations séquentielles + bras chemoimmunothérapie</div>
+      </div>
+    </div>
+
+    <div class="ref-item">
+      <span class="ref-num">2</span>
+      <div class="ref-body">
+        <div class="ref-authors">Ladenstein R, Pötschger U, Pearson ADJ, et al.</div>
+        <div class="ref-title">Busulfan and melphalan versus carboplatin, etoposide, and melphalan as high-dose chemotherapy for high-risk neuroblastoma (HR-NBL1/SIOPEN): an international, randomised, multi-arm, open-label, phase 3 trial</div>
+        <div class="ref-journal">Lancet Oncology, 2017;18(4):500–514</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1016/S1470-2045(17)30070-0" target="_blank">doi:10.1016/S1470-2045(17)30070-0</a></div>
+        <div class="ref-note">R1/HR-NBL1 : Bu-Mel EFS 49% vs CEM 33% (p&lt;0.001) · arrêt anticipé de l'essai</div>
+      </div>
+    </div>
+
+    <div class="ref-item">
+      <span class="ref-num">3</span>
+      <div class="ref-body">
+        <div class="ref-authors">Constine LS, Marks LB, Milano MT, et al.</div>
+        <div class="ref-title">A User's Guide and Summary of Pediatric Normal Tissue Effects in the Clinic (PENTEC)</div>
+        <div class="ref-journal">Int J Radiat Oncol Biol Phys. 2024;119(2):319–337</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1016/j.ijrobp.2023.09.017" target="_blank">doi:10.1016/j.ijrobp.2023.09.017</a></div>
+        <div class="ref-note">Données dose-risque rein, foie, moelle, gonades, cœur, poumon en pédiatrie</div>
+      </div>
+    </div>
+
+    <div class="ref-item">
+      <span class="ref-num">4</span>
+      <div class="ref-body">
+        <div class="ref-authors">Arunagiri N, Kelly SM, Dunlea C, et al.</div>
+        <div class="ref-title">The spleen as an organ at risk in paediatric radiotherapy: A SIOP-Europe Radiation Oncology Working Group report</div>
+        <div class="ref-journal">European Journal of Cancer. 2021;143:1–10</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1016/j.ejca.2020.10.025" target="_blank">doi:10.1016/j.ejca.2020.10.025</a></div>
+        <div class="ref-note">Neuroblastome 21.6 Gy : Dmoy rate 8,4 Gy (5,4–18,5). Risque OPSI × 2–6. Recommandation SIOPE 2021.</div>
+      </div>
+    </div>
+
+    <div class="ref-item">
+      <span class="ref-num">5</span>
+      <div class="ref-body">
+        <div class="ref-authors">Hoeben BAW, Carrie C, Timmermann B, et al.</div>
+        <div class="ref-title">Management of vertebral radiotherapy dose in paediatric patients with cancer: consensus recommendations from the SIOPE radiotherapy working group</div>
+        <div class="ref-journal">Lancet Oncology. 2019;20(3):e155–e166</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1016/S1470-2045(18)30922-5" target="_blank">doi:10.1016/S1470-2045(18)30922-5</a></div>
+        <div class="ref-note">Recommandations gradients G-D &lt; 5 Gy (2 ans → puberté) pour champs paravertébraux (neuroblastome, Wilms, sarcomes)</div>
+      </div>
+    </div>
+
+  </div><!-- /refs-section -->
+
+  <!-- PRINT FOOTER -->
+  <div class="print-footer">
+    Outil d'aide à la décision — Ne se substitue pas au jugement clinique ni aux recommandations en vigueur.<br>
+    Généré le <span id="printDate"></span> · HR-NBL2/SIOPEN v4.1 · NCT04221035 · ronant99-lgtm.github.io
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // ═══ STATE ═══
+  let state = { arm: null, response: null, hdc: null };
+  let history = [];
+  const totalSteps = 7;
+
+  function setArm(v) { state.arm = v; }
+  function setResponse(v) { state.response = v; }
+  function setHDC(v) { state.hdc = v; }
+
+  // ═══ NAVIGATION ═══
+  function go(stepNum) {
+    const current = document.querySelector('.step-card:not(.hidden)');
+    if (current) {
+      history.push(current.id);
+      current.classList.add('hidden');
+    }
+    document.getElementById('step' + stepNum).classList.remove('hidden');
+    updateProgress(stepNum);
+    document.querySelector('.progress-wrap').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress(stepNum) {
+    const pct = Math.round((stepNum / totalSteps) * 100);
+    document.getElementById('stepLabel').textContent = 'Étape ' + stepNum + ' / ' + totalSteps;
+    document.getElementById('stepPct').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  // ═══ SHOW RESULT ═══
+  function showResult(resultId) {
+    // Hide all steps
+    document.querySelectorAll('.step-card').forEach(c => c.classList.add('hidden'));
+    document.querySelectorAll('.result-card').forEach(c => c.classList.add('hidden'));
+
+    // Fill dynamic content before showing
+    fillDynamicContent(resultId);
+
+    document.getElementById('result-' + resultId).classList.remove('hidden');
+    document.getElementById('progressWrap').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Set print date
+    document.getElementById('printDate').textContent = new Date().toLocaleDateString('fr-FR');
+  }
+
+  // ═══ FILL DYNAMIC INDUCTION / HDC CONTENT ═══
+  function fillDynamicContent(resultId) {
+    const inductionText = state.arm === 'cojec'
+      ? '<strong>RAPID COJEC</strong> · 8 cours × 10j<br><span class="chip">Carboplatine</span><span class="chip">Cisplatine</span><span class="chip">Vincristine</span><span class="chip">Étoposide</span><span class="chip">Cyclophosphamide</span><br>Évaluation J80 · G-CSF 5 µg/kg/j'
+      : state.arm === 'gpoh'
+      ? '<strong>GPOH (N5/N6)</strong> · 6 cycles N5/N6<br><span class="chip">Cisplatine</span><span class="chip">Étoposide</span><span class="chip">Vindesine</span><span class="chip">Ifosfamide</span><span class="chip">Vincristine</span><span class="chip">Dacarbazine</span><span class="chip">Doxorubicine</span><br>Évaluation J126'
+      : 'Bras d\'induction non spécifié.';
+
+    const hdcText = state.hdc === 'bumel'
+      ? '<strong>HDC simple Bu-Mel</strong><br>Busulfan (dose/poids) × 16 doses sur 4 j<br>Melphalan 140 mg/m² J-1<br>→ ASCR (min 3×10⁶ CD34+/kg)'
+      : state.hdc === 'tandem'
+      ? '<strong>Tandem HDC</strong><br>1. Thiotepa <span class="val-orange">900 mg/m²</span> → ASCR1<br>2. (≥ 8 sem) → Bu-Mel → ASCR2<br>ASCR2 ≤ J90 post-ASCR1'
+      : 'N/A (bras TEMIRI/DB → tandem Thiotepa + Bu-Mel obligatoire)';
+
+    // Fill by result id
+    const snrInd = document.getElementById('induction-block-snr');
+    const snrHdc = document.getElementById('hdc-block-snr');
+    const srInd = document.getElementById('induction-block-sr');
+    const srHdc = document.getElementById('hdc-block-sr');
+
+    if (snrInd) snrInd.innerHTML = inductionText;
+    if (snrHdc) snrHdc.innerHTML = hdcText;
+    if (srInd) srInd.innerHTML = inductionText;
+    if (srHdc) srHdc.innerHTML = hdcText;
+  }
+
+  // ═══ RESET ═══
+  function reset() {
+    state = { arm: null, response: null, hdc: null };
+    history = [];
+    document.querySelectorAll('.step-card, .result-card').forEach(c => c.classList.add('hidden'));
+    document.getElementById('step1').classList.remove('hidden');
+    document.getElementById('progressWrap').style.display = '';
+    updateProgress(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ═══ PDF PRINT ═══
+  function printResult(resultId) {
+    document.querySelectorAll('.step-card, .progress-wrap').forEach(el => {
+      el.dataset.hiddenForPrint = 'true';
+      el.style.display = 'none';
+    });
+    document.querySelectorAll('.result-card').forEach(el => {
+      if (el.id !== 'result-' + resultId) {
+        el.dataset.hiddenForPrint = 'true';
+        el.style.display = 'none';
+      }
+    });
+    window.print();
+    document.querySelectorAll('[data-hidden-for-print]').forEach(el => {
+      el.style.display = '';
+      delete el.dataset.hiddenForPrint;
+    });
+  }
+</script>
+
+</body>
+</html>

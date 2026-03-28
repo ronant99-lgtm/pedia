@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PENTEC · OARs pédiatriques — Contraintes & Estimateur DVH</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0a0c13;
+  --surface: #111420;
+  --surface2: #161b2e;
+  --surface3: #1c2238;
+  --border: rgba(255,255,255,0.06);
+  --border-md: rgba(255,255,255,0.10);
+  --border-hi: rgba(255,255,255,0.18);
+  --text: #eceef5;
+  --text-2: #9ba3b8;
+  --text-3: #5a6280;
+
+  --violet: #b69ef8;
+  --violet-dim: rgba(182,158,248,0.12);
+  --violet-border: rgba(182,158,248,0.28);
+
+  --blue: #7ab8f5;
+  --blue-dim: rgba(122,184,245,0.10);
+
+  --gold: #f5c842;
+  --gold-dim: rgba(245,200,66,0.10);
+
+  --teal: #3dd6c0;
+  --teal-dim: rgba(61,214,192,0.10);
+
+  --rose: #f07585;
+  --rose-dim: rgba(240,117,133,0.10);
+
+  --green: #74d98a;
+  --green-dim: rgba(116,217,138,0.08);
+
+  --amber: #faa94e;
+  --amber-dim: rgba(250,169,78,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND GRID ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(182,158,248,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(182,158,248,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* ── LAYOUT ── */
+.app { position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+.header {
+  padding: 36px 40px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+}
+.header-left { flex: 1; min-width: 280px; }
+.header-eyebrow {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.eyebrow-badge {
+  font-size: 9px; font-weight: 500; letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--violet-border);
+  color: var(--violet); background: var(--violet-dim);
+}
+.eyebrow-divider { width: 24px; height: 1px; background: var(--border-md); }
+.eyebrow-text { font-size: 10px; color: var(--text-3); letter-spacing: 0.08em; }
+
+.header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+.header-title span { color: var(--violet); }
+.header-sub { font-size: 11px; color: var(--text-2); line-height: 1.7; max-width: 560px; }
+.header-sub em { color: var(--text); font-style: normal; }
+
+.header-meta {
+  display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+  flex-shrink: 0;
+}
+.meta-pill {
+  font-size: 10px; font-weight: 400; letter-spacing: 0.06em;
+  padding: 4px 12px; border-radius: 20px;
+  border: 1px solid var(--border-md);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.meta-pill.hi { border-color: var(--violet-border); color: var(--violet); background: var(--violet-dim); }
+
+/* ── TABS ── */
+.tabs-wrap {
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+.tabs-bar {
+  display: flex; align-items: center; gap: 2px;
+  padding: 12px 40px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-md) transparent;
+  scroll-behavior: smooth;
+}
+.tabs-bar::-webkit-scrollbar { height: 3px; }
+.tabs-bar::-webkit-scrollbar-track { background: transparent; }
+.tabs-bar::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+.tabs-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: linear-gradient(to right, var(--bg) 60%, transparent);
+  border: none; color: var(--text-3); cursor: pointer;
+  font-size: 14px; padding: 4px 8px; z-index: 5;
+  transition: color 0.15s; display: none;
+}
+.tabs-arrow:hover { color: var(--text); }
+.tabs-arrow.left { left: 0; background: linear-gradient(to right, var(--bg) 60%, transparent); }
+.tabs-arrow.right { right: 0; background: linear-gradient(to left, var(--bg) 60%, transparent); }
+
+.tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 11px; font-weight: 400; letter-spacing: 0.05em;
+  color: var(--text-3);
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.18s;
+  background: none;
+}
+.tab:hover { color: var(--text-2); background: var(--surface2); border-color: var(--border); }
+.tab.active {
+  color: var(--violet); background: var(--violet-dim);
+  border-color: var(--violet-border);
+  font-weight: 500;
+}
+.tab-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; opacity: 0.6; flex-shrink: 0;
+}
+.tab.active .tab-dot { opacity: 1; }
+
+/* ── MAIN CONTENT ── */
+.main { padding: 28px 40px 60px; }
+.panel { display: none; animation: fadeIn 0.2s ease; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── SECTION HEADERS ── */
+.section-head {
+  display: flex; align-items: center; gap: 10px;
+  margin: 28px 0 14px;
+}
+.section-head:first-child { margin-top: 0; }
+.section-tag {
+  font-size: 9px; font-weight: 500; letter-spacing: 0.14em;
+  text-transform: uppercase; padding: 3px 10px;
+  border-radius: 20px; border: 1px solid; white-space: nowrap;
+}
+.section-line { flex: 1; height: 1px; background: var(--border); }
+.s-violet { color: var(--violet); border-color: var(--violet-border); background: var(--violet-dim); }
+.s-blue   { color: var(--blue);   border-color: rgba(122,184,245,0.28); background: var(--blue-dim); }
+.s-gold   { color: var(--gold);   border-color: rgba(245,200,66,0.28);  background: var(--gold-dim); }
+.s-teal   { color: var(--teal);   border-color: rgba(61,214,192,0.28);  background: var(--teal-dim); }
+.s-rose   { color: var(--rose);   border-color: rgba(240,117,133,0.28); background: var(--rose-dim); }
+.s-green  { color: var(--green);  border-color: rgba(116,217,138,0.28); background: var(--green-dim); }
+.s-amber  { color: var(--amber);  border-color: rgba(250,169,78,0.28);  background: var(--amber-dim); }
+
+/* ── TABLE ── */
+.table-wrap {
+  overflow-x: auto; border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 11.5px;
+}
+thead tr { background: var(--surface2); }
+th {
+  padding: 10px 14px; text-align: left;
+  font-size: 9px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-3);
+  border-bottom: 1px solid var(--border-md);
+  white-space: nowrap;
+}
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top; line-height: 1.6;
+  color: var(--text-2);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.015); }
+
+.c-organ   { color: var(--text); font-weight: 500; white-space: nowrap; }
+.c-ep      { color: var(--blue); }
+.c-dose    { color: var(--gold); white-space: nowrap; font-weight: 500; }
+.c-risk    { color: var(--rose); font-weight: 600; text-align: center; white-space: nowrap; }
+.c-age     { color: var(--green); font-size: 11px; }
+.c-comment { color: var(--text-3); font-size: 10.5px; max-width: 220px; }
+.c-dim     { color: var(--text-3); font-style: italic; }
+
+/* Warning row */
+.warn-row td {
+  background: rgba(250,169,78,0.06);
+  border-top: 1px solid rgba(250,169,78,0.15);
+  border-bottom: 1px solid rgba(250,169,78,0.15);
+}
+
+/* ── CALLOUT BOX ── */
+.callout {
+  margin: 16px 0;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border-left: 3px solid;
+  font-size: 11.5px; line-height: 1.75;
+}
+.callout-amber { border-color: var(--amber); background: rgba(250,169,78,0.05); }
+.callout-violet { border-color: var(--violet); background: rgba(182,158,248,0.05); }
+.callout-rose   { border-color: var(--rose);   background: rgba(240,117,133,0.05); }
+.callout h4 {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.callout-amber h4 { color: var(--amber); }
+.callout-violet h4 { color: var(--violet); }
+.callout-rose h4   { color: var(--rose); }
+.callout ul { padding-left: 14px; }
+.callout li { margin-bottom: 4px; color: var(--text-2); }
+.callout li strong { color: var(--text); font-weight: 500; }
+
+/* ── AGE GRID ── */
+.age-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin-top: 8px;
+}
+.age-col {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.age-col-head {
+  font-size: 9px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 10px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.age-col ul { padding-left: 12px; }
+.age-col li { font-size: 11px; color: var(--text-2); line-height: 1.9; }
+
+/* ── FOOTER ── */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.footer-ref { font-size: 10px; color: var(--text-3); line-height: 1.6; }
+.footer-ref strong { color: var(--text-2); }
+.footer-abbr { font-size: 10px; color: var(--text-3); text-align: right; line-height: 1.6; }
+
+/* ── SEARCH BAR ── */
+.search-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2); border: 1px solid var(--border-md);
+  border-radius: 8px; padding: 7px 14px;
+  margin-bottom: 20px;
+}
+.search-bar input {
+  background: none; border: none; outline: none;
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  color: var(--text); width: 100%;
+}
+.search-bar input::placeholder { color: var(--text-3); }
+.search-icon { font-size: 13px; color: var(--text-3); flex-shrink: 0; }
+.search-clear {
+  font-size: 11px; color: var(--text-3); cursor: pointer;
+  background: none; border: none; padding: 0;
+  display: none;
+}
+.search-clear.visible { display: block; }
+
+/* ── HIGHLIGHT ── */
+mark {
+  background: rgba(245,200,66,0.25);
+  color: var(--gold); border-radius: 2px; padding: 0 2px;
+}
+
+@media (max-width: 640px) {
+  .header { padding: 24px 20px 20px; }
+  .tabs-bar, .main { padding-left: 20px; padding-right: 20px; }
+  .footer { padding: 14px 20px; }
+  .age-grid { grid-template-columns: 1fr; }
+  .header-meta { align-items: flex-start; }
+}
+
+/* ══════════════════════════════════════
+   DVH ESTIMATOR — styles propres au panel
+══════════════════════════════════════ */
+
+/* Steps */
+.dvh-steps { display:flex; align-items:center; margin-bottom:28px; }
+.dvh-step {
+  display:flex; align-items:center; gap:8px;
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3);
+  transition:color 0.3s; white-space:nowrap;
+}
+.dvh-step.active { color:var(--violet); }
+.dvh-step.done   { color:var(--green); }
+.dvh-step-num {
+  width:22px; height:22px; border-radius:50%;
+  border:1.5px solid currentColor; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:10px;
+}
+.dvh-step.done   .dvh-step-num { background:rgba(116,217,138,0.08); }
+.dvh-step.active .dvh-step-num { background:var(--violet-dim); }
+.dvh-connector { flex:1; height:1px; background:var(--border); margin:0 8px; }
+
+/* Progress */
+.dvh-progress { display:flex; align-items:center; gap:10px; margin-bottom:24px; }
+.dvh-progress-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); white-space:nowrap; }
+.dvh-progress-bar { flex:1; height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
+.dvh-progress-fill { height:100%; background:var(--violet); border-radius:1px; transition:width 0.4s ease; }
+
+/* DVH card */
+.dvh-card {
+  background:var(--surface2); border:1px solid var(--border-md);
+  border-radius:10px; padding:24px 28px; margin-bottom:14px;
+  position:relative; overflow:hidden;
+}
+.dvh-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--violet); }
+.dvh-card-title { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; color:var(--text); margin-bottom:5px; letter-spacing:0.03em; }
+.dvh-card-sub   { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); margin-bottom:20px; letter-spacing:0.05em; }
+
+/* Form elements inside DVH card */
+.dvh-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.dvh-form-group { display:flex; flex-direction:column; gap:5px; }
+.dvh-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-3); letter-spacing:0.1em; text-transform:uppercase; }
+.dvh-input, .dvh-select {
+  background:var(--surface3); border:1px solid var(--border-md);
+  border-radius:6px; padding:9px 12px;
+  font-family:'DM Mono',monospace; font-size:12px; color:var(--text);
+  outline:none; width:100%; transition:border-color 0.18s;
+}
+.dvh-input:focus, .dvh-select:focus { border-color:var(--violet); }
+.dvh-select option { background:var(--surface3); }
+
+/* Chemo grid */
+.dvh-chemo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:4px; }
+.dvh-chemo-item {
+  display:flex; align-items:center; gap:7px;
+  background:var(--surface3); border:1px solid var(--border);
+  border-radius:6px; padding:7px 10px;
+  cursor:pointer; transition:all 0.15s;
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--text-2); user-select:none;
+}
+.dvh-chemo-item:hover { border-color:var(--border-md); color:var(--text); }
+.dvh-chemo-item.selected { border-color:var(--violet-border); background:var(--violet-dim); color:var(--violet); }
+.dvh-chemo-dot { width:7px; height:7px; border-radius:50%; border:1.5px solid currentColor; flex-shrink:0; transition:background 0.15s; }
+.dvh-chemo-item.selected .dvh-chemo-dot { background:var(--violet); }
+
+/* Organ category */
+.dvh-cat-title {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--text-3); margin:16px 0 8px;
+  display:flex; align-items:center; gap:10px;
+}
+.dvh-cat-title::after { content:''; flex:1; height:1px; background:var(--border); }
+.dvh-organ-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.dvh-organ-item {
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface3); border:1px solid var(--border);
+  border-radius:8px; padding:9px 12px;
+  cursor:pointer; transition:all 0.15s;
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--text-2); user-select:none;
+}
+.dvh-organ-item:hover { border-color:var(--border-md); color:var(--text); }
+.dvh-organ-item.selected { border-color:var(--violet-border); background:var(--violet-dim); color:var(--violet); }
+.dvh-organ-check {
+  width:14px; height:14px; border-radius:3px;
+  border:1.5px solid currentColor; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:9px; transition:all 0.15s;
+}
+.dvh-organ-item.selected .dvh-organ-check { background:var(--violet); border-color:var(--violet); color:#0d1117; }
+.dvh-organ-hint { font-size:9px; color:var(--text-3); margin-top:1px; }
+
+/* Metrics form */
+.dvh-metrics-grid { display:flex; flex-direction:column; gap:8px; }
+.dvh-metric-row {
+  display:grid; grid-template-columns:170px 1fr;
+  align-items:center; gap:16px;
+  background:var(--surface3); border:1px solid var(--border);
+  border-radius:8px; padding:12px 16px;
+}
+.dvh-metric-name { font-family:'DM Mono',monospace; font-size:11px; font-weight:500; color:var(--text); line-height:1.3; }
+.dvh-metric-hint { font-size:9px; color:var(--text-3); margin-top:2px; }
+.dvh-metric-fields { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; }
+.dvh-metric-field-wrap { display:flex; flex-direction:column; gap:3px; min-width:100px; }
+.dvh-metric-field-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-3); letter-spacing:0.08em; text-transform:uppercase; }
+.dvh-metric-input {
+  background:var(--surface2); border:1px solid var(--border-md);
+  border-radius:6px; padding:7px 10px;
+  font-family:'DM Mono',monospace; font-size:12px; color:var(--text);
+  outline:none; width:100%; transition:border-color 0.18s;
+}
+.dvh-metric-input:focus { border-color:var(--violet); }
+.dvh-metric-unit { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); flex-shrink:0; padding-bottom:2px; }
+
+/* DVH Buttons */
+.dvh-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 20px; border-radius:8px;
+  font-family:'DM Mono',monospace; font-size:12px; font-weight:500;
+  cursor:pointer; border:1px solid; transition:all 0.18s;
+}
+.dvh-btn-primary { background:var(--violet-dim); border-color:var(--violet-border); color:var(--violet); }
+.dvh-btn-primary:hover { background:rgba(182,158,248,0.2); border-color:var(--violet); }
+.dvh-btn-ghost { background:transparent; border-color:var(--border-md); color:var(--text-2); }
+.dvh-btn-ghost:hover { border-color:var(--text-2); color:var(--text); }
+.dvh-btn-reset { background:transparent; border-color:var(--border); color:var(--text-3); font-size:10px; padding:6px 14px; }
+.dvh-btn-reset:hover { border-color:var(--text-3); color:var(--text-2); }
+.dvh-btn-actions { display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.dvh-btn-pdf { background:rgba(116,217,138,0.08); border-color:rgba(116,217,138,0.3); color:var(--green); font-size:10px; padding:6px 14px; }
+.dvh-btn-pdf:hover { background:rgba(116,217,138,0.14); border-color:var(--green); }
+
+/* Loading */
+.dvh-loading { display:none; flex-direction:column; align-items:center; gap:20px; padding:48px 24px; text-align:center; }
+.dvh-loading.active { display:flex; }
+.dvh-spinner { width:34px; height:34px; border:2px solid var(--border-md); border-top-color:var(--violet); border-radius:50%; animation:dvhspin 0.9s linear infinite; }
+@keyframes dvhspin { to { transform:rotate(360deg); } }
+.dvh-loading-msg { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-2); }
+.dvh-loading-sub { font-size:11px; color:var(--text-3); max-width:400px; line-height:1.7; }
+
+/* Error */
+.dvh-error { display:none; padding:10px 14px; border-radius:7px; border-left:3px solid var(--rose); background:rgba(240,117,133,0.08); font-family:'DM Mono',monospace; font-size:11px; color:var(--text-2); margin-top:12px; }
+.dvh-error.active { display:block; }
+
+/* Results */
+.dvh-results { display:none; }
+.dvh-results.active { display:block; }
+.dvh-results-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+.dvh-results-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; color:var(--text); }
+.dvh-results-meta { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); margin-top:4px; line-height:1.8; }
+
+/* Summary bar */
+.dvh-summary-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+.dvh-summary-pill { display:flex; align-items:center; gap:6px; padding:4px 11px; border-radius:20px; font-family:'DM Mono',monospace; font-size:10px; border:1px solid; }
+.dvh-pill-high { color:var(--rose);  border-color:rgba(240,117,133,0.3); background:rgba(240,117,133,0.07); }
+.dvh-pill-mod  { color:var(--amber); border-color:rgba(250,169,78,0.3);  background:rgba(250,169,78,0.07);  }
+.dvh-pill-low  { color:var(--green); border-color:rgba(116,217,138,0.3); background:rgba(116,217,138,0.06); }
+.dvh-pill-info { color:var(--blue);  border-color:rgba(122,184,245,0.3); background:rgba(122,184,245,0.07); }
+
+/* Section label */
+.dvh-section-label {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--text-3); margin:18px 0 8px;
+  display:flex; align-items:center; gap:10px;
+}
+.dvh-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* Risk cards */
+.dvh-risk-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; overflow:hidden; }
+.dvh-risk-header { display:flex; align-items:center; gap:12px; padding:13px 18px; cursor:pointer; transition:background 0.15s; }
+.dvh-risk-header:hover { background:var(--surface3); }
+.dvh-risk-organ { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; flex:1; color:var(--text); }
+.dvh-risk-metric { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); }
+.dvh-risk-badge { font-family:'DM Mono',monospace; font-size:9px; font-weight:500; padding:3px 10px; border-radius:20px; border:1px solid; white-space:nowrap; flex-shrink:0; }
+.dvh-badge-high { color:var(--rose);  border-color:rgba(240,117,133,0.35); background:rgba(240,117,133,0.08); }
+.dvh-badge-mod  { color:var(--amber); border-color:rgba(250,169,78,0.35);  background:rgba(250,169,78,0.08);  }
+.dvh-badge-low  { color:var(--green); border-color:rgba(116,217,138,0.35); background:rgba(116,217,138,0.07); }
+.dvh-badge-info { color:var(--blue);  border-color:rgba(122,184,245,0.35); background:rgba(122,184,245,0.07); }
+.dvh-badge-na   { color:var(--text-3); border-color:var(--border); background:transparent; }
+.dvh-risk-chevron { font-size:12px; color:var(--text-3); transition:transform 0.2s; flex-shrink:0; }
+.dvh-risk-card.open .dvh-risk-chevron { transform:rotate(90deg); }
+.dvh-risk-body { display:none; padding:0 18px 16px; border-top:1px solid var(--border); }
+.dvh-risk-card.open .dvh-risk-body { display:block; }
+.dvh-risk-row { display:flex; align-items:baseline; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); font-size:11.5px; }
+.dvh-risk-row:last-child { border-bottom:none; }
+.dvh-risk-row-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-3); min-width:130px; flex-shrink:0; text-transform:uppercase; letter-spacing:0.06em; }
+.dvh-risk-row-val { color:var(--text-2); flex:1; line-height:1.65; }
+.dvh-risk-row-val strong { color:var(--text); font-weight:500; }
+.dvh-val-hi   { color:var(--rose)  !important; font-weight:500; }
+.dvh-val-mod  { color:var(--amber) !important; font-weight:500; }
+.dvh-val-ok   { color:var(--green) !important; font-weight:500; }
+.dvh-val-info { color:var(--blue)  !important; }
+
+/* Disclaimer */
+.dvh-disclaimer {
+  margin-top:24px; padding:13px 16px; border-radius:8px;
+  border-left:3px solid var(--border-md); background:var(--surface3);
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); line-height:1.8;
+}
+.dvh-disclaimer strong { color:var(--text-2); }
+
+/* Print footer */
+.print-footer { display:none; }
+
+/* ── PRINT ── */
+body.printing .header,
+body.printing .tabs-wrap,
+body.printing .footer,
+body.printing .dvh-steps,
+body.printing .dvh-progress,
+body.printing #dvh-step1,
+body.printing #dvh-step2,
+body.printing #dvh-step3,
+body.printing .dvh-loading,
+body.printing .dvh-btn-actions,
+body.printing .dvh-results-header .dvh-btn-reset { display:none !important; }
+
+body.printing .panel { display:none !important; }
+body.printing #panel-dvh { display:block !important; }
+body.printing .dvh-results { display:block !important; }
+body.printing .dvh-risk-body { display:block !important; }
+
+@media print {
+  body { background:#fff !important; color:#000 !important; font-size:11pt; }
+  .header, .tabs-wrap, .footer, .dvh-steps, .dvh-progress,
+  #dvh-step1, #dvh-step2, #dvh-step3, .dvh-loading,
+  .dvh-btn-actions, .dvh-results-header .dvh-btn-reset { display:none !important; }
+  .panel { display:none !important; }
+  #panel-dvh { display:block !important; }
+  .main { padding:0 !important; }
+  .dvh-results { display:block !important; }
+  .dvh-risk-card { page-break-inside:avoid; border:1px solid #ccc !important; background:#fff !important; }
+  .dvh-risk-body { display:block !important; }
+  .dvh-risk-header { background:#f5f5f5 !important; }
+  .dvh-disclaimer { background:#f9f9f9 !important; border-color:#ccc !important; color:#555 !important; }
+  a[href]::after { content:" (" attr(href) ")"; font-size:8pt; color:#666; }
+  .dvh-disclaimer a::after { content:none; }
+  .print-footer { display:block !important; font-size:8pt; color:#999; margin-top:24px; border-top:1px solid #ddd; padding-top:8px; }
+}
+
+@media (max-width:640px) {
+  .dvh-form-grid { grid-template-columns:1fr; }
+  .dvh-chemo-grid { grid-template-columns:1fr 1fr; }
+  .dvh-organ-grid { grid-template-columns:1fr 1fr; }
+  .dvh-metric-row { grid-template-columns:1fr; }
+  .dvh-steps { gap:0; }
+  .dvh-step span:not(.dvh-step-num) { display:none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-eyebrow">
+      <span class="eyebrow-badge">PENTEC 2024</span>
+      <span class="eyebrow-divider"></span>
+      <span class="eyebrow-text">Référence · OARs pédiatriques</span>
+    </div>
+    <h1 class="header-title">Contraintes de dose<br><span>organes à risque</span> en pédiatrie</h1>
+    <p class="header-sub">
+      Synthèse de la Table 2 — <em>Constine LS, Marks LB, Milano MT et al.</em><br>
+      Pediatric Normal Tissue Effects in the Clinic (PENTEC). <em>Int J Radiat Oncol Biol Phys.</em> 2024;119(2):319–337.
+    </p>
+  </div>
+  <div class="header-meta">
+    <span class="meta-pill hi">19 groupes d'organes + Rate + Vertèbres</span>
+    <span class="meta-pill">Fractionn. conventionnel (sauf mention)</span>
+    <span class="meta-pill">Fractionnement ≈ 1,8–2 Gy/fr</span>
+    <span class="meta-pill">EQD2 = dose équivalente 2 Gy/fr</span>
+  </div>
+</header>
+
+<!-- ═══════════ TABS ═══════════ -->
+<div class="tabs-wrap">
+  <button class="tabs-arrow left" id="tabsLeft">‹</button>
+<nav class="tabs-bar" id="tabs">
+  <button class="tab active" data-tab="neuro"><span class="tab-dot"></span>Neuro / SNC</button>
+  <button class="tab" data-tab="oto"><span class="tab-dot"></span>Audition / Œil</button>
+  <button class="tab" data-tab="cardio"><span class="tab-dot"></span>Cœur / Poumon</button>
+  <button class="tab" data-tab="endo"><span class="tab-dot"></span>Endocrine</button>
+  <button class="tab" data-tab="repro"><span class="tab-dot"></span>Reproduction</button>
+  <button class="tab" data-tab="musculo"><span class="tab-dot"></span>Musculo-squelettique</button>
+  <button class="tab" data-tab="kidney"><span class="tab-dot"></span>Rein / Foie</button>
+  <button class="tab" data-tab="second"><span class="tab-dot"></span>2ndes tumeurs</button>
+  <button class="tab" data-tab="chemo"><span class="tab-dot"></span>Interactions chimio·RT</button>
+  <button class="tab" data-tab="age"><span class="tab-dot"></span>Effets de l'âge</button>
+  <button class="tab" data-tab="spleen"><span class="tab-dot"></span>Rate (SIOPE 2021)</button>
+  <button class="tab" data-tab="vertebrae"><span class="tab-dot"></span>Vertèbres (SIOPE 2019)</button>
+  <button class="tab" data-tab="dvh" style="color:var(--violet);"><span class="tab-dot" style="background:var(--violet);opacity:1;"></span>⚡ Estimateur DVH</button>
+</nav>
+  <button class="tabs-arrow right" id="tabsRight">›</button>
+</div>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+
+<!-- ───── NEURO ───── -->
+<div class="panel active" id="panel-neuro">
+
+  <div class="section-head"><span class="section-tag s-violet">Cerveau — Nécrose radique</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Organe</th><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-organ" rowspan="4">Cerveau + tronc</td>
+          <td rowspan="4">Cerveau entier incl. tronc cérébral</td>
+          <td class="c-ep" rowspan="2">Nécrose symptomatique</td>
+          <td class="c-dose">59 Gy sur toute partie</td><td class="c-risk">5%</td>
+          <td rowspan="4" class="c-dim">Non analysé</td>
+          <td class="c-comment">Réirradiation analysée séparément dans le rapport PENTEC</td>
+        </tr>
+        <tr><td class="c-dose">67 Gy sur toute partie</td><td class="c-risk">10%</td><td></td></tr>
+        <tr>
+          <td class="c-ep">Nécrose — réirrad. cerveau</td>
+          <td class="c-dose">EQD2 cumul 112 Gy</td><td class="c-risk">5%</td>
+          <td class="c-comment">Réirradiation cérébrale après première irradiation</td>
+        </tr>
+        <tr>
+          <td class="c-ep">Nécrose — réirrad. tronc</td>
+          <td class="c-dose">EQD2 cumul 112 Gy</td><td class="c-risk">7%</td><td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-blue">Cerveau — Neurocognition (QI)</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose à fraction du volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="8">Cerveau entier</td>
+          <td class="c-ep" rowspan="8">QI &lt; 85</td>
+          <td class="c-dose">36 Gy à 10% du cerveau</td><td class="c-risk">5%</td>
+          <td rowspan="8" class="c-age">⚠️ Jeune âge associé indépendamment à ↓ QI prédit post-RT</td>
+          <td rowspan="2" class="c-comment">MTX ≈ +5,9 Gy dose cérébrale uniforme équivalente. Cerveau entier vs partiel = facteur péjoratif indépendant.</td>
+        </tr>
+        <tr><td class="c-dose">51 Gy à 10%</td><td class="c-risk">20%</td></tr>
+        <tr><td class="c-dose">29 Gy à 20%</td><td class="c-risk">5%</td><td rowspan="2"></td></tr>
+        <tr><td class="c-dose">42 Gy à 20%</td><td class="c-risk">20%</td></tr>
+        <tr><td class="c-dose">22 Gy à 50%</td><td class="c-risk">5%</td><td rowspan="2"></td></tr>
+        <tr><td class="c-dose">32 Gy à 50%</td><td class="c-risk">20%</td></tr>
+        <tr><td class="c-dose">18 Gy à 100%</td><td class="c-risk">5%</td><td rowspan="2"></td></tr>
+        <tr><td class="c-dose">26 Gy à 100%</td><td class="c-risk">20%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-teal">Atteinte cérébrovasculaire</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="6">Polygone de Willis / artères cérébrales principales<br><span class="c-dim">(ou surrogate : citerne supra-sellaire)</span></td>
+          <td class="c-ep" rowspan="3">AVC à l'âge atteint de 35 ans</td>
+          <td class="c-dose">D100% = 30 Gy</td><td class="c-risk">~1%</td>
+          <td rowspan="6" class="c-comment">Risques faibles mais &gt; population générale. Données issues de doses prescrites ; D100 couvre le polygone de Willis et structures surrogates.</td>
+        </tr>
+        <tr><td class="c-dose">D100% = 45 Gy</td><td class="c-risk">2–3%</td></tr>
+        <tr><td class="c-dose">D100% = 54 Gy</td><td class="c-risk">3–4%</td></tr>
+        <tr>
+          <td class="c-ep" rowspan="3">AVC à l'âge atteint de 45 ans</td>
+          <td class="c-dose">D100% = 30 Gy</td><td class="c-risk">2–4%</td>
+        </tr>
+        <tr><td class="c-dose">D100% = 45 Gy</td><td class="c-risk">4–9%</td></tr>
+        <tr><td class="c-dose">D100% = 54 Gy</td><td class="c-risk">7–13%</td></tr>
+        <tr>
+          <td>Polygone de Willis</td>
+          <td class="c-ep">Vasculopathie cérébrale à 17 ans</td>
+          <td class="c-dose">D100% = 30 Gy</td><td class="c-risk">~0,2%</td>
+          <td class="c-comment">Non analysé pour effet âge</td>
+        </tr>
+        <tr><td></td><td></td><td class="c-dose">D100% = 54 Gy</td><td class="c-risk">~4%</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-rose">Moelle épinière</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr class="warn-row">
+          <td rowspan="2">Moelle épinière</td>
+          <td class="c-ep" rowspan="2">Myélopathie</td>
+          <td class="c-dose">Sans chimio : D0,03cc &lt; 54 Gy<br>et D1cc &lt; 50,4 Gy</td>
+          <td class="c-risk">Rare</td>
+          <td class="c-comment" rowspan="2">⚠️ Chimio intrathécale (vincristine, MTX, cytarabine) abaisse le seuil. Seuil avec chimio : D0,03cc &lt; 50,4 Gy ; D1cc &lt; 45 Gy. Modélisation NTCP non faisable (données insuffisantes).</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-dose">Avec chimio : D0,03cc &lt; 50,4 Gy<br>et D1cc &lt; 45 Gy</td>
+          <td class="c-risk">Rare</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-violet">Hypothalamus / Hypophyse</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="3">Hypothalamus + hypophyse</td>
+          <td class="c-ep">Déficit en GH</td>
+          <td class="c-dose">D100% = 15 Gy</td><td class="c-risk">5%</td>
+          <td rowspan="3" class="c-age">Impossible à quantifier ; cohortes plus jeunes = risque brut plus élevé</td>
+          <td class="c-comment">Axe GH = le plus radiosensible de l'axe HH</td>
+        </tr>
+        <tr>
+          <td class="c-ep">Hypothyroïdie centrale</td>
+          <td class="c-dose">D100% = 22 Gy</td><td class="c-risk">20%</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td class="c-ep">Déficit ACTH</td>
+          <td class="c-dose">D100% = 34 Gy</td><td class="c-risk">20%</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── OTO ───── -->
+<div class="panel" id="panel-oto">
+
+  <div class="section-head"><span class="section-tag s-blue">Cochlée — Perte auditive</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="2">Cochlée</td>
+          <td class="c-ep" rowspan="2">Perte auditive (seuil &gt;20 dB à toute fréquence)</td>
+          <td class="c-dose">Dmoy &lt; 35 Gy</td><td class="c-risk">&lt;5%</td>
+          <td rowspan="2" class="c-age">Risque maximal &lt;5 ans ; effets indépendants dose/âge non élucidés</td>
+          <td rowspan="2" class="c-comment">Pertes haute fréquence plus fréquentes. Platine additionnel. Cisplatine 300 mg/m² déplace la courbe de ~7 Gy.</td>
+        </tr>
+        <tr><td class="c-dose">Dmoy 50 Gy</td><td class="c-risk">30%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-teal">Structures optiques</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Structure</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="2" class="c-organ">Rétine</td>
+          <td class="c-ep" rowspan="2">Rétinopathie</td>
+          <td class="c-dose">Dmax 42 Gy</td><td class="c-risk">5%</td>
+          <td rowspan="2" class="c-comment">Fraction plus élevée corrèle avec risque accru de rétinopathie et neuropathie optique</td>
+        </tr>
+        <tr><td class="c-dose">Dmax 62 Gy</td><td class="c-risk">50%</td></tr>
+        <tr>
+          <td rowspan="2" class="c-organ">Nerf optique + chiasma</td>
+          <td class="c-ep" rowspan="2">Neuropathie optique</td>
+          <td class="c-dose">Dmax 57 Gy</td><td class="c-risk">5%</td>
+          <td rowspan="2" class="c-comment">Âge plus avancé peut augmenter la vulnérabilité (données limitées)</td>
+        </tr>
+        <tr><td class="c-dose">Dmax 64 Gy</td><td class="c-risk">50%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-gold">Cristallin</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="4">Cristallin</td>
+          <td class="c-ep" rowspan="2">Cataracte (auto-déclarée)</td>
+          <td class="c-dose">Dmoy = 12 Gy</td><td class="c-risk">5%</td>
+          <td rowspan="4" class="c-age">L'âge pédiatrique ne semble pas modifier le risque ; les enfants sont peut-être mieux dépistés</td>
+          <td rowspan="2" class="c-comment">Certains agents chimio indépendamment associés à cataracte</td>
+        </tr>
+        <tr><td class="c-dose">Dmoy &gt; 40 Gy</td><td class="c-risk">50%</td></tr>
+        <tr>
+          <td class="c-ep" rowspan="2">Cataracte (ophthalmologiste)</td>
+          <td class="c-dose">Pas de RT</td><td class="c-risk">&gt;5%</td>
+          <td rowspan="2" class="c-comment">Risque de fond sans RT élevé ; seuil bas pour cataracte avec détection ophthalmologique</td>
+        </tr>
+        <tr><td class="c-dose">Dmoy = 9 Gy</td><td class="c-risk">50%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── CARDIO ───── -->
+<div class="panel" id="panel-cardio">
+
+  <div class="section-head"><span class="section-tag s-rose">Cœur</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="6">Cœur entier</td>
+          <td class="c-ep">Insuffisance cardiaque</td>
+          <td class="c-dose">Dmoy = 20 Gy</td><td class="c-risk">1,1%</td>
+          <td rowspan="6" class="c-age">Non significatif dans les études antérieures</td>
+          <td class="c-comment">Risques évalués à 30 ans après irradiation</td>
+        </tr>
+        <tr><td class="c-ep">Coronaropathie</td><td class="c-dose">Dmoy = 20 Gy</td><td class="c-risk">2,1%</td><td></td></tr>
+        <tr><td class="c-ep">Valvulopathie</td><td class="c-dose">Dmoy = 20 Gy</td><td class="c-risk">0,5%</td><td></td></tr>
+        <tr><td class="c-ep">Toute cardiopathie</td><td class="c-dose">Dmoy = 20 Gy</td><td class="c-risk">3,8%</td><td></td></tr>
+        <tr class="warn-row">
+          <td class="c-ep">Cardiopathie + anthracyclines</td>
+          <td class="c-dose">Dmoy 10 Gy + &lt;250 mg/m²</td>
+          <td class="c-risk">3,4%</td>
+          <td class="c-comment" rowspan="2">Chaque +100 mg/m² anthracyclines = HR IC : 1,93 ≈ +10,5 Gy de dose cœur équivalente</td>
+        </tr>
+        <tr class="warn-row">
+          <td></td>
+          <td class="c-dose">Dmoy 10 Gy + &gt;250 mg/m²</td>
+          <td class="c-risk">4,8%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-blue">Poumon — Pneumopathie</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="3">Poumon entier</td>
+          <td class="c-ep">Pneumopathie grade 2 (aiguë)</td>
+          <td class="c-dose">V20 &lt; 30%</td><td class="c-risk">&lt;5%</td>
+          <td rowspan="3" class="c-comment">L'âge ne semble pas modifier le risque de pneumopathie. Toxicités tardives sub-cliniques plus fréquentes mais non modélisées.</td>
+        </tr>
+        <tr><td></td><td class="c-dose">Dmoy &lt; 12 Gy</td><td class="c-risk">&lt;5%</td></tr>
+        <tr><td class="c-ep">Pneumopathie grade 2 (tardive)</td><td class="c-dose">V27 &lt; 20%</td><td class="c-risk">&lt;5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-amber">
+    <h4>⚠️ Irradiation corporelle totale (ICT) — Syndrome pneumopathie idiopathique</h4>
+    <ul>
+      <li><strong>11 Gy prescrit</strong> (EQD2/2,3) → risque SPI : <strong>3,6%</strong></li>
+      <li><strong>12 Gy prescrit</strong> (EQD2/2,3) → risque SPI : <strong>47,5%</strong> — ⚠️ très forte sensibilité dans cet intervalle étroit</li>
+      <li>Relation dose-réponse difficile à modéliser (incertitude dosimétrique sur point de mesure pulmonaire)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ───── ENDO ───── -->
+<div class="panel" id="panel-endo">
+
+  <div class="section-head"><span class="section-tag s-gold">Thyroïde</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="6">Thyroïde entière</td>
+          <td class="c-ep" rowspan="3">Hypothyroïdie compensée (sub-clinique)</td>
+          <td class="c-dose">Dmoy = 10 Gy</td><td class="c-risk">12%</td>
+          <td rowspan="6" class="c-age">14–30 ans : risque ×1,3 vs plus jeunes. Résultats confondus par différences de dose et chimio selon les âges.</td>
+          <td rowspan="6" class="c-comment">Femmes : risque ×1,7 vs hommes. Voir Table 6 du rapport PENTEC thyroïde pour détails par âge et sexe.</td>
+        </tr>
+        <tr><td class="c-dose">Dmoy = 20 Gy</td><td class="c-risk">25%</td></tr>
+        <tr><td class="c-dose">Dmoy = 30 Gy</td><td class="c-risk">44%</td></tr>
+        <tr>
+          <td class="c-ep" rowspan="3">Hypothyroïdie clinique (non compensée)</td>
+          <td class="c-dose">Dmoy = 10 Gy</td><td class="c-risk">4%</td>
+        </tr>
+        <tr><td class="c-dose">Dmoy = 20 Gy</td><td class="c-risk">7%</td></tr>
+        <tr><td class="c-dose">Dmoy = 30 Gy</td><td class="c-risk">13%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-teal">Glandes salivaires</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Recommandation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="2">Les deux parotides</td>
+          <td class="c-ep">Xérostomie aiguë grade &gt;2</td>
+          <td class="c-dose">Dmoy = 35–40 Gy</td><td class="c-risk">32%</td>
+          <td rowspan="2" class="c-comment" style="color:var(--teal);">→ Recommandation PENTEC : Dmoy parotides &lt; 26 Gy</td>
+        </tr>
+        <tr><td class="c-ep">Xérostomie chronique grade &gt;2</td><td class="c-dose">Dmoy = 35–40 Gy</td><td class="c-risk">13–32%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-amber">Dentition</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr class="warn-row">
+          <td>Dents primaires et définitives</td>
+          <td class="c-ep">Anomalies du développement dentaire</td>
+          <td class="c-dose">Éviter &gt;20 Gy si âge &lt;4 ans</td>
+          <td class="c-risk">À risque</td>
+          <td class="c-age">⚠️ Jeune âge et stade précoce de développement dentaire associés à risque accru</td>
+          <td class="c-comment">Agents alkylants augmentent le risque indépendamment</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── REPRO ───── -->
+<div class="panel" id="panel-repro">
+
+  <div class="section-head"><span class="section-tag s-blue">Testicules</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="5">Testicules</td>
+          <td class="c-ep">Oligospermie à 1 an</td>
+          <td class="c-dose">Dmoy &gt; 1 Gy</td><td class="c-risk">&gt;90%</td>
+          <td class="c-comment">Estimation historique par diffusion interne ou dosimètre cutané</td>
+        </tr>
+        <tr><td class="c-ep" rowspan="3">Taux bas de testostérone</td>
+          <td class="c-dose">Dmoy = 0,2–12 Gy</td><td class="c-risk">25%</td>
+          <td rowspan="3" class="c-comment">Production LH augmentée avec doses élevées mais sans relation claire</td>
+        </tr>
+        <tr><td class="c-dose">Dmoy = 12–19 Gy</td><td class="c-risk">40%</td></tr>
+        <tr><td class="c-dose">Dmoy &gt; 20 Gy</td><td class="c-risk">68%</td></tr>
+        <tr><td class="c-ep">FSH basse</td><td class="c-dose">Dmoy &gt; 0,5 Gy</td><td class="c-risk">40–100%</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-violet">Ovaires / Insuffisance ovarienne</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="3">Ovaire le moins irradié</td>
+          <td class="c-ep">AOF — sans chimio</td>
+          <td class="c-dose">2 Gy</td><td class="c-risk">1–5%</td>
+          <td rowspan="3" class="c-age">Risque AOF ↑ avec l'âge. Alkylants ↑ risque AOF.</td>
+          <td class="c-comment">TD50 AOF : 1 an → 24 Gy ; 2 ans → 20 Gy</td>
+        </tr>
+        <tr>
+          <td class="c-ep">AOF — dose interméd. alkylants</td>
+          <td class="c-dose">2 Gy</td><td class="c-risk">4–7%</td>
+          <td class="c-comment">TD50 : 1 an → 22,5 Gy ; 2 ans → 17 Gy</td>
+        </tr>
+        <tr>
+          <td class="c-ep">AOF — haute dose alkylants</td>
+          <td class="c-dose">2 Gy</td><td class="c-risk">6–13%</td>
+          <td class="c-comment">TD50 : 1 an → 17 Gy ; 2 ans → 13 Gy</td>
+        </tr>
+        <tr>
+          <td rowspan="6">Ovaire le moins irradié</td>
+          <td class="c-ep" rowspan="6">Insuffisance ovarienne prématurée (POI)</td>
+          <td class="c-dose">Sans chimio, &lt;10 Gy — à 30 ans</td><td class="c-risk">17%</td>
+          <td rowspan="6" class="c-age">Risque POI ↑ avec âge atteint et avec dose d'alkylants</td>
+          <td rowspan="2" class="c-comment">Sans chimio</td>
+        </tr>
+        <tr><td class="c-dose">Sans chimio, &gt;10 Gy — à 30 ans</td><td class="c-risk">83%</td></tr>
+        <tr><td class="c-dose">Sans chimio, &gt;10 Gy — à 40 ans</td><td class="c-risk">100%</td><td></td></tr>
+        <tr>
+          <td class="c-dose">CED = 10 g/m², &lt;10 Gy — à 30 ans</td><td class="c-risk">41%</td>
+          <td rowspan="3" class="c-comment">CED = dose cyclophosphamide équivalente</td>
+        </tr>
+        <tr><td class="c-dose">CED ≥20 g/m², &lt;10 Gy — à 30 ans</td><td class="c-risk">53%</td></tr>
+        <tr><td class="c-dose">CED ≥20 g/m², &gt;10 Gy — à 30 ans</td><td class="c-risk">~100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-rose">Sein</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume / Âge traitement</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="4">Bourgeon mammaire (traitement &lt;4 ans)</td>
+          <td class="c-ep" rowspan="4">Hypoplasie mammaire perçue</td>
+          <td class="c-dose">0 Gy (fond)</td><td class="c-risk">15%</td>
+          <td rowspan="4" class="c-comment">Relation dose-réponse très forte. Seuil très bas pour risque significatif.</td>
+        </tr>
+        <tr><td class="c-dose">0–0,34 Gy</td><td class="c-risk">38%</td></tr>
+        <tr><td class="c-dose">0,34–0,97 Gy</td><td class="c-risk">61%</td></tr>
+        <tr><td class="c-dose">≥ 0,97 Gy</td><td class="c-risk">97%</td></tr>
+        <tr>
+          <td>Médiastin (traitement 14–40 ans)</td>
+          <td class="c-ep">Allaitement impossible</td>
+          <td class="c-dose">27–46 Gy (médiastin)</td><td class="c-risk">39%</td>
+          <td class="c-comment">Données issues de patientes traitées pour lymphome de Hodgkin</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── MUSCULO ───── -->
+<div class="panel" id="panel-musculo">
+  <div class="callout callout-amber">
+    <h4>⚠️ Importance particulière en oncologie pédiatrique</h4>
+    <ul>
+      <li>L'irradiation asymétrique des corps vertébraux en croissance est un mécanisme clé de la scoliose post-radique</li>
+      <li>Le jeune âge est le facteur prédictif le plus puissant — plus l'enfant est jeune, plus le risque est élevé</li>
+      <li>Les données disponibles sont limitées par des seuils d'anomalie variables et des durées de suivi hétérogènes</li>
+      <li>Recommandation : inclure des niveaux vertébraux de façon symétrique chaque fois que possible</li>
+    </ul>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-amber">Squelette — Croissance et scoliose</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Structure</th><th>Volume</th><th>Endpoint</th><th>Dose / Âge</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr class="warn-row">
+          <td rowspan="3" class="c-organ">Vertèbres</td>
+          <td rowspan="3">Corps vertébraux</td>
+          <td rowspan="3" class="c-ep">Scoliose cliniquement significative et retard de croissance</td>
+          <td class="c-dose">Âge &lt;2 ans → &gt;10 Gy</td>
+          <td class="c-risk">⚠️ À risque</td>
+          <td rowspan="3" class="c-age">⚠️ Jeune âge = facteur prédictif majeur de scoliose et de retard de croissance rachidienne</td>
+          <td rowspan="3" class="c-comment">Données limitées par des seuils d'anomalie variables. Plus de données nécessaires sur la croissance rachidienne avec et sans épargne intentionnelle des corps vertébraux.</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-dose">Âge 2–6 ans → &gt;20 Gy</td>
+          <td class="c-risk">⚠️ À risque</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-dose">Âge &gt;6 ans → &gt;30 Gy</td>
+          <td class="c-risk">À risque</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── KIDNEY ───── -->
+<div class="panel" id="panel-kidney">
+
+  <div class="section-head"><span class="section-tag s-teal">Rein — Toxicité rénale ⚠️ Interaction ifosfamide</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="5">Rein entier</td>
+          <td class="c-ep">HTA</td>
+          <td class="c-dose">Rein entier = 9,6 Gy</td><td class="c-risk">5%</td>
+          <td class="c-comment">RT + cisplatine : +1% vs cisplatine seul. RT + ifosfamide : +5% vs ifosfamide seul. (Doses en EQD2/3,4)</td>
+        </tr>
+        <tr><td class="c-ep">IRC grade 2 (MRC)</td><td class="c-dose">Rein entier = 10,2 Gy</td><td class="c-risk">5%</td><td></td></tr>
+        <tr><td class="c-ep">IRC grades 3–5</td><td class="c-dose">Rein entier = 14,5 Gy</td><td class="c-risk">5%</td><td></td></tr>
+        <tr class="warn-row">
+          <td class="c-ep">IRC grade 2 + cisplatine</td>
+          <td class="c-dose">V10 &gt; 25%</td><td class="c-risk">5%</td>
+          <td class="c-comment" rowspan="2">⚠️ Ifosfamide 63 g/m² seul → 5% risque toxicité sévère. Avec RT et V10 = 42% → risque 10%</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-ep">IRC grade 2 + ifosfamide</td>
+          <td class="c-dose">V10 &gt; 40%</td><td class="c-risk">10%</td>
+        </tr>
+        <tr>
+          <td>Irradiation abdominale totale (Wilms, 1,5 Gy × 7)</td>
+          <td class="c-ep">IRC grade 2</td>
+          <td class="c-dose">1,5 Gy × 7 (WAI)</td><td class="c-risk">4%</td>
+          <td class="c-comment" rowspan="2">Contexte tumeur de Wilms unilatérale après néphrectomie</td>
+        </tr>
+        <tr>
+          <td>Irradiation abdominale totale (Wilms)</td>
+          <td class="c-ep">IRC grades 3–5</td>
+          <td class="c-dose">1,5 Gy × 7 (WAI)</td><td class="c-risk">1%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-gold">Foie</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Volume</th><th>Endpoint</th><th>Dose / Volume</th><th>Risque</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td rowspan="2">Foie entier</td>
+          <td class="c-ep" rowspan="2">Syndrome d'obstruction sinusoïdale hépatique (SOS / VOD)</td>
+          <td class="c-dose">D100% = 10 Gy</td><td class="c-risk">6,1%</td>
+          <td rowspan="2" class="c-age">⚠️ Enfants &lt;20 ans plus susceptibles que les adultes</td>
+          <td rowspan="2" class="c-comment">Chimio non alkylante après RT foie entier augmente le risque de toxicité</td>
+        </tr>
+        <tr><td class="c-dose">D100% = 20 Gy</td><td class="c-risk">14,5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── SECOND ───── -->
+<div class="panel" id="panel-second">
+
+  <div class="callout callout-rose">
+    <h4>⚠️ Pertinence particulière — Sarcome d'Ewing</h4>
+    <ul>
+      <li>Les patients traités pour sarcome d'Ewing reçoivent des <strong>doses élevées (54–60 Gy)</strong> à des sites fréquemment osseux ou paraosseux</li>
+      <li>La combinaison <strong>anthracyclines + alkylants + RT</strong> multiplie le risque de sarcome secondaire</li>
+      <li>Le jeune âge à l'irradiation est un facteur de risque indépendant pour tous les types de tumeurs secondaires solides</li>
+    </ul>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-violet">Tumeurs malignes secondaires du SNC</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Dose / Volume</th><th>EAR (excès risque absolu)</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-ep" rowspan="4">Tumeur maligne secondaire SNC</td>
+          <td class="c-dose">EAR après 20 Gy — à 50 ans</td><td class="c-risk">1,6%</td>
+          <td rowspan="4" class="c-dim">Pas d'effet d'âge discernable</td>
+          <td rowspan="4" class="c-comment">Le sexe ne modifie pas le risque de tumeur maligne du SNC</td>
+        </tr>
+        <tr><td class="c-dose">EAR après 20 Gy — à 75 ans</td><td class="c-risk">4,5%</td></tr>
+        <tr><td class="c-dose">EAR après 50 Gy — à 50 ans</td><td class="c-risk">3,9%</td></tr>
+        <tr><td class="c-dose">EAR après 50 Gy — à 75 ans</td><td class="c-risk">11%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-blue">Méningiomes secondaires</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Mesure</th><th>Valeur</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-ep">Méningiome secondaire</td>
+          <td class="c-dose">ERR/Gy (excès risque relatif)</td>
+          <td class="c-risk">0,44</td>
+          <td class="c-age">⚠️ Jeune âge à l'irradiation = risque accru</td>
+          <td class="c-comment">Femmes : risque de méningiome plus élevé. Données insuffisantes pour calculer EAR.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-rose">Sarcomes secondaires ⚠️</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Dose / Volume</th><th>EAR</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr class="warn-row">
+          <td class="c-ep" rowspan="4">Sarcome secondaire dans le champ irradié</td>
+          <td class="c-dose">EAR après 20 Gy — à 50 ans</td><td class="c-risk">0,2%</td>
+          <td rowspan="4" class="c-age">⚠️ Jeune âge à l'irradiation associé à risque accru de sarcome secondaire</td>
+          <td rowspan="4" class="c-comment">Pas d'effet du sexe. Anthracyclines et alkylants : odds ratio ~2 pour sarcome secondaire (Table 4).</td>
+        </tr>
+        <tr class="warn-row"><td class="c-dose">EAR après 20 Gy — à 75 ans</td><td class="c-risk">0,9%</td></tr>
+        <tr class="warn-row"><td class="c-dose">EAR après 50 Gy — à 50 ans</td><td class="c-risk">0,3%</td></tr>
+        <tr class="warn-row"><td class="c-dose">EAR après 50 Gy — à 75 ans</td><td class="c-risk">1,2%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-teal">Cancer du poumon secondaire</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Dose / Volume</th><th>EAR</th><th>Effet âge</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-ep" rowspan="4">Cancer du poumon secondaire</td>
+          <td class="c-dose">EAR après 20 Gy — à 50 ans</td><td class="c-risk">0,3%</td>
+          <td rowspan="4" class="c-dim">Données insuffisantes pour analyser l'effet âge</td>
+          <td rowspan="4" class="c-comment">Pas d'effet du sexe</td>
+        </tr>
+        <tr><td class="c-dose">EAR après 20 Gy — à 75 ans</td><td class="c-risk">6%</td></tr>
+        <tr><td class="c-dose">EAR après 50 Gy — à 50 ans</td><td class="c-risk">0,7%</td></tr>
+        <tr><td class="c-dose">EAR après 50 Gy — à 75 ans</td><td class="c-risk">~15%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── CHEMO ───── -->
+<div class="panel" id="panel-chemo">
+
+  <div class="callout callout-violet">
+    <h4>Principe clé — Effets additifs chimio + RT</h4>
+    <ul>
+      <li>Pour de nombreux OARs, la chimiothérapie peut <strong>modifier significativement</strong> le risque de toxicité radique, de façon indépendante, additive ou synergique</li>
+      <li>Les données PENTEC permettent de quantifier ces interactions pour certains organes (Table 4 de l'article)</li>
+      <li>La chimio seule peut parfois causer la même sévérité de toxicité que celle habituellement attribuée à la RT</li>
+    </ul>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-violet">Tableau des interactions quantifiées (Table 4 PENTEC)</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Localisation / Organe</th><th>Observation</th><th>Quantification</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-organ">SNC — Neurocognition</td>
+          <td class="c-ep">Neurotoxicité augmentée par le méthotrexate</td>
+          <td class="c-comment" style="color:var(--gold);">MTX ≈ +5,9 Gy de dose cérébrale uniforme équivalente</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Moelle épinière — Myélite</td>
+          <td class="c-ep">Chimio intrathécale abaisse la tolérance de la moelle</td>
+          <td class="c-comment" style="color:var(--gold);">Dose RT moyenne associée à myélopathie : 39,6 Gy (avec chimio) vs 49,7 Gy (sans chimio) — P = 0,04</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-organ">Cœur — IC congestive</td>
+          <td class="c-ep">Anthracyclines + RT : risque IC relatif &gt; effet RT seul</td>
+          <td class="c-comment" style="color:var(--amber);">Chaque +100 mg/m² anthracyclines → HR pour IC = 1,93 (IC95 : 1,58–2,36) ≈ +10,5 Gy dose cœur</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-organ">Ovaires — AOF</td>
+          <td class="c-ep">Alkylants (CED) + RT : risque AOF très augmenté</td>
+          <td class="c-comment" style="color:var(--amber);">AOF après 2 Gy selon CED : 1–5% (CED 10 g/m²) → 4–7% (CED 20 g/m²) → 6–13% (CED 30 g/m²)</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Ovaires — POI</td>
+          <td class="c-ep">Risque POI à 30 ans selon CED</td>
+          <td class="c-comment" style="color:var(--teal);">CED = 0 : &lt;10 Gy → 17% ; &gt;10 Gy → 83%<br>CED ≥20 g/m² : &lt;10 Gy → 53% ; &gt;10 Gy → ~100%</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-organ">Rein — Toxicité rénale</td>
+          <td class="c-ep">Ifosfamide augmente le risque de toxicité rénale avec RT</td>
+          <td class="c-comment" style="color:var(--amber);">Ifosfamide 63 g/m² seul → 5% toxicité sévère sans RT. Avec RT + V10 = 42% → 10% de risque</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Cochlée — Audition</td>
+          <td class="c-ep">Cisplatine déplace la courbe dose-réponse cochléaire</td>
+          <td class="c-comment" style="color:var(--teal);">Cisplatine 300 mg/m² → déplace la courbe de ~7 Gy (dose équivalente cochléaire tolérée abaissée de 7 Gy)</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-organ">Tissu irradié — Sarcomes secondaires</td>
+          <td class="c-ep">Anthracyclines et alkylants ↑ risque sarcomes secondaires</td>
+          <td class="c-comment" style="color:var(--amber);">OR sarcome secondaire ≈ ×2 pour anthracyclines ET pour alkylants (séparément)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── AGE ───── -->
+<div class="panel" id="panel-age">
+  <div class="callout callout-violet">
+    <h4>Principe fondamental PENTEC — Vulnérabilité développementale</h4>
+    <ul>
+      <li>Les enfants présentent une <strong>mosaïque tissulaire</strong> qui se développe à des rythmes et dans des séquences temporelles différents</li>
+      <li>Les tissus à fort potentiel prolifératif et indifférenciés sont les plus radiosensibles</li>
+      <li>L'expression clinique des dommages peut être retardée jusqu'à l'âge adulte (injury "remembered" but not expressed until growth)</li>
+    </ul>
+  </div>
+
+  <div class="age-grid">
+    <div class="age-col">
+      <div class="age-col-head" style="color:var(--rose);">⬆ Jeune âge augmente la vulnérabilité</div>
+      <ul>
+        <li>Neurocognition</li>
+        <li>Croissance musculo-squelettique</li>
+        <li>Développement dentaire</li>
+        <li>Déficit en GH (impact développement)</li>
+        <li>Audition (surtout &lt;5 ans)</li>
+        <li>Formation de cataracte (possible)</li>
+        <li>Développement mammaire</li>
+        <li>Fonction hépatique (organe entier)</li>
+        <li>Méningiomes secondaires</li>
+        <li>Sarcomes secondaires</li>
+      </ul>
+    </div>
+    <div class="age-col">
+      <div class="age-col-head" style="color:var(--gold);">⬆ Âge plus avancé augmente la vulnérabilité</div>
+      <ul>
+        <li>Hypothyroïdie primaire (&gt;15 ans)</li>
+        <li>Reproduction féminine (POI, AOF)</li>
+      </ul>
+    </div>
+    <div class="age-col">
+      <div class="age-col-head" style="color:var(--text-3);">○ Pas d'effet ou incertain</div>
+      <ul>
+        <li>Nécrose radique cérébrale</li>
+        <li>Nécrose après réirradiation SNC</li>
+        <li>Fonction HH (sauf GH)</li>
+        <li>Neuropathie optique</li>
+        <li>Fonction salivaire</li>
+        <li>Myélopathie</li>
+        <li>Pneumopathie radique</li>
+        <li>Insuffisance rénale</li>
+        <li>Reproduction masculine</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-head" style="margin-top:24px;"><span class="section-tag s-amber">Points de vigilance développementaux (Table 3 PENTEC)</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tissu / Organe</th><th>Fenêtre à risque</th><th>Mécanisme</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-organ">Vertèbres en croissance</td>
+          <td class="c-dose">&lt;2 ans : &gt;10 Gy risqué<br>2–6 ans : &gt;20 Gy risqué<br>&gt;6 ans : &gt;30 Gy risqué</td>
+          <td class="c-comment">Irradiation asymétrique des plaques de croissance → scoliose ; irradiation symétrique → nanisme</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Bourgeon mammaire</td>
+          <td class="c-dose">Traitement avant 4 ans<br>≥0,97 Gy → risque 97%</td>
+          <td class="c-comment">Irradiation pendant la phase embryologique précoce du tissu mammaire = dommage quasi-complet</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Gonades (F)</td>
+          <td class="c-dose">Réserve ovarienne maximale à la naissance → diminue avec l'âge</td>
+          <td class="c-comment">Paradoxalement plus vulnérables avec l'âge car la réserve ovarienne décroît naturellement ; synergisme avec alkylants</td>
+        </tr>
+        <tr>
+          <td class="c-organ">SNC en développement</td>
+          <td class="c-dose">Myélinisation jusqu'à l'âge adulte (&gt;20 ans)</td>
+          <td class="c-comment">RT pendant la myélinisation active → perturbation de la substance blanche, neurocognition, connectivité</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Cochlée</td>
+          <td class="c-dose">Risque maximal &lt;5 ans</td>
+          <td class="c-comment">Cellules ciliées externes post-mitotiques, non régénératives ; vulnérabilité maximale pendant maturation</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ───── SPLEEN ───── -->
+<div class="panel" id="panel-spleen">
+
+  <div class="callout callout-rose">
+    <h4>⚠️ Risque sous-reconnu — Recommandation SIOPE 2021</h4>
+    <ul>
+      <li>La dysfonction splénique post-radique expose à un risque d'<strong>infection bactérienne fulminante (OPSI)</strong>, potentiellement fatale, tout au long de la vie</li>
+      <li>Le risque est <strong>mal reconnu</strong> dans la pratique actuelle : non mentionné dans la plupart des protocoles, des fiches patient, et des recommandations professionnelles existantes</li>
+      <li>Plus de la <strong>moitié</strong> des patients pédiatriques examinés reçoivent une dose splénique &gt;10 Gy à titre incident (médiane 11,3 Gy, range 0,38–44,2 Gy dans une série de 70 patients)</li>
+      <li>Recommandation : <strong>délinéer systématiquement la rate</strong> pour tout champ abdominal et communiquer la dose au pédiatre référent</li>
+    </ul>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-rose">Données dose-risque — Mortalité par infection tardive</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Dose splénique</th><th>Risque relatif</th><th>Risque cumulatif (35 ans)</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-ep" rowspan="3">Décès par infection tardive<br><span class="c-dim">(OPSI — organisms encapsulés)</span></td>
+          <td class="c-dose">&lt; 10 Gy</td>
+          <td class="c-risk">×2,0</td>
+          <td class="c-risk">—</td>
+          <td class="c-comment">Risque significatif même à doses basses</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-dose">10–19,9 Gy</td>
+          <td class="c-risk">×5,5</td>
+          <td class="c-risk">1,1 %</td>
+          <td class="c-comment">Seuil de vigilance proposé : <strong>Dmoy ≥ 10 Gy</strong></td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-dose">≥ 20 Gy</td>
+          <td class="c-risk">×6,0</td>
+          <td class="c-risk">1,3 %</td>
+          <td class="c-comment">Seuil classique anciens référentiels (COG, UKCCSG) : &gt;40 Gy — désormais considéré trop restrictif</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:10px; color:var(--text-3); margin: -4px 0 16px; padding: 0 2px;">
+    Source des données dose-risque : Childhood Cancer Survivor Study (Bates JE et al., 2018) — cohorte &gt;20 000 patients diagnostiqués &lt;21 ans (1970–1999), suivi médian 26 ans, 62 décès par infection.
+  </div>
+
+  <div class="section-head"><span class="section-tag s-amber">Objectif de dose — Recommandation SIOPE 2021</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Organe</th><th>Objectif</th><th>Seuil de vigilance</th><th>Conduite à tenir si Dmoy ≥ seuil</th></tr></thead>
+      <tbody>
+        <tr class="warn-row">
+          <td class="c-organ">Rate (irradiation incidente)</td>
+          <td class="c-dose">Dmoy &lt; 10 Gy (ALARA)<br><span class="c-dim">sans compromettre la couverture cible</span></td>
+          <td class="c-dose" style="color:var(--rose);">Dmoy ≥ 10 Gy</td>
+          <td class="c-comment">
+            <strong style="color:var(--text);">1. Communiquer la dose</strong> au pédiatre/oncologue référent<br>
+            <strong style="color:var(--text);">2. Envisager prophylaxie OPSI :</strong><br>
+            · Vaccination pneumocoque (recommandée 80–84 %)<br>
+            · Vaccination méningocoque (47–63 %)<br>
+            · Vaccination Haemophilus influenzae B (53–66 %)<br>
+            · Pénicilline V orale ± longue durée (47 %)<br>
+            <strong style="color:var(--text);">3. Informer</strong> patient/famille du risque et de sa persistance à vie
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-blue">Doses incidentes observées en pratique pédiatrique (n=70)</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tumeur / Site</th><th>Dose prescrite</th><th>Dmoy rate [médiane (range)] Gy</th><th>Commentaire</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-organ" rowspan="3">Neuroblastome</td>
+          <td class="c-dose">21 Gy (14–15 fr)</td>
+          <td class="c-risk">8,4 (5,4–18,5)</td>
+          <td class="c-comment">Selon latéralité et extension du volume cible</td>
+        </tr>
+        <tr>
+          <td class="c-dose">21,6 Gy (12 fr)</td>
+          <td class="c-risk">18,6</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td class="c-dose">36 Gy (24 fr)</td>
+          <td class="c-risk">14,4 (3,9–31,4)</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td class="c-organ">Tumeur de Wilms IR<br><span class="c-dim">(flanc gauche)</span></td>
+          <td class="c-dose">14,4 Gy</td>
+          <td class="c-risk" style="color:var(--amber);">13,6 (9,4–14,6)</td>
+          <td class="c-comment">⚠️ Flanc gauche : Dmoy quasi-égale à la dose prescrite. Flanc droit : 0,4 Gy seulement</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Tumeur de Wilms IR<br><span class="c-dim">(poumon entier)</span></td>
+          <td class="c-dose">12 Gy</td>
+          <td class="c-risk" style="color:var(--amber);">9,4 (6,3–12,4)</td>
+          <td class="c-comment">Souvent proche du seuil 10 Gy</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Tumeur de Wilms IR<br><span class="c-dim">(abdomen + pelvis)</span></td>
+          <td class="c-dose">15 Gy</td>
+          <td class="c-risk" style="color:var(--rose);">15,1 (14,8–15,2)</td>
+          <td class="c-comment">⚠️ Irradiation abdominale totale → Dmoy ≈ dose prescrite</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Tumeur de Wilms HR<br><span class="c-dim">(abdomen + pelvis)</span></td>
+          <td class="c-dose">19,5 Gy</td>
+          <td class="c-risk" style="color:var(--rose);">19,7</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td class="c-organ">Sarcome d'Ewing<br><span class="c-dim">(poumon entier)</span></td>
+          <td class="c-dose">15–18 Gy</td>
+          <td class="c-risk">4,6–18,2</td>
+          <td class="c-comment">Variable selon extension</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Carcinome surrénalien<br><span class="c-dim">(surrénale gauche)</span></td>
+          <td class="c-dose">54 Gy</td>
+          <td class="c-risk" style="color:var(--rose);">44,2</td>
+          <td class="c-comment">⚠️ Cas extrême — dose la plus élevée de la série</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head" style="margin-top:32px;"><span class="section-tag s-violet">Références</span><span class="section-line"></span></div>
+  <div style="font-size:11px; color:var(--text-2); line-height:1.8;">
+    <div style="display:flex; gap:12px; margin-bottom:12px;">
+      <span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); min-width:20px; padding-top:2px;">[1]</span>
+      <div>
+        <div><strong>Arunagiri N, Kelly SM, Dunlea C, et al.</strong></div>
+        <div style="color:var(--text);">The spleen as an organ at risk in paediatric radiotherapy: A SIOP-Europe Radiation Oncology Working Group report</div>
+        <div style="color:var(--text-2); font-size:11px;">European Journal of Cancer. 2021;143:1–10.</div>
+        <div style="font-family:'DM Mono',monospace; font-size:11px;"><a href="https://doi.org/10.1016/j.ejca.2020.10.025" target="_blank" style="color:var(--violet); text-decoration:none;">https://doi.org/10.1016/j.ejca.2020.10.025</a></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; margin-bottom:12px;">
+      <span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); min-width:20px; padding-top:2px;">[2]</span>
+      <div>
+        <div><strong>Bates JE, Howell RM, Liu Q, et al.</strong></div>
+        <div style="color:var(--text);">Therapy-Related Cardiac Risk in Childhood Cancer Survivors: An Analysis of the Childhood Cancer Survivor Study</div>
+        <div style="color:var(--text-2); font-size:11px; font-style:italic;">Note : données dose-risque rate issues de : Bates JE et al. Spleen radiation and infection mortality. CCSS 2018.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ───── VERTEBRAE ───── -->
+<div class="panel" id="panel-vertebrae">
+
+  <div class="callout callout-amber">
+    <h4>Principes clés — Recommandations SIOPE 2019 (Hoeben et al., Lancet Oncol)</h4>
+    <ul>
+      <li>L'inhomogénéité de dose sur les vertèbres en croissance est le mécanisme principal de <strong>scoliose, cyphose et hypoplasie</strong> post-radiques</li>
+      <li>En RT conformationnelle moderne, des gradients de dose prononcés sur les vertèbres sont possibles — <strong>contrairement à la RT 2D/3D</strong> où la dose était généralement homogène</li>
+      <li>Recommandation générale : délivrer une <strong>dose homogène</strong> sur toutes les vertèbres incluses dans le champ chez les enfants n'ayant pas terminé leur poussée de croissance pubertaire</li>
+      <li>Si un gradient de dose est inévitable, les seuils par groupe d'âge ci-dessous s'appliquent</li>
+    </ul>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-amber">Recommandations de dose par groupe d'âge — Vertèbres en croissance</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Groupe d'âge</th><th>Principe</th><th>Seuil de dose (dose totale)</th><th>Risque si dépassé</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr class="warn-row">
+          <td class="c-organ">&lt; 2 ans</td>
+          <td class="c-ep">Homogénéité vertébrale <strong>stricte</strong></td>
+          <td class="c-dose">&gt; 10 Gy : risque important<br>Gradient inacceptable</td>
+          <td class="c-risk" style="color:var(--rose);">⚠️ Très élevé</td>
+          <td class="c-comment">Croissance rachidienne maximale. Irradiation asymétrique → scoliose sévère. Irradiation symétrique → nanisme axial. Dommages à &gt; 10 Gy.</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-organ">2–6 ans</td>
+          <td class="c-ep">Homogénéité vertébrale <strong>recommandée</strong></td>
+          <td class="c-dose">&gt; 20 Gy : risque significatif<br>Si gradient inévitable : accepté</td>
+          <td class="c-risk" style="color:var(--amber);">Élevé</td>
+          <td class="c-comment">Phase de croissance active. Espacement vertébral thoracique en cours. Restriction thoracique si &gt;6 vertèbres thoraciques irradiées &lt;6 ans.</td>
+        </tr>
+        <tr>
+          <td class="c-organ">6–10 ans</td>
+          <td class="c-ep">Homogénéité <strong>souhaitable</strong></td>
+          <td class="c-dose">&gt; 25–30 Gy : risque mesurable</td>
+          <td class="c-risk" style="color:var(--gold);">Modéré</td>
+          <td class="c-comment">Croissance rachidienne lombo-thoracique significative (90% hauteur lombaire finale atteinte à 10 ans). Gradient acceptable si techniquement inévitable.</td>
+        </tr>
+        <tr>
+          <td class="c-organ">&gt; 10 ans<br><span class="c-dim">(prépubère)</span></td>
+          <td class="c-ep">Homogénéité <strong>si pas terminé la puberté</strong></td>
+          <td class="c-dose">&gt; 30–35 Gy : retard mesurable<br>&gt; 33 Gy : impact sévère si ≤11 ans (♂) / ≤9 ans (♀)</td>
+          <td class="c-risk" style="color:var(--teal);">Faible–modéré</td>
+          <td class="c-comment">Impact maximal si poussée pubertaire non débutée. Willman et al. : perte de hauteur assise 8,2% (7,4 cm) pour &gt;33 Gy à ≤11 ans (♂). Modèle Hogeboom : déficit moyen 4,7 cm si &gt;15 Gy.</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Après puberté</td>
+          <td class="c-ep">Gradient toléré</td>
+          <td class="c-dose">Risque faible sauf doses très élevées</td>
+          <td class="c-risk" style="color:var(--green);">Faible</td>
+          <td class="c-comment">Plaques de croissance fermées — risque résiduel limité à l'os mature (fractures, ostéoporose)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-rose">Gradients de dose acceptables — Recommandations chiffrées (Figure 2)</span><span class="section-line"></span></div>
+  <div class="callout callout-violet" style="margin-bottom:14px;">
+    <h4>Principe commun aux deux types de cibles</h4>
+    <ul>
+      <li>Ces gradients s'appliquent pour un fractionnement conventionnel <strong>1,8–2 Gy/fraction</strong></li>
+      <li>Pour une dose tumorale <strong>&gt; 40 Gy</strong>, un gradient plus important peut être accepté, sous réserve que les centres d'ossification primaires reçoivent <strong>≥ 36 Gy minimum</strong></li>
+      <li>Après la phase d'accélération pubertaire (méthode Risser / Sauvegrain) : <strong>tous les gradients sont acceptables</strong></li>
+    </ul>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type de cible</th><th>Groupe d'âge / Contexte</th><th>Gradient gauche-droit ET post-ant accepté</th><th>Condition / Exception</th></tr></thead>
+      <tbody>
+        <!-- PARAVERTÉBRAL -->
+        <tr class="warn-row">
+          <td class="c-organ" rowspan="4">Paravertébral<br><span class="c-dim">Tumeur de Wilms, neuroblastome, sarcomes des tissus mous</span></td>
+          <td class="c-dose">0–2 ans *</td>
+          <td class="c-risk" style="color:var(--rose);">Δ &lt; 3 Gy</td>
+          <td class="c-comment">⚠️ Si possible, éviter d'irradier &gt;7 vertèbres thoraciques à &gt;20 Gy<br>Si dose tumorale &gt;40 Gy : gradient &gt;3 Gy toléré si vertèbres ≥36 Gy</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-dose">2 ans → fin accélération pubertaire *</td>
+          <td class="c-risk" style="color:var(--amber);">Δ &lt; 5 Gy</td>
+          <td class="c-comment">Si dose tumorale &gt;40 Gy : gradient &gt;5 Gy toléré si vertèbres ≥36 Gy</td>
+        </tr>
+        <tr>
+          <td class="c-dose">Après accélération pubertaire †</td>
+          <td class="c-risk" style="color:var(--green);">Tous gradients acceptables</td>
+          <td class="c-comment">Plaques de croissance fermées</td>
+        </tr>
+        <!-- CRANIOSPINAL -->
+        <tr style="border-top: 2px solid var(--border-md);">
+          <td colspan="3" style="padding:0;"></td>
+        </tr>
+        <tr>
+          <td class="c-organ" rowspan="4">Craniospinal (CSI)<br><span class="c-dim">Médulloblastome, épendymome, tumeurs germinales</span><br><span class="c-dim">(gradient G-D homogène → seul le gradient post-ant est contrôlé)</span></td>
+          <td class="c-dose">0–6 ans</td>
+          <td class="c-risk" style="color:var(--rose);">Gradient post-ant &lt; 5 Gy<br><span style="font-size:10px; color:var(--text-3);">(si dose prescrite ≤ 25 Gy)</span></td>
+          <td class="c-comment">Si dose &gt;25 Gy : centres d'ossification primaires ≥ 20 Gy<br>OU mimer le gradient d'un faisceau postérieur conventionnel (≥70% de la dose prescrite)</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-dose">6 ans → fin accélération pubertaire †</td>
+          <td class="c-risk" style="color:var(--amber);">Gradient post-ant selon dose :<br>≤25 Gy → Δ &lt; 5 Gy<br>&gt;25 Gy → vertèbres ≥ 20 Gy</td>
+          <td class="c-comment">Alternative : mimer gradient faisceau postérieur conventionnel (≥ ~70% dose cible)</td>
+        </tr>
+        <tr>
+          <td class="c-dose">Après accélération pubertaire †</td>
+          <td class="c-risk" style="color:var(--green);">Tous gradients acceptables</td>
+          <td class="c-comment"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:10px; color:var(--text-3); margin: -4px 0 20px; padding: 0 2px; line-height:1.8;">
+    * Si possible, éviter une dose &gt;20 Gy sur 7 vertèbres thoraciques ou plus chez les 0–6 ans.<br>
+    † Fin de la phase d'accélération pubertaire déterminée par la méthode de Risser (radio bassin) ou de Sauvegrain (radio coude).<br>
+    ‡ Pour une dose tumorale &gt;40 Gy : gradients plus importants acceptés si les centres d'ossification primaires reçoivent ≥36 Gy.
+  </div>
+
+  <div class="section-head"><span class="section-tag s-blue">Délinéation recommandée et volumes à risque</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Structure à délinéer</th><th>Contenu</th><th>Recommandation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-organ">Corps vertébral + arc</td>
+          <td class="c-ep">Tous les centres d'ossification primaires + plaques de croissance</td>
+          <td class="c-comment">Délinéer <em>a minima</em> le corps vertébral et l'arc vertébral. Les plaques de croissance (épiphyses supérieure et inférieure) doivent être incluses.</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-organ">Vertèbres thoraciques (jeune enfant &lt;6 ans)</td>
+          <td class="c-ep">Développement thoracique et respiratoire</td>
+          <td class="c-comment">⚠️ Limiter le nombre de vertèbres thoraciques irradiées autant que possible. Risque d'<strong>insuffisance respiratoire</strong> si développement thoracique insuffisant. Longueur thoracique cible ≥18–22 cm (atteinte entre 5–10 ans).</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Vertèbres lombaires</td>
+          <td class="c-ep">Croissance lombaire plus rapide (~2 mm/an vs 1 mm/an thoracique)</td>
+          <td class="c-comment">90% hauteur finale atteinte à 10 ans. Éléments postérieurs à croissance plus lente → gradient dose ant/post contribue à la lordose normale.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head"><span class="section-tag s-teal">Données cliniques de référence — Retard de croissance rachidienne</span><span class="section-line"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Étude / Population</th><th>Dose / Traitement</th><th>Séquelle mesurée</th><th>Commentaires</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="c-organ">Probert & Parker<br><span class="c-dim">Irradiation rachidienne entière</span></td>
+          <td class="c-dose">&gt; 35 Gy vs &lt; 25 Gy</td>
+          <td class="c-ep">Perte de hauteur assise disproportionnée, maximale à &gt;35 Gy</td>
+          <td class="c-comment">Premiers travaux à quantifier la perte de croissance en hauteur assise. Référence fondatrice.</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Willman et al.<br><span class="c-dim">Lymphome de Hodgkin, rachis entier</span></td>
+          <td class="c-dose">&gt; 33 Gy, ≤11 ans (♂) ou ≤9 ans (♀)</td>
+          <td class="c-ep">Perte hauteur assise : 8,2 % (≈ 7,4 cm, ≈ 2 DS)</td>
+          <td class="c-comment">Doses &lt;33 Gy ou âge pubertaire/postpubertaire → impact &lt;1 DS</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Hogeboom et al.<br><span class="c-dim">NWTS — 2778 patients, tumeur de Wilms</span></td>
+          <td class="c-dose">&gt; 15 Gy flank / abdomen (0–40 Gy)</td>
+          <td class="c-ep">Déficit moyen taille adulte : 4,7 cm<br>Nourrissons (&lt;1 an) : impact dès 10 Gy</td>
+          <td class="c-comment">Modèle de prédiction : déficit par Gy en fonction de l'âge au traitement. Nourrissons = sous-groupe le plus vulnérable.</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Hartley et al.<br><span class="c-dim">Irradiation cranio-spinale (CSI)</span></td>
+          <td class="c-dose">23,4 Gy vs 36–39,6 Gy CSI<br>Suivi moyen 44 mois</td>
+          <td class="c-ep">Croissance vertébrale plus lente à haute dose, rachis lombaire le plus affecté</td>
+          <td class="c-comment">Croissance résiduelle présente même après 36 Gy. Rachis lombaire &gt; cervical &gt; thoracique en termes de sensibilité.</td>
+        </tr>
+        <tr>
+          <td class="c-organ">Ng et al.<br><span class="c-dim">IMRT — Neuroblastome, âge moyen 4,3 ans</span></td>
+          <td class="c-dose">Vertèbres cibles : ≥18 Gy · Vertèbres épargnées adj. : moy. 12,9 Gy · Hors champ : référence</td>
+          <td class="c-ep">Croissance la plus lente dans vertèbres cibles. Vertèbres adjacentes épargnées : croissance aussi significativement réduite vs hors champ</td>
+          <td class="c-comment">Même les vertèbres adjacentes recevant &gt;10 Gy croissent moins vite. Justifie l'objectif de minimiser la dose sur toutes les vertèbres proches du champ.</td>
+        </tr>
+        <tr class="warn-row">
+          <td class="c-organ">Essai PNETS (médulloblastome)<br><span class="c-dim">Hyperfractionnement vs conventionnel</span></td>
+          <td class="c-dose">Hyperfract : 36 Gy (1 Gy×2/j) vs Conventionnel : 23,4 Gy (1,8 Gy×1/j)</td>
+          <td class="c-ep">⚠️ Hyperfractionnement → plus de restriction croissance rachidienne que conventionnel</td>
+          <td class="c-comment">L'hyperfractionnement n'épargne pas les os en croissance. Dose BED plus élevée dans le bras hypofractionné = facteur confondant. α/β os en croissance ≈ 4–5.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-head" style="margin-top:32px;"><span class="section-tag s-violet">Référence</span><span class="section-line"></span></div>
+  <div style="font-size:11px; color:var(--text-2); line-height:1.8;">
+    <div style="display:flex; gap:12px;">
+      <span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--text-3); min-width:20px; padding-top:2px;">[1]</span>
+      <div>
+        <div><strong>Hoeben BA, Carrie C, Timmermann B, et al. on behalf of the SIOPE Radiotherapy Working Group</strong></div>
+        <div style="color:var(--text);">Management of vertebral radiotherapy dose in paediatric patients with cancer: consensus recommendations from the SIOPE radiotherapy working group</div>
+        <div style="color:var(--text-2); font-size:11px;">Lancet Oncology. 2019;20(2):e155–e166.</div>
+        <div style="font-family:'DM Mono',monospace; font-size:11px;"><a href="https://doi.org/10.1016/S1470-2045(18)30847-0" target="_blank" style="color:var(--violet); text-decoration:none;">https://doi.org/10.1016/S1470-2045(18)30847-0</a></div>
+        <div style="color:var(--text-3); font-size:11px; font-style:italic; margin-top:2px;">Consensus de 11 pays européens, SIOPE Radiotherapy Working Group, basé sur une revue systématique et une enquête auprès de 29 centres</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ───── DVH ESTIMATOR ───── -->
+<div class="panel" id="panel-dvh">
+
+  <!-- STEPS -->
+  <div class="dvh-steps">
+    <div class="dvh-step active" id="dvhs1"><div class="dvh-step-num">1</div><span>Patient</span></div>
+    <div class="dvh-connector"></div>
+    <div class="dvh-step" id="dvhs2"><div class="dvh-step-num">2</div><span>Organes</span></div>
+    <div class="dvh-connector"></div>
+    <div class="dvh-step" id="dvhs3"><div class="dvh-step-num">3</div><span>Métriques</span></div>
+    <div class="dvh-connector"></div>
+    <div class="dvh-step" id="dvhs4"><div class="dvh-step-num">4</div><span>Rapport</span></div>
+  </div>
+  <div class="dvh-progress">
+    <span class="dvh-progress-label" id="dvhProgressLabel">Étape 1 / 4</span>
+    <div class="dvh-progress-bar"><div class="dvh-progress-fill" id="dvhProgressFill" style="width:25%"></div></div>
+  </div>
+
+  <!-- STEP 1 : PATIENT -->
+  <div id="dvh-step1">
+    <div class="dvh-card">
+      <div class="dvh-card-title">Données patient</div>
+      <div class="dvh-card-sub">Conditionnent les corrections chimio·RT et les seuils par âge</div>
+      <div class="dvh-form-grid">
+        <div class="dvh-form-group">
+          <label class="dvh-label">Âge au traitement (ans)</label>
+          <input class="dvh-input" type="number" id="dvhAge" min="0" max="25" step="0.5" placeholder="ex : 7">
+        </div>
+        <div class="dvh-form-group">
+          <label class="dvh-label">Sexe</label>
+          <select class="dvh-select" id="dvhSexe">
+            <option value="">— Sélectionner —</option>
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+          </select>
+        </div>
+        <div class="dvh-form-group">
+          <label class="dvh-label">Diagnostic principal</label>
+          <input class="dvh-input" type="text" id="dvhDiag" placeholder="ex : Médulloblastome…">
+        </div>
+        <div class="dvh-form-group">
+          <label class="dvh-label">Dose prescrite (Gy)</label>
+          <input class="dvh-input" type="number" id="dvhDose" min="0" max="80" step="0.1" placeholder="ex : 23.4">
+        </div>
+      </div>
+      <div class="dvh-form-group" style="margin-top:8px;">
+        <label class="dvh-label" style="margin-bottom:6px;">Chimiothérapies reçues ou prévues</label>
+        <div class="dvh-chemo-grid">
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'anthracyclines')"><div class="dvh-chemo-dot"></div>Anthracyclines</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'alkylants')"><div class="dvh-chemo-dot"></div>Alkylants</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'cisplatine')"><div class="dvh-chemo-dot"></div>Cisplatine / Platines</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'methotrexate')"><div class="dvh-chemo-dot"></div>Méthotrexate HD</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'ifosfamide')"><div class="dvh-chemo-dot"></div>Ifosfamide</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'vincristine')"><div class="dvh-chemo-dot"></div>Vincristine</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'intrathecal')"><div class="dvh-chemo-dot"></div>Chimio intrathécale</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'bleomycine')"><div class="dvh-chemo-dot"></div>Bléomycine</div>
+          <div class="dvh-chemo-item" onclick="dvhToggleChemo(this,'autre')"><div class="dvh-chemo-dot"></div>Autre / Inconnu</div>
+        </div>
+      </div>
+      <div class="dvh-btn-actions">
+        <button class="dvh-btn dvh-btn-primary" onclick="dvhGoStep2()">Continuer → Sélection des organes</button>
+      </div>
+      <div class="dvh-error" id="dvhErr1">⚠ Veuillez renseigner au minimum l'âge du patient.</div>
+    </div>
+  </div>
+
+  <!-- STEP 2 : ORGANES -->
+  <div id="dvh-step2" style="display:none;">
+    <div class="dvh-card">
+      <div class="dvh-card-title">Organes à évaluer</div>
+      <div class="dvh-card-sub">Cochez les organes pour lesquels vous disposez de données dosimétriques</div>
+
+      <div class="dvh-cat-title">Système nerveux central</div>
+      <div class="dvh-organ-grid">
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'cerveau')"><div class="dvh-organ-check">✓</div><div><div>Cerveau</div><div class="dvh-organ-hint">Dmoy, VxGy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'tronc')"><div class="dvh-organ-check">✓</div><div><div>Tronc cérébral</div><div class="dvh-organ-hint">D0.03cc, Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'moelle')"><div class="dvh-organ-check">✓</div><div><div>Moelle épinière</div><div class="dvh-organ-hint">D0.03cc, D1cc</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'hypothalamus')"><div class="dvh-organ-check">✓</div><div><div>Hypothalamus / Hypophyse</div><div class="dvh-organ-hint">D100%</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'hippocampe')"><div class="dvh-organ-check">✓</div><div><div>Hippocampes</div><div class="dvh-organ-hint">Dmoy G/D</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'polygone')"><div class="dvh-organ-check">✓</div><div><div>Polygone de Willis</div><div class="dvh-organ-hint">D100%</div></div></div>
+      </div>
+
+      <div class="dvh-cat-title">Tête et cou</div>
+      <div class="dvh-organ-grid">
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'cochlee_g')"><div class="dvh-organ-check">✓</div><div><div>Cochlée gauche</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'cochlee_d')"><div class="dvh-organ-check">✓</div><div><div>Cochlée droite</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'chiasme')"><div class="dvh-organ-check">✓</div><div><div>Chiasme / Nerfs optiques</div><div class="dvh-organ-hint">Dmax, D0.03cc</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'cristallin')"><div class="dvh-organ-check">✓</div><div><div>Cristallin</div><div class="dvh-organ-hint">Dmax, Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'thyroide')"><div class="dvh-organ-check">✓</div><div><div>Thyroïde</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'glandes_sal')"><div class="dvh-organ-check">✓</div><div><div>Glandes salivaires</div><div class="dvh-organ-hint">Dmoy parotide</div></div></div>
+      </div>
+
+      <div class="dvh-cat-title">Thorax</div>
+      <div class="dvh-organ-grid">
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'coeur')"><div class="dvh-organ-check">✓</div><div><div>Cœur</div><div class="dvh-organ-hint">Dmoy, V20Gy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'poumon_g')"><div class="dvh-organ-check">✓</div><div><div>Poumon gauche</div><div class="dvh-organ-hint">V20Gy, Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'poumon_d')"><div class="dvh-organ-check">✓</div><div><div>Poumon droit</div><div class="dvh-organ-hint">V20Gy, Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'sein_g')"><div class="dvh-organ-check">✓</div><div><div>Sein / Bourgeon G</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'sein_d')"><div class="dvh-organ-check">✓</div><div><div>Sein / Bourgeon D</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+      </div>
+
+      <div class="dvh-cat-title">Abdomen</div>
+      <div class="dvh-organ-grid">
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'rein_g')"><div class="dvh-organ-check">✓</div><div><div>Rein gauche</div><div class="dvh-organ-hint">V12Gy, Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'rein_d')"><div class="dvh-organ-check">✓</div><div><div>Rein droit</div><div class="dvh-organ-hint">V12Gy, Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'foie')"><div class="dvh-organ-check">✓</div><div><div>Foie</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'rate')"><div class="dvh-organ-check">✓</div><div><div>Rate</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+      </div>
+
+      <div class="dvh-cat-title">Reproduction</div>
+      <div class="dvh-organ-grid">
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'ovaire_g')"><div class="dvh-organ-check">✓</div><div><div>Ovaire gauche</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'ovaire_d')"><div class="dvh-organ-check">✓</div><div><div>Ovaire droit</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'uterus')"><div class="dvh-organ-check">✓</div><div><div>Utérus</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'testicule')"><div class="dvh-organ-check">✓</div><div><div>Testicule</div><div class="dvh-organ-hint">Dmoy</div></div></div>
+      </div>
+
+      <div class="dvh-cat-title">Musculo-squelettique</div>
+      <div class="dvh-organ-grid">
+        <div class="dvh-organ-item" onclick="dvhToggleOrgan(this,'vertebres')"><div class="dvh-organ-check">✓</div><div><div>Vertèbres</div><div class="dvh-organ-hint">Dmin, Dmax, gradient</div></div></div>
+      </div>
+
+      <div class="dvh-btn-actions">
+        <button class="dvh-btn dvh-btn-ghost" onclick="dvhGoStep1()">← Retour</button>
+        <button class="dvh-btn dvh-btn-primary" onclick="dvhGoStep3()">Continuer → Saisie des métriques</button>
+      </div>
+      <div class="dvh-error" id="dvhErr2">⚠ Veuillez sélectionner au moins un organe.</div>
+    </div>
+  </div>
+
+  <!-- STEP 3 : MÉTRIQUES -->
+  <div id="dvh-step3" style="display:none;">
+    <div class="dvh-card">
+      <div class="dvh-card-title">Métriques dosimétriques</div>
+      <div class="dvh-card-sub">Valeurs en Gy (ou % pour les volumes) — laisser vide si non disponible</div>
+      <div class="dvh-metrics-grid" id="dvhMetricsGrid"></div>
+      <div class="dvh-btn-actions">
+        <button class="dvh-btn dvh-btn-ghost" onclick="dvhGoStep2back()">← Retour</button>
+        <button class="dvh-btn dvh-btn-primary" onclick="dvhAnalyze()">⚡ Analyser les risques</button>
+      </div>
+      <div class="dvh-error" id="dvhErr3">⚠ Veuillez renseigner au moins une valeur.</div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="dvh-loading" id="dvhLoading">
+    <div class="dvh-spinner"></div>
+    <div class="dvh-loading-msg" id="dvhLoadingMsg">Analyse en cours…</div>
+    <div class="dvh-loading-sub">Comparaison aux seuils PENTEC 2024 et SIOPE 2019–2021, correction des interactions chimio·RT.</div>
+  </div>
+
+  <!-- STEP 4 : RAPPORT -->
+  <div class="dvh-results" id="dvhResults">
+    <div class="dvh-results-header">
+      <div>
+        <div class="dvh-results-title">Rapport de risques estimés</div>
+        <div class="dvh-results-meta" id="dvhResultsMeta"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="dvh-btn dvh-btn-pdf" onclick="dvhPrintResult()">⬇ Exporter PDF</button>
+        <button class="dvh-btn dvh-btn-reset" onclick="dvhReset()">⟳ Nouvelle analyse</button>
+      </div>
+    </div>
+    <div class="dvh-summary-bar" id="dvhSummaryBar"></div>
+    <div id="dvhRiskCards"></div>
+    <div class="dvh-disclaimer">
+      <strong>⚠ Outil d'aide à la décision clinique</strong> — Ne se substitue pas au jugement médical ni aux recommandations institutionnelles. Estimations basées sur des cohortes historiques avec incertitudes significatives. Toute décision doit être prise en RCP.<br>
+      Sources : PENTEC 2024 (Constine et al., IJROBP 2024;119:319–337) · SIOPE Vertèbres 2019 (Hoeben et al., Lancet Oncol 2019;20:e155) · SIOPE Rate 2021 (Arunagiri et al., EJC 2021;143:1–10)
+    </div>
+    <div class="print-footer">
+      Outil d'aide à la décision — Ne se substitue pas au jugement clinique ni aux recommandations en vigueur.<br>
+      Généré le <span id="dvhPrintDate"></span> · PENTEC 2024 / SIOPE · ronant99-lgtm.github.io
+    </div>
+  </div>
+
+</div><!-- /panel-dvh -->
+
+</main>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+  <div class="footer-ref">
+    <strong>Source :</strong> Constine LS, Marks LB, Milano MT, Ronckers CM, Jackson A, Hudson MM, Marcus KJ, Hodgson DC, Hua CH, Howell RM, Marples B, Yorke E, Olch A, Bentzen SM.<br>
+    <em>A User's Guide and Summary of Pediatric Normal Tissue Effects in the Clinic (PENTEC).</em> Int J Radiat Oncol Biol Phys. 2024;119(2):319–337. doi:10.1016/j.ijrobp.2023.09.017
+  </div>
+  <div class="footer-abbr">
+    <strong>EAR</strong> = Excès risque absolu (pour 10 000/an) · <strong>ERR</strong> = Excès risque relatif<br>
+    <strong>EQD2</strong> = dose équivalente 2 Gy/fr · <strong>CED</strong> = dose éq. cyclophosphamide<br>
+    <strong>AOF</strong> = insuffisance ovarienne aiguë · <strong>POI</strong> = insuffisance ovarienne prématurée
+  </div>
+</footer>
+
+</div><!-- .app -->
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const id = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + id).classList.add('active');
+    // Scroll to top of main on mobile
+    if (window.innerWidth < 640) {
+      document.querySelector('.main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Tabs arrow scroll
+const tabsBar = document.getElementById('tabs');
+const tabsLeft = document.getElementById('tabsLeft');
+const tabsRight = document.getElementById('tabsRight');
+
+function updateArrows() {
+  const canScrollLeft = tabsBar.scrollLeft > 8;
+  const canScrollRight = tabsBar.scrollLeft < tabsBar.scrollWidth - tabsBar.clientWidth - 8;
+  tabsLeft.style.display = canScrollLeft ? 'block' : 'none';
+  tabsRight.style.display = canScrollRight ? 'block' : 'none';
+}
+
+tabsLeft.addEventListener('click', () => { tabsBar.scrollLeft -= 200; });
+tabsRight.addEventListener('click', () => { tabsBar.scrollLeft += 200; });
+tabsBar.addEventListener('scroll', updateArrows);
+window.addEventListener('resize', updateArrows);
+updateArrows();
+
+// ═══════════════════════════════════════════════
+// DVH ESTIMATOR — State & Logic
+// ═══════════════════════════════════════════════
+let dvhPatient = {};
+let dvhChemo = new Set();
+let dvhOrgans = new Set();
+
+const DVH_ORGAN_DEFS = {
+  cerveau:      { label:'Cerveau', hint:'Neurocognition / Nécrose',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 6.5',unit:'Gy'},{key:'d100',label:'D100%',ph:'ex : 24',unit:'Gy'},{key:'v18',label:'V18Gy',ph:'ex : 100',unit:'%'},{key:'v36',label:'V36Gy',ph:'ex : 40',unit:'%'}]},
+  tronc:        { label:'Tronc cérébral', hint:'Nécrose / Myélopathie haute',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 25',unit:'Gy'},{key:'d003cc',label:'D0.03cc',ph:'ex : 51',unit:'Gy'},{key:'dmax',label:'Dmax',ph:'ex : 54',unit:'Gy'}]},
+  moelle:       { label:'Moelle épinière', hint:'Myélopathie',
+    fields:[{key:'d003cc',label:'D0.03cc',ph:'ex : 45',unit:'Gy'},{key:'d1cc',label:'D1cc',ph:'ex : 42',unit:'Gy'}]},
+  hypothalamus: { label:'Hypothalamus / Hypophyse', hint:'Déficit GH, TSH centrale, ACTH',
+    fields:[{key:'d100',label:'D100%',ph:'ex : 20',unit:'Gy'}]},
+  hippocampe:   { label:'Hippocampes', hint:'Mémoire / Neurocognition',
+    fields:[{key:'dmoy_g',label:'Dmoy Gauche',ph:'ex : 12',unit:'Gy'},{key:'dmoy_d',label:'Dmoy Droite',ph:'ex : 16',unit:'Gy'}]},
+  polygone:     { label:'Polygone de Willis', hint:'AVC tardif',
+    fields:[{key:'d100',label:'D100%',ph:'ex : 45',unit:'Gy'}]},
+  cochlee_g:    { label:'Cochlée gauche', hint:'Perte auditive',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 35',unit:'Gy'}]},
+  cochlee_d:    { label:'Cochlée droite', hint:'Perte auditive',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 38',unit:'Gy'}]},
+  chiasme:      { label:'Chiasme / Nerfs optiques', hint:'Neuropathie optique',
+    fields:[{key:'dmax',label:'Dmax',ph:'ex : 54',unit:'Gy'},{key:'d003cc',label:'D0.03cc',ph:'ex : 50',unit:'Gy'}]},
+  cristallin:   { label:'Cristallin', hint:'Cataracte',
+    fields:[{key:'dmax',label:'Dmax',ph:'ex : 8',unit:'Gy'},{key:'dmoy',label:'Dmoy',ph:'ex : 5',unit:'Gy'}]},
+  thyroide:     { label:'Thyroïde', hint:'Hypothyroïdie primaire',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 25',unit:'Gy'}]},
+  glandes_sal:  { label:'Glandes salivaires', hint:'Xérostomie',
+    fields:[{key:'dmoy',label:'Dmoy parotide',ph:'ex : 22',unit:'Gy'}]},
+  coeur:        { label:'Cœur', hint:'IC / Péricardite',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 18',unit:'Gy'},{key:'v20',label:'V20Gy',ph:'ex : 30',unit:'%'}]},
+  poumon_g:     { label:'Poumon gauche', hint:'Pneumopathie radique',
+    fields:[{key:'v20',label:'V20Gy',ph:'ex : 25',unit:'%'},{key:'dmoy',label:'Dmoy',ph:'ex : 12',unit:'Gy'}]},
+  poumon_d:     { label:'Poumon droit', hint:'Pneumopathie radique',
+    fields:[{key:'v20',label:'V20Gy',ph:'ex : 10',unit:'%'},{key:'dmoy',label:'Dmoy',ph:'ex : 8',unit:'Gy'}]},
+  sein_g:       { label:'Sein / Bourgeon gauche', hint:'Hypoplasie mammaire',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 1.5',unit:'Gy'}]},
+  sein_d:       { label:'Sein / Bourgeon droit', hint:'Hypoplasie mammaire',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 0.8',unit:'Gy'}]},
+  rein_g:       { label:'Rein gauche', hint:'HTA / Insuffisance rénale',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 14',unit:'Gy'},{key:'v12',label:'V12Gy',ph:'ex : 45',unit:'%'},{key:'v20',label:'V20Gy',ph:'ex : 30',unit:'%'}]},
+  rein_d:       { label:'Rein droit', hint:'HTA / Insuffisance rénale',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 8',unit:'Gy'},{key:'v12',label:'V12Gy',ph:'ex : 20',unit:'%'},{key:'v20',label:'V20Gy',ph:'ex : 10',unit:'%'}]},
+  foie:         { label:'Foie', hint:'Hépatotoxicité',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 20',unit:'Gy'}]},
+  rate:         { label:'Rate', hint:'Dysfonction splénique / OPSI (SIOPE 2021)',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 12',unit:'Gy'}]},
+  ovaire_g:     { label:'Ovaire gauche', hint:'AOF / POI',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 4',unit:'Gy'}]},
+  ovaire_d:     { label:'Ovaire droit', hint:'AOF / POI',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 3',unit:'Gy'}]},
+  uterus:       { label:'Utérus', hint:'Complications obstétricales',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 10',unit:'Gy'}]},
+  testicule:    { label:'Testicule', hint:'Azoospermie / Déficit testostérone',
+    fields:[{key:'dmoy',label:'Dmoy',ph:'ex : 2',unit:'Gy'}]},
+  vertebres:    { label:'Vertèbres', hint:'Scoliose / Croissance (SIOPE 2019)',
+    fields:[{key:'dmin',label:'Dmin',ph:'ex : 18',unit:'Gy'},{key:'dmoy',label:'Dmoy',ph:'ex : 22',unit:'Gy'},{key:'dmax',label:'Dmax',ph:'ex : 26',unit:'Gy'},{key:'gradient',label:'Gradient',ph:'ex : 8',unit:'Gy'}]},
+};
+
+function dvhSetStep(n) {
+  [1,2,3,4].forEach(i => {
+    const el = document.getElementById('dvhs'+i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  });
+  document.getElementById('dvhProgressLabel').textContent = `Étape ${n} / 4`;
+  document.getElementById('dvhProgressFill').style.width = (n/4*100) + '%';
+}
+
+function dvhToggleChemo(el, val) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) dvhChemo.add(val); else dvhChemo.delete(val);
+}
+function dvhToggleOrgan(el, id) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) dvhOrgans.add(id); else dvhOrgans.delete(id);
+}
+
+function dvhGoStep1() {
+  ['dvh-step2','dvh-step3'].forEach(id => document.getElementById(id).style.display='none');
+  document.getElementById('dvhLoading').classList.remove('active');
+  document.getElementById('dvhResults').classList.remove('active');
+  document.getElementById('dvh-step1').style.display='block';
+  dvhSetStep(1);
+}
+function dvhGoStep2() {
+  const age = document.getElementById('dvhAge').value;
+  if (!age) { document.getElementById('dvhErr1').classList.add('active'); return; }
+  document.getElementById('dvhErr1').classList.remove('active');
+  dvhPatient = {
+    age: parseFloat(age),
+    sexe: document.getElementById('dvhSexe').value,
+    diag: document.getElementById('dvhDiag').value,
+    dose: document.getElementById('dvhDose').value,
+    chemo: [...dvhChemo]
+  };
+  document.getElementById('dvh-step1').style.display='none';
+  document.getElementById('dvh-step3').style.display='none';
+  document.getElementById('dvh-step2').style.display='block';
+  dvhSetStep(2);
+}
+function dvhGoStep3() {
+  if (dvhOrgans.size === 0) { document.getElementById('dvhErr2').classList.add('active'); return; }
+  document.getElementById('dvhErr2').classList.remove('active');
+  dvhBuildMetrics();
+  document.getElementById('dvh-step2').style.display='none';
+  document.getElementById('dvh-step3').style.display='block';
+  dvhSetStep(3);
+}
+function dvhGoStep2back() {
+  document.getElementById('dvh-step3').style.display='none';
+  document.getElementById('dvh-step2').style.display='block';
+  dvhSetStep(2);
+}
+function dvhReset() {
+  document.getElementById('dvhResults').classList.remove('active');
+  document.getElementById('dvh-step2').style.display='none';
+  document.getElementById('dvh-step3').style.display='none';
+  document.getElementById('dvh-step1').style.display='block';
+  dvhOrgans.clear();
+  dvhChemo.clear();
+  document.querySelectorAll('.dvh-organ-item.selected').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.dvh-chemo-item.selected').forEach(el => el.classList.remove('selected'));
+  dvhSetStep(1);
+}
+
+function dvhBuildMetrics() {
+  const grid = document.getElementById('dvhMetricsGrid');
+  grid.innerHTML = '';
+  dvhOrgans.forEach(id => {
+    const def = DVH_ORGAN_DEFS[id]; if (!def) return;
+    const row = document.createElement('div');
+    row.className = 'dvh-metric-row';
+    const fieldsHtml = def.fields.map(f => `
+      <div class="dvh-metric-field-wrap">
+        <div class="dvh-metric-field-label">${f.label}</div>
+        <input class="dvh-metric-input" type="number" step="0.1" min="0"
+          id="dvhm_${id}_${f.key}" placeholder="${f.ph}">
+      </div>
+      <div class="dvh-metric-unit">${f.unit}</div>`).join('');
+    row.innerHTML = `
+      <div><div class="dvh-metric-name">${def.label}</div><div class="dvh-metric-hint">${def.hint}</div></div>
+      <div class="dvh-metric-fields">${fieldsHtml}</div>`;
+    grid.appendChild(row);
+  });
+}
+
+function dvhCollectMetrics() {
+  const metrics = {};
+  dvhOrgans.forEach(id => {
+    const def = DVH_ORGAN_DEFS[id]; const vals = {};
+    def.fields.forEach(f => {
+      const el = document.getElementById(`dvhm_${id}_${f.key}`);
+      if (el && el.value !== '') vals[f.label] = parseFloat(el.value) + ' ' + f.unit;
+    });
+    if (Object.keys(vals).length > 0) metrics[def.label] = vals;
+  });
+  return metrics;
+}
+
+async function dvhAnalyze() {
+  const metrics = dvhCollectMetrics();
+  const hasAny = Object.values(metrics).some(v => Object.keys(v).length > 0);
+  if (!hasAny) { document.getElementById('dvhErr3').classList.add('active'); return; }
+  document.getElementById('dvhErr3').classList.remove('active');
+  document.getElementById('dvh-step3').style.display='none';
+  document.getElementById('dvhLoading').classList.add('active');
+  dvhSetStep(4);
+
+  const msgs = ['Extraction des métriques…','Comparaison aux seuils PENTEC 2024…','Correction chimio·RT…','Évaluation SIOPE rate / vertèbres…','Génération du rapport…'];
+  let mi = 0; const msgEl = document.getElementById('dvhLoadingMsg');
+  const ti = setInterval(() => { mi=(mi+1)%msgs.length; msgEl.textContent=msgs[mi]; }, 1800);
+
+  const chemoStr = dvhPatient.chemo.length > 0 ? dvhPatient.chemo.join(', ') : 'aucune';
+  const metricsStr = Object.entries(metrics).map(([org, vals]) =>
+    `${org} : ${Object.entries(vals).map(([k,v]) => `${k} = ${v}`).join(', ')}`).join('\n');
+
+  const SYS = `Tu es un expert en radiothérapie pédiatrique. Tu analyses des paramètres dosimétriques et estimes les risques de toxicité tardive selon PENTEC 2024 et SIOPE 2019–2021.
+
+RÉFÉRENCES PENTEC 2024 :
+CERVEAU — Nécrose : 59 Gy→5%, 67 Gy→10%. QI<85 : D100% 18 Gy→5%, 26 Gy→20% ; D50% 22 Gy→5%, 32 Gy→20%. MTX HD≈+5,9 Gy équivalent cérébral. Jeune âge aggrave risque neurocognitif.
+TRONC — Nécrose Dmax 59–67 Gy→5–10%. Chimio intrathécale abaisse le seuil.
+MOELLE — Myélopathie sans chimio : D0.03cc<54 Gy et D1cc<50.4 Gy→rare. Avec chimio IT : D0.03cc<50.4 et D1cc<45 Gy→rare.
+HYPOTHALAMUS/HYPOPHYSE — Déficit GH : D100%=15 Gy→5%. Hypothyroïdie centrale : D100%=22 Gy→20%. ACTH : D100%=34 Gy→20%.
+HIPPOCAMPES — Pas de courbe NTCP pédiatrique établie. Dmoy>30 Gy associé à déficit mnésique.
+POLYGONE DE WILLIS — AVC à 35 ans : D100%=30 Gy→~1%, 45 Gy→2–3%, 54 Gy→3–4%. AVC à 45 ans : 30 Gy→2–4%, 45 Gy→4–9%, 54 Gy→7–13%.
+COCHLÉE — Perte auditive (>20 dB) : Dmoy<35 Gy→<5%, 50 Gy→30%. Cisplatine 300 mg/m²≈+7 Gy équivalent cochléaire. Risque max <5 ans.
+CHIASME/NERFS OPTIQUES — Neuropathie : Dmax<55 Gy→<5% ; 60 Gy→7–20%.
+CRISTALLIN — Cataracte : >0.5 Gy risque croissant ; >10 Gy risque élevé.
+THYROÏDE — Hypothyroïdie primaire : Dmoy>20 Gy→risque significatif ; >30 Gy→élevé. Risque plus élevé >15 ans.
+CŒUR — IC risque croissant avec Dmoy. Anthracyclines : +100 mg/m²≈+10.5 Gy équivalent cardiaque. Péricardite Dmoy>15–20 Gy.
+POUMON — Pneumopathie : V20Gy<20%→faible ; 20–30%→modéré ; >30%→élevé. Bléomycine aggrave.
+SEIN/BOURGEON — <4 ans : ≥0.97 Gy→97% hypoplasie. 14–40 ans médiastin 27–46 Gy→39% allaitement impossible.
+REIN — HTA : Dmoy=9.6 Gy→5%. Insuffisance rénale : V12Gy>40%→risque élevé. Ifosfamide+V10Gy=42%→10% toxicité sévère.
+FOIE — Hépatotoxicité : Dmoy<19 Gy→rare ; >26 Gy→risque croissant.
+RATE (SIOPE 2021) — Dysfonction/OPSI : Dmoy<10 Gy→RR×2 ; 10–20 Gy→RR×5.5 ; ≥20 Gy→RR×6. Risque cumulatif mortalité infectieuse 35 ans : ~1.1% (10–20 Gy), ~1.3% (≥20 Gy). Seuil prophylaxie OPSI : Dmoy≥10 Gy → vaccination pneumo/méningocoque/HiB ± pénicilline V.
+OVAIRES — AOF : 2 Gy→1–5% sans alkylants. TD50 AOF : ~24 Gy à 1 an. Alkylants aggravent. POI 30 ans : >10 Gy sans chimio→83% ; avec CED≥20 g/m²+>10 Gy→~100%.
+TESTICULE — Azoospermie temporaire 1–3 Gy. Permanente >4 Gy. Déficit testostérone >20 Gy.
+VERTÈBRES (SIOPE 2019) — Cibles paravertébrales : 0–2 ans→gradient<3 Gy ; 2 ans–fin puberté→gradient<5 Gy. CSI dose≤25 Gy : gradient post-ant<5 Gy ; >25 Gy : vertèbres≥20 Gy. Scoliose sévère : <2 ans+>10 Gy ; 2–6 ans+>20 Gy.
+
+Réponds UNIQUEMENT en JSON valide sans texte avant/après ni backticks :
+{"summary":{"high":N,"mod":N,"low":N,"info":N},"organs":[{"name":"...","metric":"...","level":"high|mod|low|info|na","risk_pct":"...% ou null","qualitative":"...","chemo_correction":"... ou null","systemic_reco":"... ou null","comment":"...","reference":"PENTEC 2024 | SIOPE 2021 | SIOPE 2019"}]}`;
+
+  const USR = `Patient : ${dvhPatient.age} ans · ${dvhPatient.sexe||'?'} · ${dvhPatient.diag||'non précisé'} · Dose : ${dvhPatient.dose||'?'} Gy · Chimio : ${chemoStr}\n\nMétriques DVH :\n${metricsStr}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:3000, system:SYS, messages:[{role:'user',content:USR}] })
+    });
+    clearInterval(ti);
+    document.getElementById('dvhLoading').classList.remove('active');
+
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      throw new Error(`API ${resp.status}: ${errData.error?.message || resp.statusText}`);
+    }
+
+    const data = await resp.json();
+
+    // Vérifier que la réponse contient bien du contenu
+    if (!data.content || data.content.length === 0) {
+      throw new Error('Réponse vide de l\'API');
+    }
+
+    let raw = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    raw = raw.replace(/```json|```/g,'').trim();
+
+    // Extraire le JSON même s'il y a du texte autour
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Format de réponse inattendu');
+
+    dvhRenderResults(JSON.parse(jsonMatch[0]));
+  } catch(err) {
+    clearInterval(ti);
+    document.getElementById('dvhLoading').classList.remove('active');
+    document.getElementById('dvh-step3').style.display='block';
+    dvhSetStep(3);
+    const e = document.getElementById('dvhErr3');
+    e.textContent = `⚠ Erreur : ${err.message}. Vérifiez votre connexion et réessayez.`;
+    e.classList.add('active');
+    console.error('DVH Analyze error:', err);
+  }
+}
+
+function dvhRenderResults(result) {
+  const chemoStr = dvhPatient.chemo.length > 0 ? dvhPatient.chemo.join(', ') : 'aucune';
+  document.getElementById('dvhResultsMeta').innerHTML =
+    `${dvhPatient.age} ans · ${dvhPatient.sexe||'?'} · ${dvhPatient.diag||'—'} · ${dvhPatient.dose||'?'} Gy · Chimio : ${chemoStr}`;
+  document.getElementById('dvhPrintDate').textContent = new Date().toLocaleDateString('fr-FR');
+
+  const sb = document.getElementById('dvhSummaryBar'); sb.innerHTML='';
+  if (result.summary.high>0) sb.innerHTML+=`<div class="dvh-summary-pill dvh-pill-high">⬆ ${result.summary.high} risque élevé</div>`;
+  if (result.summary.mod>0)  sb.innerHTML+=`<div class="dvh-summary-pill dvh-pill-mod">⚠ ${result.summary.mod} risque modéré</div>`;
+  if (result.summary.low>0)  sb.innerHTML+=`<div class="dvh-summary-pill dvh-pill-low">✓ ${result.summary.low} risque faible</div>`;
+  if (result.summary.info>0) sb.innerHTML+=`<div class="dvh-summary-pill dvh-pill-info">ℹ ${result.summary.info} recommandation</div>`;
+
+  const container = document.getElementById('dvhRiskCards'); container.innerHTML='';
+  const order = {high:0,mod:1,low:2,info:3,na:4};
+  result.organs.sort((a,b)=>(order[a.level]||4)-(order[b.level]||4));
+  const sNames = {high:'Risque élevé',mod:'Risque modéré',low:'Risque faible',info:'Recommandations systémiques',na:'Non évaluable'};
+  let lastLvl = null;
+
+  result.organs.forEach(org => {
+    if (org.level !== lastLvl) {
+      const sl = document.createElement('div');
+      sl.className='dvh-section-label'; sl.textContent=sNames[org.level]||'Autre';
+      container.appendChild(sl); lastLvl=org.level;
+    }
+    const bc = {high:'dvh-badge-high',mod:'dvh-badge-mod',low:'dvh-badge-low',info:'dvh-badge-info',na:'dvh-badge-na'}[org.level]||'dvh-badge-na';
+    const bt = {high:'⬆ Élevé',mod:'⚠ Modéré',low:'✓ Faible',info:'ℹ Info',na:'— N/A'}[org.level]||'—';
+    const vc = {high:'dvh-val-hi',mod:'dvh-val-mod',low:'dvh-val-ok',info:'dvh-val-info'}[org.level]||'';
+    const card = document.createElement('div');
+    card.className = 'dvh-risk-card' + (org.level==='high' ? ' open' : '');
+    card.innerHTML = `
+      <div class="dvh-risk-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="dvh-risk-organ">${org.name}</div>
+        ${org.metric ? `<div class="dvh-risk-metric">${org.metric}</div>` : ''}
+        <span class="dvh-risk-badge ${bc}">${bt}</span>
+        <span class="dvh-risk-chevron">›</span>
+      </div>
+      <div class="dvh-risk-body">
+        ${org.risk_pct ? `<div class="dvh-risk-row"><div class="dvh-risk-row-label">Risque estimé</div><div class="dvh-risk-row-val"><strong class="${vc}">${org.risk_pct}</strong></div></div>` : ''}
+        <div class="dvh-risk-row"><div class="dvh-risk-row-label">Niveau</div><div class="dvh-risk-row-val">${org.qualitative||'—'}</div></div>
+        ${org.chemo_correction ? `<div class="dvh-risk-row"><div class="dvh-risk-row-label">Correction chimio</div><div class="dvh-risk-row-val dvh-val-info">${org.chemo_correction}</div></div>` : ''}
+        ${org.systemic_reco ? `<div class="dvh-risk-row"><div class="dvh-risk-row-label">Reco systémique</div><div class="dvh-risk-row-val"><strong>${org.systemic_reco}</strong></div></div>` : ''}
+        <div class="dvh-risk-row"><div class="dvh-risk-row-label">Commentaire</div><div class="dvh-risk-row-val">${org.comment||'—'}</div></div>
+        <div class="dvh-risk-row"><div class="dvh-risk-row-label">Source</div><div class="dvh-risk-row-val" style="color:var(--text-3);font-size:10px;">${org.reference||'—'}</div></div>
+      </div>`;
+    container.appendChild(card);
+  });
+  document.getElementById('dvhResults').classList.add('active');
+}
+
+function dvhPrintResult() {
+  // Ouvrir toutes les cards
+  document.querySelectorAll('.dvh-risk-card').forEach(c => c.classList.add('open'));
+  // Ajouter classe printing pour forcer la visibilité du panel DVH
+  document.body.classList.add('printing');
+  // Laisser le navigateur recalculer les styles puis ouvrir la boîte d'impression
+  setTimeout(() => {
+    window.print();
+    // Restaurer après impression
+    setTimeout(() => {
+      document.body.classList.remove('printing');
+    }, 500);
+  }, 100);
+}
+
+</script>
+</body>
+</html>

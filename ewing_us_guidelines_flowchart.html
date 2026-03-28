@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ewing Sarcoma — US Guidelines (NCCN v2.2026 / NCI PDQ)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.16);
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --text-dim: #484f58;
+
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.10);
+    --red-border: rgba(239,68,68,0.32);
+
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.10);
+    --blue-border: rgba(59,130,246,0.30);
+
+    --sky: #38bdf8;
+    --sky-bg: rgba(56,189,248,0.09);
+    --sky-border: rgba(56,189,248,0.28);
+
+    --teal: #2dd4bf;
+    --teal-bg: rgba(45,212,191,0.09);
+    --teal-border: rgba(45,212,191,0.28);
+
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.08);
+    --green-border: rgba(34,197,94,0.26);
+
+    --amber: #f59e0b;
+    --amber-bg: rgba(245,158,11,0.10);
+    --amber-border: rgba(245,158,11,0.30);
+
+    --orange: #f97316;
+    --orange-bg: rgba(249,115,22,0.10);
+    --orange-border: rgba(249,115,22,0.28);
+
+    --purple: #a78bfa;
+    --purple-bg: rgba(167,139,250,0.10);
+    --purple-border: rgba(167,139,250,0.30);
+
+    --pink: #ec4899;
+    --pink-bg: rgba(236,72,153,0.10);
+    --pink-border: rgba(236,72,153,0.28);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 16px 80px;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    max-width: 960px;
+    margin: 0 auto 40px;
+    padding: 28px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .header-flag {
+    width: 52px; height: 52px; flex-shrink: 0;
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .header-content h1 {
+    font-size: 20px; font-weight: 600; color: var(--text);
+    margin-bottom: 6px;
+  }
+  .header-content p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge {
+    font-size: 11px; font-weight: 500;
+    padding: 3px 9px; border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+  .badge-red { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); }
+  .badge-blue { background: var(--blue-bg); border: 1px solid var(--blue-border); color: var(--blue); }
+  .badge-green { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+  .badge-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber); }
+
+  /* ── TABS ── */
+  .tabs {
+    max-width: 960px;
+    margin: 0 auto 28px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .tab:hover { border-color: var(--border-hover); color: var(--text); }
+  .tab.active { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
+
+  /* ── SECTION ── */
+  .section {
+    max-width: 960px;
+    margin: 0 auto 28px;
+    display: none;
+  }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-bottom: 14px; padding-left: 4px;
+  }
+
+  /* ── FLOW ── */
+  .flow { display: flex; flex-direction: column; gap: 4px; }
+
+  .flow-step {
+    display: flex; align-items: stretch; gap: 0;
+  }
+
+  .step-connector {
+    display: flex; flex-direction: column; align-items: center;
+    width: 32px; flex-shrink: 0; padding-top: 2px;
+  }
+  .step-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid;
+  }
+  .step-line { width: 2px; flex: 1; min-height: 12px; }
+
+  .step-card {
+    flex: 1;
+    margin: 0 0 8px 8px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .step-card:hover { border-color: var(--border-hover); background: var(--surface2); }
+  .step-card.open { border-color: var(--border-hover); }
+
+  .step-header {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  }
+  .step-num {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; font-family: 'DM Mono', monospace;
+    margin-bottom: 4px;
+  }
+  .step-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .step-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .step-toggle {
+    width: 24px; height: 24px; flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+  .step-card.open .step-toggle { transform: rotate(180deg); }
+
+  .step-body {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .step-card.open .step-body { display: block; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media(max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── SUB-BOXES ── */
+  .box {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .box-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+
+  .box-red { border-color: var(--red-border); background: var(--red-bg); }
+  .box-red .box-title { color: var(--red); }
+  .box-blue { border-color: var(--blue-border); background: var(--blue-bg); }
+  .box-blue .box-title { color: var(--blue); }
+  .box-sky { border-color: var(--sky-border); background: var(--sky-bg); }
+  .box-sky .box-title { color: var(--sky); }
+  .box-teal { border-color: var(--teal-border); background: var(--teal-bg); }
+  .box-teal .box-title { color: var(--teal); }
+  .box-green { border-color: var(--green-border); background: var(--green-bg); }
+  .box-green .box-title { color: var(--green); }
+  .box-amber { border-color: var(--amber-border); background: var(--amber-bg); }
+  .box-amber .box-title { color: var(--amber); }
+  .box-orange { border-color: var(--orange-border); background: var(--orange-bg); }
+  .box-orange .box-title { color: var(--orange); }
+  .box-purple { border-color: var(--purple-border); background: var(--purple-bg); }
+  .box-purple .box-title { color: var(--purple); }
+  .box-pink { border-color: var(--pink-border); background: var(--pink-bg); }
+  .box-pink .box-title { color: var(--pink); }
+
+  /* ── LISTS ── */
+  ul.dot-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  ul.dot-list li {
+    font-size: 13px; color: var(--text-muted); line-height: 1.45;
+    padding-left: 16px; position: relative;
+  }
+  ul.dot-list li::before {
+    content: '·'; position: absolute; left: 4px;
+    color: var(--text-dim); font-size: 16px; line-height: 1;
+  }
+  ul.dot-list li strong { color: var(--text); }
+  ul.dot-list li .hl { color: var(--amber); font-weight: 500; }
+  ul.dot-list li .hl-green { color: var(--green); font-weight: 500; }
+  ul.dot-list li .hl-red { color: var(--red); font-weight: 500; }
+  ul.dot-list li .hl-blue { color: var(--sky); font-weight: 500; }
+  ul.dot-list li .hl-purple { color: var(--purple); font-weight: 500; }
+
+  /* ── DRUG TABLE ── */
+  .drug-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .drug-table th {
+    text-align: left; padding: 6px 10px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+  .drug-table td {
+    padding: 7px 10px; color: var(--text-muted);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+  .drug-table td:first-child { color: var(--text); font-weight: 500; }
+  .drug-table tr:last-child td { border-bottom: none; }
+
+  /* ── RT DOSE BOX ── */
+  .rt-dose {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+  .rt-dose-val {
+    font-size: 18px; font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+  .rt-dose-label { font-size: 12px; color: var(--text-muted); }
+
+  /* ── DECISION TREE ── */
+  .decision-tree { display: flex; flex-direction: column; gap: 6px; }
+  .decision-node {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .decision-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .decision-text { color: var(--text-muted); line-height: 1.4; }
+  .decision-text strong { color: var(--text); }
+
+  /* ── PILL TAGS ── */
+  .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    border: 1px solid var(--border); color: var(--text-muted);
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* ── EVIDENCE LABEL ── */
+  .evidence {
+    display: inline-block;
+    font-size: 10px; font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    padding: 1px 6px; border-radius: 4px;
+    border: 1px solid;
+    vertical-align: middle; margin-left: 4px;
+  }
+  .ev-1 { color: var(--green); border-color: var(--green-border); background: var(--green-bg); }
+  .ev-2a { color: var(--blue); border-color: var(--blue-border); background: var(--blue-bg); }
+  .ev-2b { color: var(--amber); border-color: var(--amber-border); background: var(--amber-bg); }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  .comp-table th {
+    padding: 8px 12px; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--text-dim); border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .comp-table th:nth-child(2) { color: var(--red); }
+  .comp-table th:nth-child(3) { color: #a78bfa; }
+  .comp-table td {
+    padding: 7px 12px; font-size: 12px; color: var(--text-muted);
+    border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top;
+  }
+  .comp-table td:first-child { color: var(--text); font-weight: 500; }
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  /* ── ALERT BOX ── */
+  .alert {
+    padding: 10px 14px; border-radius: 8px;
+    font-size: 12.5px; line-height: 1.5;
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .alert-icon { flex-shrink: 0; font-size: 15px; }
+  .alert-amber { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber); }
+  .alert-red { background: var(--red-bg); border: 1px solid var(--red-border); color: #fca5a5; }
+  .alert-green { background: var(--green-bg); border: 1px solid var(--green-border); color: #86efac; }
+  .alert-blue { background: var(--blue-bg); border: 1px solid var(--blue-border); color: #93c5fd; }
+
+  /* ── SEPARATOR ── */
+  .sep { height: 1px; background: var(--border); margin: 12px 0; }
+
+  /* ── OUTCOMES ── */
+  .outcome-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .outcome-chip {
+    padding: 6px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border);
+  }
+
+  /* ── SCROLL TO TOP ── */
+  .back-top {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text-muted); cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; z-index: 100;
+  }
+  .back-top:hover { background: var(--surface); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<div class="page-header">
+  <div class="header-flag">🇺🇸</div>
+  <div class="header-content">
+    <h1>Ewing Sarcoma — US Guidelines</h1>
+    <p>NCCN Bone Cancer v2.2026 (December 19, 2025) · NCI PDQ Health Professional Version (November 27, 2024) · COG trials (AEWS0031/1031/1221)</p>
+    <div class="badge-row">
+      <span class="badge badge-red">NCCN v2.2026</span>
+      <span class="badge badge-blue">NCI PDQ Nov 2024</span>
+      <span class="badge badge-green">COG AEWS0031/1031/1221</span>
+      <span class="badge badge-amber">rEECur 2024</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TABS ══════════ -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('workup')">① Workup</div>
+  <div class="tab" onclick="showTab('chemo')">② Chemotherapy</div>
+  <div class="tab" onclick="showTab('local')">③ Local Control &amp; RT</div>
+  <div class="tab" onclick="showTab('meta')">④ Metastatic Disease</div>
+  <div class="tab" onclick="showTab('surveillance')">⑤ Surveillance</div>
+  <div class="tab" onclick="showTab('relapse')">⑥ Relapse</div>
+  <div class="tab" onclick="showTab('compare')">⑦ US vs EU</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TAB 1 — WORKUP
+══════════════════════════════════════════════ -->
+<div class="section active" id="tab-workup">
+<div class="section-title">NCCN EW-1 · Workup &amp; Initial Assessment</div>
+<div class="flow">
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--red);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--red-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--red)">Step 1 · NCCN EW-1</div>
+          <div class="step-title">Multidisciplinary Evaluation &amp; Biopsy</div>
+          <div class="step-subtitle">All patients must be evaluated by an MDT at a sarcoma specialty center</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="alert alert-red">
+          <span class="alert-icon">⚠</span>
+          Biopsy incision placement MUST involve the orthopedic oncologist who will perform definitive surgery. Limb salvage depends on correct biopsy track. Primary resection at initial diagnosis is almost never appropriate.
+        </div>
+        <div class="grid-2">
+          <div class="box box-red">
+            <div class="box-title">MDT Core Team</div>
+            <ul class="dot-list">
+              <li>Orthopedic oncologist</li>
+              <li>Bone pathologist</li>
+              <li>Medical/pediatric oncologist</li>
+              <li>Radiation oncologist</li>
+              <li>Musculoskeletal radiologist</li>
+            </ul>
+          </div>
+          <div class="box box-blue">
+            <div class="box-title">Biopsy Principles (BONE-A)</div>
+            <ul class="dot-list">
+              <li>Perform at treating institution</li>
+              <li>Biopsy from <strong>soft tissue component</strong> preferred (avoids fracture risk)</li>
+              <li>Reserve undecalcified bone for molecular studies — strong acid decalcification denatures DNA/RNA</li>
+              <li>Fresh tissue for cytogenetics &amp; NGS preferred</li>
+              <li>Core needle biopsy acceptable if adequate tissue obtained</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--blue);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--blue-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--blue)">Step 2 · NCCN EW-1</div>
+          <div class="step-title">Imaging Workup</div>
+          <div class="step-subtitle">Obtain ALL studies before starting chemotherapy</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-blue">
+            <div class="box-title">Required Imaging</div>
+            <ul class="dot-list">
+              <li><strong>Contrast-enhanced MRI</strong> of primary site <span class="hl">(mandatory)</span></li>
+              <li><strong>CT of primary site</strong></li>
+              <li><strong>Chest CT</strong> (with or without contrast) — low-dose non-contrast for restaging</li>
+              <li><strong>FDG-PET/CT</strong> (preferred) head-to-toe — can replace bone scan</li>
+              <li><span class="hl">Bone scan</span> if FDG-PET/CT not available</li>
+            </ul>
+          </div>
+          <div class="box box-sky">
+            <div class="box-title">Bone Marrow &amp; Staging</div>
+            <ul class="dot-list">
+              <li>Consider <strong>BM biopsy ± aspiration</strong> — may be omitted if FDG-PET/CT used in localized disease with no bone metastases (sensitivity 100%, specificity 96%)</li>
+              <li>Screening MRI spine/pelvis if clinically indicated</li>
+              <li><strong>Skip metastasis</strong> evaluation for appendicular tumors — image entire involved bone (15.8% incidence)</li>
+              <li>Whole-body MRI may provide additional staging information</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="alert alert-blue">
+          <span class="alert-icon">ℹ</span>
+          FDG-PET/CT and bone scan have high correlation for Ewing sarcoma. BM metastasis as sole site: only 1.2% of patients; 4.8% overall in newly diagnosed disease (systematic review, N=141).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--teal);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--teal-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--teal)">Step 3 · NCCN EW-1</div>
+          <div class="step-title">Molecular Workup &amp; Labs</div>
+          <div class="step-subtitle">Required before initiation of treatment</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-teal">
+            <div class="box-title">Molecular / Biomarker Testing</div>
+            <ul class="dot-list">
+              <li><strong>FISH EWSR1</strong> break-apart probe — 1st line (≥90% cases)</li>
+              <li><strong>RT-PCR</strong> for EWSR1::FLI1 / EWSR1::ERG (most common fusions)</li>
+              <li><strong>Cytogenetics</strong> / conventional karyotype</li>
+              <li>If above negative → <strong>MGPT / NGS fusion panel</strong> (NCCN category 2A) to detect FUS fusions or CIC/BCOR rearrangements</li>
+              <li>Note: FUS fusions = EWSR1 FISH negative → require NGS</li>
+            </ul>
+          </div>
+          <div class="box box-amber">
+            <div class="box-title">Labs &amp; Other</div>
+            <ul class="dot-list">
+              <li><strong>LDH</strong> — adverse prognostic if elevated</li>
+              <li>CBC, CMP with calcium</li>
+              <li><strong>Fertility consultation must be offered</strong> (NCCN 2026 revision)</li>
+              <li>Cardiac function (echo/MUGA) prior to anthracyclines</li>
+              <li>Renal function (Cr, GFR) prior to ifosfamide</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="box box-orange">
+          <div class="box-title">Staging System (NCCN)</div>
+          <ul class="dot-list">
+            <li>Ewing sarcoma is staged as <strong>Localized</strong> or <strong>Metastatic</strong> (no standard AJCC staging system routinely used)</li>
+            <li><span class="hl">Localized</span>: no spread beyond primary site or regional nodes (CT/MRI/PET-negative)</li>
+            <li><span class="hl-red">Metastatic</span>: any confirmed distant site — lung, bone, BM, soft tissue</li>
+            <li>Regional LN involvement → pathological confirmation required</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--purple);"></div>
+      <div class="step-line" style="background: none;"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--purple)">Step 4 · Prognostic Assessment</div>
+          <div class="step-title">Risk Stratification</div>
+          <div class="step-subtitle">NCI PDQ / COG pre-treatment factors</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-red">
+            <div class="box-title">Adverse Prognostic Factors</div>
+            <ul class="dot-list">
+              <li><span class="hl-red">Metastatic disease</span> — strongest predictor</li>
+              <li>Axial/pelvic primary (vs distal extremity)</li>
+              <li>Tumor volume <span class="hl-red">&gt;100–200 mL</span> or &gt;8 cm</li>
+              <li>Age &gt;10–18 years (RR 1.4 vs &lt;10y; RR 2.5 vs adults)</li>
+              <li>Male sex</li>
+              <li>Elevated LDH</li>
+              <li>Pathological fracture (controversial)</li>
+              <li>Detectable ctDNA at diagnosis (3y EFS 48.6% vs 82.1%)</li>
+              <li>STAG2 loss by IHC (EFS 54% vs 75%)</li>
+              <li>Gain 1q / loss 16q (der(16)t(1;16))</li>
+              <li>Complex karyotype (&gt;5 abnormalities)</li>
+            </ul>
+          </div>
+          <div class="box box-green">
+            <div class="box-title">Favorable Factors</div>
+            <ul class="dot-list">
+              <li>Localized disease</li>
+              <li>Distal extremity primary</li>
+              <li>Small tumor volume (&lt;100 mL)</li>
+              <li>Age &lt;10 years</li>
+              <li>Female sex</li>
+              <li>Extraskeletal primary (HR EFS 0.62 vs bone)</li>
+              <li>Good histologic response: <span class="hl-green">&lt;10% viable tumor</span></li>
+              <li>Pulmonary-only metastases (vs bone/BM)</li>
+              <li>Unilateral lung involvement (vs bilateral)</li>
+              <li>Complete clearance of lung nodules on induction (OS 71.2% vs 50.2%)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /flow -->
+</div><!-- /tab-workup -->
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 2 — CHEMOTHERAPY
+══════════════════════════════════════════════ -->
+<div class="section" id="tab-chemo">
+<div class="section-title">Systemic Therapy · BONE-B · COG Standard Regimens</div>
+<div class="flow">
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--red);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--red-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--red)">Induction · NCCN EW-1</div>
+          <div class="step-title">Interval-Compressed VDC/IE</div>
+          <div class="step-subtitle">Category 1 — COG AEWS0031 standard · At least 9 weeks prior to local therapy</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="alert alert-green">
+          <span class="alert-icon">✓</span>
+          <strong>AEWS0031 (JCO 2012, 10y follow-up JCO 2023):</strong> Interval-compressed VDC/IE every 2 weeks → 10y EFS 70% vs 61% (q3w), 10y OS 76% vs 69% (P=.04). No additional toxicity.
+        </div>
+        <div class="grid-2">
+          <div class="box box-red">
+            <div class="box-title">VDC Cycles (odd cycles)</div>
+            <table class="drug-table">
+              <tr><th>Drug</th><th>Dose</th></tr>
+              <tr><td>Vincristine</td><td>2 mg/m² D1 (max 2 mg)</td></tr>
+              <tr><td>Doxorubicin</td><td>75 mg/m²/cycle (37.5×2d)</td></tr>
+              <tr><td>Cyclophosphamide</td><td>1,200 mg/m² D1 + MESNA</td></tr>
+              <tr><td>G-CSF</td><td>Required to maintain q14d</td></tr>
+            </table>
+          </div>
+          <div class="box box-blue">
+            <div class="box-title">IE Cycles (even cycles)</div>
+            <table class="drug-table">
+              <tr><th>Drug</th><th>Dose</th></tr>
+              <tr><td>Ifosfamide</td><td>1,800 mg/m²/d × 5 (9 g/m²) + MESNA</td></tr>
+              <tr><td>Etoposide</td><td>100 mg/m²/d × 5 (500 mg/m²)</td></tr>
+              <tr><td>G-CSF</td><td>Required for interval compression</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="box box-amber">
+          <div class="box-title">Cycle Schedule</div>
+          <ul class="dot-list">
+            <li>Alternating VDC → IE → VDC → IE every <span class="hl">14 days</span> (interval-compressed)</li>
+            <li>NCCN: category 1 evidence for <strong>28–49 weeks total</strong> depending on regimen/risk</li>
+            <li>Longer pre-local-control therapy may be considered for metastatic disease based on response</li>
+            <li>Recovery: ANC ≥0.75×10⁹/L, platelets ≥75×10⁹/L typically required</li>
+            <li>Note: actinomycin-D (dactinomycin) may be used in consolidation but NOT during RT</li>
+          </ul>
+        </div>
+        <div class="sep"></div>
+        <div class="alert alert-blue">
+          <span class="alert-icon">ℹ</span>
+          <strong>EE2012 (Lancet 2022):</strong> VDC/IE vs VIDE — HR EFS 0.71, HR OS 0.62, posterior probability &gt;99% in favor of VDC/IE. Less febrile neutropenia. VDC/IE now internationally adopted over VIDE.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--blue);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--blue-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--blue)">Consolidation · Localized Disease</div>
+          <div class="step-title">Post-Local Control Chemotherapy</div>
+          <div class="step-subtitle">Continue VDC/IE based on local control outcome · Category 1</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-green">
+            <div class="box-title">Negative / Close Margins (R0/R1 equivalent)</div>
+            <ul class="dot-list">
+              <li>Continue <strong>chemotherapy (cat.1)</strong> ± consider RT depending on margin status</li>
+              <li>Total chemotherapy duration: 28–49 weeks depending on schedule used</li>
+              <li>IE/VC ×5 additional cycles for standard-risk</li>
+            </ul>
+          </div>
+          <div class="box box-orange">
+            <div class="box-title">Positive Margins (R2 equivalent)</div>
+            <ul class="dot-list">
+              <li><strong>RT + chemotherapy</strong> (category 1 for chemotherapy)</li>
+              <li>RT concurrently with consolidation chemotherapy</li>
+              <li>Postoperative RT should begin <span class="hl">within 60 days of surgery</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="alert alert-amber">
+          <span class="alert-icon">⚠</span>
+          <strong>AEWS1031 (JCO 2021):</strong> Addition of VTC (vincristine-topotecan-cyclophosphamide) every 3rd cycle did NOT improve outcomes. 5y EFS 78% vs 79% (ns). VDC/IE remains the standard backbone — no improvement shown by adding VTC.
+        </div>
+        <div class="sep"></div>
+        <div class="box box-red">
+          <div class="box-title">High-Dose Chemotherapy + ASCT — US Position</div>
+          <ul class="dot-list">
+            <li>Not standard per COG/NCCN for localized disease treated with intensive VDC/IE</li>
+            <li>EE99 R2loc showed BuMel benefit over VIDE consolidation, but VIDE is less intensive than VDC/IE — benefit not extrapolated</li>
+            <li>COG: BuMel advantage in VIDE-treated population cannot justify ASCT after VDC/IE</li>
+            <li>High-dose therapy: select patients at high relapse risk — no level A1 evidence for COG regimens</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--purple);"></div>
+      <div class="step-line" style="background: none;"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--purple)">Key Evidence Summary</div>
+          <div class="step-title">COG Trial Results — Chemotherapy</div>
+          <div class="step-subtitle">Randomized data supporting current US standard</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <table class="drug-table">
+          <tr>
+            <th>Trial</th><th>N</th><th>Question</th><th>Result</th>
+          </tr>
+          <tr>
+            <td>AEWS0031 (2012)</td><td>568</td>
+            <td>VDC/IE q14d vs q21d</td>
+            <td>5y EFS 73% vs 65% (P=.048) <span class="evidence ev-1">Cat.1</span></td>
+          </tr>
+          <tr>
+            <td>AEWS0031 (2023, 10y)</td><td>568</td>
+            <td>Long-term follow-up</td>
+            <td>10y EFS 70% vs 61%, OS 76% vs 69% (P=.04) <span class="evidence ev-1">Cat.1</span></td>
+          </tr>
+          <tr>
+            <td>AEWS1031 (2021)</td><td>595</td>
+            <td>VDC/IE ± VTC</td>
+            <td>5y EFS 78% vs 79% (ns) — VTC no benefit <span class="evidence ev-1">Cat.1</span></td>
+          </tr>
+          <tr>
+            <td>AEWS1221 (2023)</td><td>298</td>
+            <td>VDC/IE ± ganitumab (IGF-1R) metastatic</td>
+            <td>3y EFS 39.1% vs 37.4% (ns) — no benefit <span class="evidence ev-1">Cat.1</span></td>
+          </tr>
+          <tr>
+            <td>EE2012 (2022)</td><td>640</td>
+            <td>VDC/IE vs VIDE</td>
+            <td>3y EFS 67% vs 61%, HR 0.71, prob&gt;99% <span class="evidence ev-2a">Cat.B1</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TAB 3 — LOCAL CONTROL & RT
+══════════════════════════════════════════════ -->
+<div class="section" id="tab-local">
+<div class="section-title">Local Control &amp; Radiation Therapy · NCCN EW-2 · BONE-C</div>
+<div class="flow">
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--blue);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--blue-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--blue)">Restaging · After ≥9 Weeks Chemotherapy</div>
+          <div class="step-title">Restaging Before Local Control Decision</div>
+          <div class="step-subtitle">Use same imaging technique as initial workup</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <ul class="dot-list">
+          <li>Chest CT (low-dose non-contrast preferred)</li>
+          <li>Contrast-enhanced MRI + CT (without contrast) of primary site</li>
+          <li>X-rays of primary site</li>
+          <li>Consider FDG-PET/CT (head-to-toe) or bone scan — correlates with histologic response</li>
+          <li>Decreased PET uptake correlates with good histologic response and better outcome</li>
+          <li>Repeat other abnormal baseline studies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--green);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--green-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--green)">Surgery · NCCN EW-2 · BONE-A</div>
+          <div class="step-title">Surgical Local Control</div>
+          <div class="step-subtitle">Preferred approach for resectable lesions — wide excision with clear margins</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="alert alert-green">
+          <span class="alert-icon">✓</span>
+          Surgery is generally preferred if the lesion is resectable with acceptable functional/cosmetic outcome. The superiority of surgery over RT has never been tested in a prospective RCT — apparent superiority may reflect selection bias.
+        </div>
+        <div class="grid-2">
+          <div class="box box-green">
+            <div class="box-title">Indications for Surgery</div>
+            <ul class="dot-list">
+              <li>Resectable lesion with anticipated adequate margins</li>
+              <li>Acceptable functional and cosmetic outcome predicted</li>
+              <li>Limb salvage preferred over amputation when feasible</li>
+              <li>Wide excision target: <span class="hl-green">histologically negative margins</span></li>
+              <li>Amputation in selected cases (NCCN EW-2)</li>
+            </ul>
+          </div>
+          <div class="box box-amber">
+            <div class="box-title">Outcomes by Margin Status</div>
+            <ul class="dot-list">
+              <li><span class="hl-green">Negative margins</span>: 8y local failure 5%, OS 94% (St. Jude)</li>
+              <li><span class="hl-red">Positive margins</span>: 8y local failure 17%, OS 71%</li>
+              <li>Histologic response (&lt;10% viable): strong predictor of EFS</li>
+              <li>Complete necrosis → particularly favorable regardless of margin</li>
+              <li>Necrotic tumor at margin = considered <strong>negative margin</strong> if complete pathologic response (NCCN BONE-D 2026)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="alert alert-amber">
+          <span class="alert-icon">⚠</span>
+          <strong>Timing:</strong> Local therapy initiated 6–15 weeks → 5y OS 78.7%; &gt;16 weeks → 70.4% (P&lt;.001). Difference more pronounced for RT-alone patients (NCDB, N=1,318).
+        </div>
+        <div class="sep"></div>
+        <div class="box box-sky">
+          <div class="box-title">Pelvic Ewing — Special Considerations</div>
+          <ul class="dot-list">
+            <li>Pelvic tumors: COG INT-0091 → no difference in local control/survival by modality (surgery alone vs RT alone vs combined)</li>
+            <li>EE99 pelvic data: combined RT+surgery associated with improved OS vs surgery alone, especially non-sacral (OS 72% vs 47%, P=.024)</li>
+            <li>NCCN: chemotherapy (cat.1) + consider RT for pelvic tumors</li>
+            <li>Adverse factors for pelvic local failure: large volume, periacetabular site, RT-only approach</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--sky);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--sky-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--sky)">Radiation Therapy · BONE-C</div>
+          <div class="step-title">RT Doses &amp; Indications</div>
+          <div class="step-subtitle">Delivered with stringent planning techniques by experienced Ewing sarcoma RT teams</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+
+        <div class="grid-3" style="margin-bottom:14px;">
+          <div class="box box-sky">
+            <div class="box-title">Definitive RT</div>
+            <div class="rt-dose">
+              <span class="rt-dose-val" style="color:var(--sky)">55.8 Gy</span>
+              <span class="rt-dose-label">/ 1.8 Gy/fr</span>
+            </div>
+            <ul class="dot-list">
+              <li>Pre-chemo volume + <span class="hl-blue">2 cm margin</span></li>
+              <li>Initial 45 Gy to pre-chemo tumor</li>
+              <li>Boost +10.8 Gy to post-chemo volume</li>
+              <li>No difference vs RT to entire bone (RCT)</li>
+            </ul>
+          </div>
+          <div class="box box-green">
+            <div class="box-title">Post-op Microscopic (R1)</div>
+            <div class="rt-dose">
+              <span class="rt-dose-val" style="color:var(--green)">50.4 Gy</span>
+              <span class="rt-dose-label">/ 1.8 Gy/fr</span>
+            </div>
+            <ul class="dot-list">
+              <li>Also: 45 Gy + 5.4 Gy boost</li>
+              <li>Begin within <span class="hl-green">60 days of surgery</span></li>
+              <li>Given concurrently with consolidation chemo</li>
+            </ul>
+          </div>
+          <div class="box box-orange">
+            <div class="box-title">Gross Residual (R2)</div>
+            <div class="rt-dose">
+              <span class="rt-dose-val" style="color:var(--orange)">45+10.8 Gy</span>
+              <span class="rt-dose-label">= 55.8 Gy</span>
+            </div>
+            <ul class="dot-list">
+              <li>45 Gy to original disease site</li>
+              <li>+10.8 Gy boost for gross residual</li>
+              <li>(INT-0091 / St. Jude protocol)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="grid-2">
+          <div class="box box-purple">
+            <div class="box-title">Dose Escalation — Laskar 2022 (RCT)</div>
+            <ul class="dot-list">
+              <li>Unresectable Ewing sarcoma (N=95)</li>
+              <li><span class="hl-green">70.2 Gy</span> vs 55.8 Gy / 1.8 Gy/fr</li>
+              <li>5y local control: <span class="hl-green">76.4%</span> vs <span class="hl-red">49.4%</span> (P=.02)</li>
+              <li>5y DFS: 46.7% vs 31.8% (ns, P=.22)</li>
+              <li>5y OS: 58.8% vs 45.4% (ns, P=.08)</li>
+              <li>Skin toxicity G&gt;2: 10.4% vs 2.1%</li>
+              <li><em>Improved local control but no survival benefit — likely due to unchanged metastatic rate</em></li>
+            </ul>
+          </div>
+          <div class="box box-amber">
+            <div class="box-title">High-Dose Escalation — Single-Institution</div>
+            <ul class="dot-list">
+              <li>Tumors ≥8 cm → <span class="hl">64.8 Gy</span> median dose (Kacar 2024, Cancer)</li>
+              <li>5y cumulative incidence of local failure: 6.6%</li>
+              <li>Favorable comparison to published local failure rates</li>
+              <li>Higher local failure in: age &gt;14y + tumor &gt;8 cm</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="grid-2">
+          <div class="box box-sky">
+            <div class="box-title">Preoperative RT</div>
+            <ul class="dot-list">
+              <li>May be considered for marginally resectable tumors</li>
+              <li>Given concurrently with consolidation chemotherapy (BONE-C 2026)</li>
+              <li>Delphi consensus: strong agreement — preop RT when inadequate margin foreseen</li>
+              <li>Goal: achieve clear margins at surgery</li>
+            </ul>
+          </div>
+          <div class="box box-teal">
+            <div class="box-title">Second Malignancy Risk</div>
+            <ul class="dot-list">
+              <li><span class="hl-red">≥60 Gy</span>: secondary sarcoma incidence <strong>20%</strong></li>
+              <li><span class="hl">48–60 Gy</span>: secondary sarcoma <strong>5%</strong></li>
+              <li><span class="hl-green">&lt;48 Gy</span>: secondary sarcoma <strong>0%</strong></li>
+              <li>RT + anthracyclines + alkylants: OR ×2 for secondary sarcoma (PENTEC)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="box box-blue">
+          <div class="box-title">RT Technique (BONE-C)</div>
+          <ul class="dot-list">
+            <li><strong>IMRT/VMAT</strong>: standard technique, dose conformality reduces late effects</li>
+            <li><strong>Proton therapy</strong>: treatment plans show superior normal tissue sparing vs IMRT (Rombi 2012) — no difference in local control or functional outcome established yet; consider for pediatric/central axis cases</li>
+            <li><strong>SBRT</strong>: for metastatic bone/soft tissue sites (see metastatic section)</li>
+            <li>Hyperfractionated RT: NOT associated with improved local control or reduced morbidity</li>
+            <li>RT is delivered in setting with stringent planning by experienced Ewing sarcoma teams</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--teal);"></div>
+      <div class="step-line" style="background: none;"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--teal)">RT Target Volumes</div>
+          <div class="step-title">Target Volume Delineation</div>
+          <div class="step-subtitle">NCI PDQ / COG approach</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-teal">
+            <div class="box-title">Definitive RT Volumes</div>
+            <ul class="dot-list">
+              <li><strong>Initial phase:</strong> 45 Gy to pre-chemotherapy tumor volume</li>
+              <li>Margin: 2 cm around pre-chemo GTV (anatomical barriers respected)</li>
+              <li><strong>Boost phase:</strong> +10.8 Gy to post-chemotherapy volume</li>
+              <li>Boost restricted to residual mass with smaller margin</li>
+              <li>Alternative: 55.8 Gy to pre-chemo volume + 2 cm (no difference in RCT)</li>
+            </ul>
+          </div>
+          <div class="box box-green">
+            <div class="box-title">Post-operative RT Volumes</div>
+            <ul class="dot-list">
+              <li>Clinical target includes surgical bed + scar/drain sites in phase 1</li>
+              <li>Phase 1 (45 Gy): operative bed</li>
+              <li>Phase 2 boost: areas of residual disease / highest risk</li>
+              <li>Chest wall with pleural effusion/invasion → consider hemithorax RT</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="box box-amber">
+          <div class="box-title">Special Sites</div>
+          <ul class="dot-list">
+            <li><strong>Chest wall:</strong> Pleural invasion / effusion / intraoperative contamination → hemithorax RT. EFS trend better with hemithorax RT (not significant). Vertebral tumors: lower EFS probability without hemithorax RT</li>
+            <li><strong>Spine/sacrum:</strong> RT required due to surgical complexity; dose limited by cord tolerance</li>
+            <li><strong>Pelvic:</strong> combined RT+surgery favored over surgery alone (EE99 data)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 4 — METASTATIC
+══════════════════════════════════════════════ -->
+<div class="section" id="tab-meta">
+<div class="section-title">Metastatic Disease · NCCN EW-3 · NCI PDQ</div>
+<div class="flow">
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--red);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--red-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--red)">Epidemiology &amp; Prognosis</div>
+          <div class="step-title">Metastatic Ewing Sarcoma — Overview</div>
+          <div class="step-subtitle">~25% of patients at diagnosis · Poor overall prognosis</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="outcome-row">
+          <div class="outcome-chip" style="background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)">
+            All metastatic: 6y EFS ~28%, OS ~30%
+          </div>
+          <div class="outcome-chip" style="background:var(--green-bg);border-color:var(--green-border);color:var(--green)">
+            Lung only: 6y EFS ~40% (with WLI)
+          </div>
+          <div class="outcome-chip" style="background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)">
+            Bone only: 4y EFS ~28%
+          </div>
+          <div class="outcome-chip" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red)">
+            Lung + bone/BM: 4y EFS ~14%
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="box box-red">
+          <div class="box-title">Independent Poor Prognostic Factors (Metastatic)</div>
+          <ul class="dot-list">
+            <li>Age &gt;14 years</li>
+            <li>Primary tumor volume &gt;200 mL</li>
+            <li>More than one bone metastatic site</li>
+            <li>Bone marrow involvement</li>
+            <li>Additional pulmonary metastases (combined sites)</li>
+            <li>Bilateral lung involvement vs unilateral</li>
+            <li>Lack of complete pulmonary response to induction (OS 50.2% vs 71.2%)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--blue);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--blue-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--blue)">Treatment Algorithm · NCCN EW-3</div>
+          <div class="step-title">Metastatic Treatment Strategy</div>
+          <div class="step-subtitle">Stratified by extent of metastatic disease</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+
+        <div class="decision-tree">
+          <div class="decision-node" style="background:var(--blue-bg);border-color:var(--blue-border)">
+            <span class="decision-icon">🫁</span>
+            <div class="decision-text">
+              <strong>Lung only — Partial Response to induction:</strong>
+              Resection + <span style="color:var(--sky)">Whole Lung Irradiation (WLI)</span>
+            </div>
+          </div>
+          <div class="decision-node" style="background:var(--blue-bg);border-color:var(--blue-border)">
+            <span class="decision-icon">🫁</span>
+            <div class="decision-text">
+              <strong>Lung only — Complete Response to induction:</strong>
+              Consider WLI (NCCN EW-3)
+            </div>
+          </div>
+          <div class="decision-node" style="background:var(--green-bg);border-color:var(--green-border)">
+            <span class="decision-icon">🎯</span>
+            <div class="decision-text">
+              <strong>Oligometastatic:</strong>
+              Local control to primary site + Excision of all metastatic sites if possible
+            </div>
+          </div>
+          <div class="decision-node" style="background:var(--amber-bg);border-color:var(--amber-border)">
+            <span class="decision-icon">⚠</span>
+            <div class="decision-text">
+              <strong>Widely metastatic (cannot deliver local control to all sites):</strong>
+              Continuing chemotherapy ± palliative surgery; Palliative RT to symptomatic areas; Other ablative techniques
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="alert alert-amber">
+          <span class="alert-icon">⚠</span>
+          <strong>Local control of all metastatic sites:</strong> Retrospective data (N=120 PDMES) — RT to primary + all metastases → 3y EFS 39% vs 17%/14% for partial or no local treatment (P&lt;.001). Caution: significant selection bias.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--sky);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--sky-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--sky)">Whole Lung Irradiation (WLI)</div>
+          <div class="step-title">WLI Doses &amp; Indications</div>
+          <div class="step-subtitle">For all patients with pulmonary metastases — even if CR on chemotherapy</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-sky">
+            <div class="box-title">WLI Dose (NCI PDQ / NCCN)</div>
+            <div class="rt-dose">
+              <span class="rt-dose-val" style="color:var(--sky)">12–15 Gy</span>
+              <span class="rt-dose-label">bilateral lungs</span>
+            </div>
+            <ul class="dot-list">
+              <li>Doses modulated based on: age, lung volume irradiated, pulmonary function</li>
+              <li>No prospective RCT proving OS benefit in modern era</li>
+              <li>Recommended even for complete responders (NCCN "consider WLI")</li>
+              <li>Early 1970s intergroup trial: WLI improved OS with VAC vs VAC alone</li>
+            </ul>
+          </div>
+          <div class="box box-blue">
+            <div class="box-title">Rapid pulmonary CR (Reiter 2024)</div>
+            <ul class="dot-list">
+              <li>41.2% of metastatic pulmonary patients achieved radiographic CR on induction</li>
+              <li>CR group: 5y OS 71.2% vs 50.2% residual nodules</li>
+              <li>Early CR + consolidative WLI → 5y OS 85.2%</li>
+              <li>Argues for WLI even in CR group</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--teal);"></div>
+      <div class="step-line" style="background: none;"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--teal)">Metastatic RT — Bone &amp; Soft Tissue</div>
+          <div class="step-title">SBRT for Metastatic Sites</div>
+          <div class="step-subtitle">NCI PDQ — Brown 2014</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-teal">
+            <div class="box-title">SBRT — Curative/Definitive Intent</div>
+            <div class="rt-dose">
+              <span class="rt-dose-val" style="color:var(--teal)">40 Gy / 5 fr</span>
+              <span class="rt-dose-label">median (range 30–60 Gy / 3–10 fr)</span>
+            </div>
+            <ul class="dot-list">
+              <li>Bone and soft tissue metastatic sites</li>
+              <li>Biologically equivalent to standard fractionation doses</li>
+            </ul>
+          </div>
+          <div class="box box-blue">
+            <div class="box-title">Palliative SBRT</div>
+            <div class="rt-dose">
+              <span class="rt-dose-val" style="color:var(--blue)">40 Gy / 5 fr</span>
+              <span class="rt-dose-label">median (range 16–50 Gy / 1–10 fr)</span>
+            </div>
+            <ul class="dot-list">
+              <li>Short-course (&lt;10 fractions): 85% complete/partial pain relief in pediatric cohorts</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="alert alert-amber">
+          <span class="alert-icon">⚠</span>
+          High-dose chemotherapy + HSCT for metastatic Ewing sarcoma (bone/BM): NOT shown to improve EFS over standard chemotherapy. No graft-versus-tumor effect demonstrated. Not standard per NCI PDQ/COG for de novo metastatic disease.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 5 — SURVEILLANCE
+══════════════════════════════════════════════ -->
+<div class="section" id="tab-surveillance">
+<div class="section-title">Surveillance · NCCN EW-2 · NCI PDQ</div>
+<div class="flow">
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--green);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--green-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--green)">Follow-up Schedule</div>
+          <div class="step-title">NCCN EW-2 Surveillance Protocol</div>
+          <div class="step-subtitle">Indefinite surveillance — category 2B after 5 years (NCCN 2026)</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-3">
+          <div class="box box-green">
+            <div class="box-title">0–24 months</div>
+            <ul class="dot-list">
+              <li>Physical exam</li>
+              <li>Contrast-enhanced MRI of primary site</li>
+              <li>CT of primary site</li>
+              <li>Chest imaging (x-ray or CT) <span class="hl-green">every 3 months</span></li>
+              <li>X-rays of primary site</li>
+              <li>CBC and labs as indicated</li>
+            </ul>
+          </div>
+          <div class="box box-amber">
+            <div class="box-title">24 months → 5 years</div>
+            <ul class="dot-list">
+              <li><strong>Increase intervals</strong> for physical exam and imaging</li>
+              <li>Chest and primary imaging — less frequent</li>
+              <li>Consider FDG-PET/CT or bone scan as clinically indicated</li>
+            </ul>
+          </div>
+          <div class="box box-blue">
+            <div class="box-title">&gt; 5 years</div>
+            <ul class="dot-list">
+              <li><strong>Annual</strong> follow-up (indefinitely)</li>
+              <li><span class="badge badge-amber" style="font-size:10px">Category 2B</span></li>
+              <li>Late relapse: 13% occur &gt;5y from diagnosis (higher than other pediatric solid tumors)</li>
+              <li>Black race, male, older age, pelvic/axial primary → higher late death risk</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="alert alert-blue">
+          <span class="alert-icon">ℹ</span>
+          <strong>Late relapse is a major concern:</strong> SEER analysis — of 1,351 patients surviving &gt;60 months, 209 died; 144 (69%) from recurrent Ewing sarcoma. Late deaths associated with pelvic/axial primary, older age, male, Black race.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--purple);"></div>
+      <div class="step-line" style="background: none;"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--purple)">Late Effects Monitoring</div>
+          <div class="step-title">Long-Term Toxicity Surveillance</div>
+          <div class="step-subtitle">Organ-specific monitoring for treatment-related late effects</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="grid-2">
+          <div class="box box-purple">
+            <div class="box-title">Cardiotoxicity (Anthracyclines)</div>
+            <ul class="dot-list">
+              <li>Doxorubicin cumulative dose ≤375 mg/m² in most COG regimens</li>
+              <li>Cardiac surveillance: echo every 1–5 years depending on total dose and RT field</li>
+              <li>PENTEC: Dmean 20 Gy → IC 1.1%, coronary 2.1%, any cardiac event 3.8%</li>
+              <li>+100 mg/m² anthracycline ≈ +10.5 Gy equivalent cardiac risk</li>
+            </ul>
+          </div>
+          <div class="box box-red">
+            <div class="box-title">Nephrotoxicity (Ifosfamide)</div>
+            <ul class="dot-list">
+              <li>Ifosfamide cumulative: 9 g/m²/cycle × multiple cycles</li>
+              <li>Renal function annually (GFR, tubular function)</li>
+              <li>PENTEC: V10 &gt;40% → grade 2 renal failure 10% with ifosfamide</li>
+              <li>Fanconi syndrome: tubulopathy, electrolyte monitoring</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="grid-2">
+          <div class="box box-blue">
+            <div class="box-title">Pulmonary (WLI / Thoracic RT)</div>
+            <ul class="dot-list">
+              <li>PFTs annually if WLI received</li>
+              <li>V20 &lt;30% or Dmean &lt;12 Gy → &lt;5% grade 2 pneumonitis</li>
+              <li>WLI 12–15 Gy: late pulmonary fibrosis risk — long-term PFT monitoring</li>
+            </ul>
+          </div>
+          <div class="box box-amber">
+            <div class="box-title">Secondary Malignancy</div>
+            <ul class="dot-list">
+              <li>Lifelong surveillance — secondary sarcomas peak at 5–10y</li>
+              <li>RT &gt;60 Gy: 20% secondary sarcoma risk</li>
+              <li>RT combined with alkylants + anthracyclines: OR ×2</li>
+              <li>Annual clinical exam of prior RT field</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 6 — RELAPSE
+══════════════════════════════════════════════ -->
+<div class="section" id="tab-relapse">
+<div class="section-title">Relapse / Refractory Disease · NCI PDQ · rEECur</div>
+<div class="flow">
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--red);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--red-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--red)">Prognosis at Relapse</div>
+          <div class="step-title">Epidemiology &amp; Prognostic Factors</div>
+          <div class="step-subtitle">5y OS after relapse: 10–15% · No standardized 2nd-line treatment</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="outcome-row">
+          <div class="outcome-chip" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red)">
+            Overall 5y OS: 10–15%
+          </div>
+          <div class="outcome-chip" style="background:var(--green-bg);border-color:var(--green-border);color:var(--green)">
+            Late relapse (&gt;2y): 5y OS 30%
+          </div>
+          <div class="outcome-chip" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red)">
+            Early relapse (&lt;2y): 5y OS 7%
+          </div>
+          <div class="outcome-chip" style="background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)">
+            80% relapse within 2 years
+          </div>
+        </div>
+        <div class="sep"></div>
+        <ul class="dot-list">
+          <li><strong>Time to recurrence</strong>: most important prognostic factor at relapse (&gt;2y → 5y OS 30% vs 7%)</li>
+          <li><strong>Local + distant</strong>: worse than isolated local or isolated metastatic relapse</li>
+          <li><strong>6-month EFS rate</strong> at relapse: only 13% (COG cooperative group phase II data)</li>
+          <li>Italian/Scandinavian: younger age + longer DFI + lung-only → better PFS after relapse</li>
+          <li>Prior ASCT → less likely to achieve 2nd CR</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--orange);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--orange-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--orange)">rEECur Trial — Reference Standard</div>
+          <div class="step-title">International Randomized Trial for Relapsed/Refractory ES</div>
+          <div class="step-subtitle">MAMS phase II/III · &gt;650 patients · High-dose ifosfamide = current reference arm</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="alert alert-amber">
+          <span class="alert-icon">⚠</span>
+          rEECur is the first RCT comparing second-line regimens for relapsed/refractory Ewing sarcoma. High-dose ifosfamide emerged as most effective despite significant renal and neurological toxicity.
+        </div>
+        <div class="grid-2">
+          <div class="box box-orange">
+            <div class="box-title">Arm Hierarchy (closed in order)</div>
+            <ul class="dot-list">
+              <li><span class="hl-red">GD</span> (gem-docetaxel) — closed 1st (least effective)</li>
+              <li><span class="hl-red">IT</span> (irinotecan-temozolomide) — closed 2nd</li>
+              <li><span class="hl-red">TC</span> (topotecan-cyclophosphamide) — closed 3rd; IFOS &gt; TC in phase III</li>
+              <li><span class="hl-red">CE</span> (carboplatin-etoposide) — closed August 2024</li>
+              <li><span class="hl-green">HD-IFOS</span> (15 g/m², 5d CI q21d) — <strong>current reference arm</strong></li>
+              <li><span class="hl-blue">IFOS-L</span> (IFOS + lenvatinib) — ongoing since June 2023</li>
+            </ul>
+          </div>
+          <div class="box box-green">
+            <div class="box-title">HD-IFOS Results</div>
+            <ul class="dot-list">
+              <li>Ifosfamide: 15 g/m² continuous infusion × 5 days</li>
+              <li>Cycle: every 21 days</li>
+              <li>Median PFS: 5.1 months</li>
+              <li>Median OS: 14.4 months</li>
+              <li>Toxicities G3+: febrile neutropenia 30%, encephalopathy 5%, renal 2%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--blue);"></div>
+      <div class="step-line" style="background: linear-gradient(var(--blue-border), var(--border));"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--blue)">Second-Line Chemotherapy Options</div>
+          <div class="step-title">Active Regimens for Relapsed ES</div>
+          <div class="step-subtitle">NCI PDQ evidence — mostly retrospective data</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <table class="drug-table">
+          <tr><th>Regimen</th><th>Doses</th><th>ORR</th><th>Evidence</th></tr>
+          <tr>
+            <td>Topotecan + Cyclophosphamide (TC)</td>
+            <td>Topo 0.75 mg/m²/d ×5 + Cyclo 250 mg/m²/d ×5</td>
+            <td>29–50%</td>
+            <td>Phase II (Saylors 2001)</td>
+          </tr>
+          <tr>
+            <td>Irinotecan + Temozolomide (IT) 10d</td>
+            <td>Irino 20 mg/m²/d ×5 ×2wk + Temo 100 mg/m²/d ×5</td>
+            <td>54% (10d) vs 21% (5d)</td>
+            <td>Phase II RCT (Xu 2023)</td>
+          </tr>
+          <tr>
+            <td>Vincristine + IT (VIT)</td>
+            <td>VCR 1.5 mg/m² + IT as above</td>
+            <td>54–63%</td>
+            <td>Retrospective</td>
+          </tr>
+          <tr>
+            <td>HD-Ifosfamide</td>
+            <td>15 g/m² CI ×5d q21d</td>
+            <td>Active in prior IFOS-exposed</td>
+            <td>rEECur (best arm)</td>
+          </tr>
+          <tr>
+            <td>Gemcitabine + Docetaxel (GD)</td>
+            <td>Gem 675–900 mg/m² D1,8 + Doce 75–100 mg/m² D8</td>
+            <td>—</td>
+            <td>Least effective (rEECur)</td>
+          </tr>
+          <tr>
+            <td>Regorafenib</td>
+            <td>Monotherapy — phase II RCT</td>
+            <td>13% ORR, PFS 11.4 vs 3.9w</td>
+            <td>Duffaud 2023 (n=36)</td>
+          </tr>
+          <tr>
+            <td>Lurbinectedin</td>
+            <td>Targets EWS::FLI1 transcription</td>
+            <td>14.3% ORR, CBR 39.3%</td>
+            <td>Basket Ph II (Subbiah 2022)</td>
+          </tr>
+          <tr>
+            <td>Cabozantinib</td>
+            <td>40–60 mg/d oral</td>
+            <td>26% ORR</td>
+            <td>CABONE (Italiano 2020)</td>
+          </tr>
+        </table>
+        <div class="sep"></div>
+        <div class="alert alert-blue">
+          <span class="alert-icon">ℹ</span>
+          Irinotecan 10-day schedule superior to 5-day: ORR 54% vs 21% (RCT, Xu 2023); retrospective review: median TTP 4.6–9.5m (10d) vs 3.0–3.9m (5d). Preferred schedule: irinotecan 20 mg/m²/d × 5d × 2wk.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-connector">
+      <div class="step-dot" style="border-color: var(--purple);"></div>
+      <div class="step-line" style="background: none;"></div>
+    </div>
+    <div class="step-card" onclick="toggleCard(this)">
+      <div class="step-header">
+        <div>
+          <div class="step-num" style="color:var(--purple)">RT at Relapse · NCCN EW-2</div>
+          <div class="step-title">Local Control Strategies at Relapse</div>
+        </div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <ul class="dot-list">
+          <li><strong>Surgery</strong>: aggressive resection (including amputation/hemipelvectomy) may be considered for non-metastatic local relapse, even with limited prognosis</li>
+          <li><strong>Pulmonary metastasectomy</strong>: controversial for isolated lung relapse — no clear benefit shown</li>
+          <li><strong>WLI at relapse</strong>: patients with lung relapse who have not received prior WLI — consider WLI ± SBRT; residual disease may be surgically removed</li>
+          <li><strong>SBRT</strong>: for oligometastatic bone/soft tissue relapse sites</li>
+          <li><strong>Palliative RT</strong>: short course (&lt;10 fr) — 85% pain relief in pediatric cohorts</li>
+          <li><strong>Bone RT</strong>: may provide palliation; radical resection may further improve outcome</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 7 — US vs EU COMPARISON
+══════════════════════════════════════════════ -->
+<div class="section" id="tab-compare">
+<div class="section-title">US (NCCN/COG) vs European (EE2012/GEIS/Roadmap) — Key Differences</div>
+
+  <div class="step-card" style="cursor:default;margin-bottom:16px;">
+    <table class="comp-table">
+      <tr>
+        <th>Parameter</th>
+        <th>🇺🇸 NCCN / COG</th>
+        <th>🇪🇺 EE2012 / GEIS / Roadmap</th>
+      </tr>
+      <tr>
+        <td>Induction backbone</td>
+        <td>VDC/IE q14d (cat.1, AEWS0031)</td>
+        <td>VDC/IE q14d (EE2012) — same since 2022</td>
+      </tr>
+      <tr>
+        <td>Induction duration</td>
+        <td>≥9 weeks before local therapy</td>
+        <td>9 cycles VDC/IE (~18 wks)</td>
+      </tr>
+      <tr>
+        <td>Risk stratification</td>
+        <td>Localized vs metastatic (primary staging)</td>
+        <td>Standard vs high risk (volume, histo response)</td>
+      </tr>
+      <tr>
+        <td>Consolidation standard risk</td>
+        <td>Continue VDC/IE × additional cycles</td>
+        <td>IE/VC ×5 cycles</td>
+      </tr>
+      <tr>
+        <td>Consolidation high risk (localized)</td>
+        <td>HD chemo/ASCT — NOT standard (VDC/IE already intensive)</td>
+        <td>BuMel + ASCT (EE99 R2loc data, with VIDE context)</td>
+      </tr>
+      <tr>
+        <td>Definitive RT dose</td>
+        <td>55.8 Gy (45+10.8 boost)</td>
+        <td>54 Gy (50.4 + 5.4 boost option)</td>
+      </tr>
+      <tr>
+        <td>Post-op RT: R1 (microscopic+)</td>
+        <td>50.4 Gy (or 45+5.4 Gy)</td>
+        <td>45–50.4 Gy</td>
+      </tr>
+      <tr>
+        <td>Post-op RT: R2 (gross+)</td>
+        <td>45+10.8 Gy = 55.8 Gy</td>
+        <td>54–55.8 Gy</td>
+      </tr>
+      <tr>
+        <td>RT dose escalation</td>
+        <td>70.2 Gy — RCT data (Laskar 2022), better LC, no OS benefit</td>
+        <td>64.8 Gy — large tumors (institutional series)</td>
+      </tr>
+      <tr>
+        <td>Preop RT timing</td>
+        <td>Concurrently with consolidation chemo (BONE-C 2026)</td>
+        <td>50.4 Gy/28fr (reducible to 45/25)</td>
+      </tr>
+      <tr>
+        <td>Post-op RT timing</td>
+        <td>Within 60 days, concurrent consolidation chemo (BONE-C 2026)</td>
+        <td>Délai ≤60 jours (Roadmap level II-A)</td>
+      </tr>
+      <tr>
+        <td>WLI dose</td>
+        <td>12–15 Gy (both lungs)</td>
+        <td>15 Gy (&lt;14y) / 18 Gy (≥14y)</td>
+      </tr>
+      <tr>
+        <td>WLI — lung CR</td>
+        <td>"Consider WLI" (NCCN EW-3)</td>
+        <td>End of consolidation (not concurrent BuMel)</td>
+      </tr>
+      <tr>
+        <td>Target volumes</td>
+        <td>Pre-chemo GTV + 2 cm → 45 Gy; post-chemo + boost 10.8 Gy</td>
+        <td>GTV + 1.5–2 cm → CTV → PTV +0.5–1 cm</td>
+      </tr>
+      <tr>
+        <td>Surveillance</td>
+        <td>q3m ×2y → less frequent → annual indefinitely (cat.2B)</td>
+        <td>q2–3m ×2y → q4–6m ×3–5y → annual &gt;5y</td>
+      </tr>
+      <tr>
+        <td>2nd-line standard</td>
+        <td>No formal standard; HD-IFOS (rEECur), IT, TC, GD</td>
+        <td>HD-IFOS (rEECur reference); IFOS-L ongoing</td>
+      </tr>
+      <tr>
+        <td>RT technique</td>
+        <td>IMRT/VMAT standard; protons for selected cases</td>
+        <td>IMRT/VMAT; protons for central/pediatric (Roadmap)</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="grid-2">
+    <div class="box box-green">
+      <div class="box-title">Points of Convergence (2022–2026)</div>
+      <ul class="dot-list">
+        <li>Both use <strong>VDC/IE q14d</strong> as standard backbone (EE2012 result)</li>
+        <li>Both endorse <strong>multidisciplinary expert center</strong> evaluation</li>
+        <li>Both mandate <strong>biopsy at treating institution</strong></li>
+        <li>Both use <strong>FDG-PET/CT</strong> for staging</li>
+        <li>Both endorse <strong>proton therapy</strong> for select pediatric/central cases</li>
+        <li>Both use <strong>rEECur HD-IFOS</strong> as preferred 2nd-line reference</li>
+        <li>Both require <strong>RT within 60 days of surgery</strong></li>
+        <li>Both endorse <strong>SBRT</strong> for metastatic bone/soft tissue</li>
+      </ul>
+    </div>
+    <div class="box box-amber">
+      <div class="box-title">Key Remaining Differences</div>
+      <ul class="dot-list">
+        <li>RT dose: US 55.8 Gy vs EU 54 Gy (∆1.8 Gy — 1 fraction)</li>
+        <li>WLI dose: US 12–15 Gy (age-independent) vs EU 15/18 Gy by age</li>
+        <li>ASCT for localized high-risk: EU uses BuMel (EE99 R2loc); US does NOT extrapolate (VIDE context)</li>
+        <li>Risk stratification: EU explicitly stratifies by volume+histo response for BuMel; US primarily localized vs metastatic</li>
+        <li>Dose escalation evidence: US has RCT data (70.2 Gy Laskar 2022) for unresectable; EU mainly institutional (64.8 Gy)</li>
+        <li>Surveillance: US guidelines specify <strong>indefinitely annual</strong> (cat.2B) — more explicit late follow-up recommendation</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- SCROLL TOP -->
+<button class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function toggleCard(card) {
+  card.classList.toggle('open');
+}
+// Open first card of each section by default
+document.querySelectorAll('.section').forEach(section => {
+  const firstCard = section.querySelector('.step-card');
+  if (firstCard) firstCard.classList.add('open');
+});
+</script>
+</body>
+</html>
