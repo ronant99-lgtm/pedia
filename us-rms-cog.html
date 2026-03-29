@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>COG/IRSG · Rhabdomyosarcome US — Stratification & Logigramme</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+/* ── RESET ── */
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;
+  --border:#2a3441;--border2:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --lr:#3fb950;--sr:#388bfd;--hr:#f85149;--vhr:#d29922;
+  --accent:#388bfd;--radius:10px;
+}
+/* ── THÈME ── */
+body.light{
+  --bg:#f5f0e8;--surface:#ffffff;--surface2:#ede8dc;--surface3:#e6e0d2;
+  --border:#c8bfaa;--border2:#d4ccba;
+  --text:#1a1208;--text2:#5a4f3a;--text3:#9a8f7a;
+  --lr:#2d7a3a;--sr:#1a5fa8;--hr:#c0392b;--vhr:#a0720a;
+  --accent:#1a5fa8;
+}
+body.light header{background:rgba(245,240,232,0.97);backdrop-filter:blur(10px);}
+body.light .tab-nav{background:var(--surface2);}
+body.light .tab-btn:hover{background:rgba(0,0,0,.04);}
+body.light .tooltip{background:rgba(245,240,232,.98);border-color:rgba(26,95,168,.25);}
+body.light .btn-reset-zoom{background:var(--surface2);}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;transition:background .25s,color .25s;}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:200;background:rgba(13,17,23,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;}
+.hdr-logo{width:32px;height:32px;border:1.5px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);font-weight:500;flex-shrink:0;}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:15px;}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px;}
+.hdr-badge{font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;border-radius:20px;background:rgba(56,139,253,0.1);border:1px solid rgba(56,139,253,0.3);color:var(--accent);margin-left:auto;flex-shrink:0;}
+
+/* ── TAB NAV ── */
+.tab-nav{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:150;}
+.tab-btn{flex:1;padding:11px 16px;border:none;background:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;}
+.tab-btn:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ── PANELS ── */
+.panel{display:none;}
+.panel.active{display:block;}
+#panel-flow{height:calc(100vh - 105px);overflow:hidden;position:relative;}
+
+/* ── WIZARD LAYOUT ── */
+.container{max-width:860px;margin:0 auto;padding:32px 20px 80px;}
+.progress-wrap{margin-bottom:28px;}
+.progress-header{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;}
+.progress-bar{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;}
+
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:14px;position:relative;animation:fadeSlide .3s ease;overflow:hidden;}
+.step-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+.q-title{font-size:14px;font-weight:500;margin-bottom:5px;line-height:1.4;}
+.q-sub{font-size:11px;color:var(--text2);margin-bottom:18px;line-height:1.5;}
+.options{display:flex;flex-direction:column;gap:8px;}
+.opt-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;text-align:left;transition:all .2s;position:relative;overflow:hidden;}
+.opt-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);transform:scaleY(0);transition:transform .2s;}
+.opt-btn:hover{border-color:var(--accent);background:rgba(56,139,253,.06);}
+.opt-btn:hover::before{transform:scaleY(1);}
+.opt-desc{font-size:11px;color:var(--text3);margin-top:3px;}
+.btn-back{background:none;border:1px solid var(--border2);color:var(--text2);padding:7px 13px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;margin-bottom:16px;transition:all .2s;}
+.btn-back:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── RESULT CARD ── */
+.result-card{border-radius:var(--radius);padding:24px;animation:fadeSlide .3s ease;}
+.result-card.lr{border:1px solid var(--lr);border-top:3px solid var(--lr);background:rgba(63,185,80,.04);}
+.result-card.sr{border:1px solid var(--sr);border-top:3px solid var(--sr);background:rgba(56,139,253,.04);}
+.result-card.hr{border:1px solid var(--hr);border-top:3px solid var(--hr);background:rgba(248,81,73,.05);}
+.result-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px;}
+.result-title{font-family:'DM Serif Display',serif;font-size:19px;}
+.result-subgroup{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:6px;}
+.risk-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;flex-shrink:0;}
+.risk-badge.lr{background:rgba(63,185,80,.15);color:var(--lr);border:1px solid rgba(63,185,80,.3);}
+.risk-badge.sr{background:rgba(56,139,253,.15);color:var(--sr);border:1px solid rgba(56,139,253,.3);}
+.risk-badge.hr{background:rgba(248,81,73,.15);color:var(--hr);border:1px solid rgba(248,81,73,.3);}
+.result-grid{display:grid;gap:10px;margin-bottom:12px;}
+.r-row{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.r-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+.r-val{font-size:13px;color:var(--text);line-height:1.6;}
+
+/* ── RT BLOCK ── */
+.rt-block{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--sr);border-radius:8px;padding:16px;margin-bottom:12px;}
+.rt-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--sr);text-transform:uppercase;margin-bottom:12px;}
+.rt-section{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.rt-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.rt-section-hdr{font-size:12px;font-weight:500;color:var(--text);margin-bottom:7px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.rt-tag{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(56,139,253,.12);color:var(--sr);flex-shrink:0;}
+.rt-tag.no-rt{background:rgba(110,118,129,.12);color:var(--text3);}
+.rt-tag.alert{background:rgba(248,81,73,.12);color:var(--hr);}
+.rt-tag.yellow{background:rgba(210,153,34,.12);color:var(--vhr);}
+.rt-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:560px){.rt-2col{grid-template-columns:1fr;}}
+.rt-box{background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:9px 11px;}
+.rt-box-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.rt-box-val{font-size:12px;color:var(--text);line-height:1.5;}
+.rt-dose{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--sr);}
+.rt-dose.esc{color:var(--vhr);}
+.rt-dose.highesc{color:var(--hr);}
+.rt-sub{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4;}
+.rt-note{font-size:11px;color:var(--text2);margin-top:5px;line-height:1.5;}
+
+/* ── OUTCOMES ── */
+.outcomes-block{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px;}
+.outcome-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.outcome-row:last-child{border-bottom:none;}
+.outcome-label{color:var(--text2);}
+.outcome-val{font-family:'DM Mono',monospace;font-size:11px;}
+.outcome-good{color:var(--lr);}.outcome-mid{color:var(--vhr);}.outcome-bad{color:var(--hr);}
+
+.result-actions{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;}
+.btn-restart{background:none;border:1px solid var(--border2);color:var(--text2);padding:9px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s;}
+.btn-restart:hover{border-color:var(--accent);color:var(--accent);}
+.btn-pdf{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);padding:9px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s;}
+.btn-pdf:hover{border-color:var(--accent);color:var(--accent);}
+.nct-link{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-decoration:none;}
+.nct-link:hover{text-decoration:underline;}
+
+/* ── REFS ── */
+.refs-section{margin-top:44px;border-top:1px solid var(--border);padding-top:22px;}
+.refs-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+.ref-item{display:flex;gap:10px;margin-bottom:14px;font-size:12px;}
+.ref-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:18px;padding-top:2px;}
+.ref-authors{font-weight:500;}.ref-title{color:var(--text);margin-top:2px;}.ref-journal{color:var(--text2);font-size:11px;margin-top:1px;}
+.ref-doi a{color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;text-decoration:none;}
+.ref-doi a:hover{text-decoration:underline;}
+
+/* ── D3 FLOWCHART ── */
+#chart{width:100%;height:100%;cursor:grab;}
+#chart:active{cursor:grabbing;}
+.btn-reset-zoom{position:absolute;top:14px;right:14px;background:var(--surface);border:1px solid var(--border2);color:var(--text2);padding:7px 14px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;z-index:10;transition:all .2s;}
+.btn-reset-zoom:hover{border-color:var(--accent);color:var(--accent);}
+.flow-legend{position:absolute;bottom:14px;left:14px;display:flex;flex-wrap:wrap;gap:8px;z-index:10;}
+.leg-it{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);}
+.leg-dot{width:9px;height:9px;border-radius:50%;}
+
+/* ── TOOLTIP ── */
+.tooltip{position:fixed;pointer-events:none;z-index:300;background:rgba(13,17,23,.97);border-radius:10px;padding:14px 16px;width:300px;box-shadow:0 6px 28px rgba(0,0,0,.35);border:1px solid rgba(56,139,253,.2);display:none;}
+.tt-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:7px;letter-spacing:1.5px;text-transform:uppercase;}
+.tt-q{font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px;line-height:1.4;}
+.tt-section{margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--border);}
+.tt-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.tt-section-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.tt-row{display:flex;gap:7px;margin-bottom:3px;font-size:11px;}
+.tt-label{color:var(--text3);min-width:60px;flex-shrink:0;}
+.tt-val{color:var(--text2);line-height:1.4;}
+.tt-dose{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--sr);}
+.tt-dose.esc{color:var(--vhr);}
+.tt-dose.highesc{color:var(--hr);}
+.tt-outcome{margin-top:5px;}
+.tt-efs{font-family:'DM Mono',monospace;font-size:11px;}
+.efs-good{color:var(--lr);}.efs-mid{color:var(--vhr);}.efs-bad{color:var(--hr);}
+
+/* ── TOGGLE THÈME ── */
+.btn-theme{width:30px;height:30px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:14px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;margin-left:8px;flex-shrink:0;}
+.btn-theme:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── PRINT ── */
+.print-footer{display:none;}
+@media print{
+  body,body.light{background:#fff!important;color:#000!important;}
+  header,body.light header{position:static!important;background:#fff!important;border-bottom:1px solid #ccc!important;}
+  .tab-nav,.btn-pdf,.btn-restart,.progress-wrap,.btn-back,#panel-flow,.btn-theme{display:none!important;}
+  .panel{display:block!important;}
+  .result-card{border:1.5px solid #333!important;background:#fff!important;break-inside:avoid;}
+  .print-footer{display:block;font-size:8pt;color:#999;margin-top:22px;border-top:1px solid #ddd;padding-top:8px;}
+  :root,body.light{--text:#000;--text2:#444;--text3:#888;--surface:#fff;--surface2:#f5f5f5;--border:#ddd;--border2:#eee;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">US</div>
+  <div>
+    <div class="hdr-title">COG/IRSG — Rhabdomyosarcome · Stratification & Traitement</div>
+    <div class="hdr-sub">ARST 1431 · D9803 · D9602 · Timing · Volumes · Doses RT intégrés</div>
+  </div>
+  <span class="hdr-badge">COG · IRSG</span>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Passer en mode clair">◑</button>
+</header>
+
+<div class="tab-nav">
+  <button class="tab-btn active" id="tab-wizard" onclick="switchTab('wizard')">⬡ Stratification pas-à-pas</button>
+  <button class="tab-btn" id="tab-flow" onclick="switchTab('flow')">⬡ Logigramme interactif</button>
+</div>
+
+<!-- PANEL WIZARD -->
+<div class="panel active" id="panel-wizard">
+  <div class="container">
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-header">
+        <span id="stepLabel">Étape 1 / 5</span>
+        <span id="stepName">Statut Fusion / Histologie</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+    </div>
+    <div id="app"></div>
+    <div class="refs-section" id="refsSection" style="display:none">
+      <div class="refs-title">Références</div>
+      <div class="ref-item"><span class="ref-num">[1]</span><div>
+        <div class="ref-authors">Gupta AA, Anderson JR, Bhatt A, et al.</div>
+        <div class="ref-title">ARST 1431 — Temsirolimus added to standard chemotherapy for intermediate-risk rhabdomyosarcoma</div>
+        <div class="ref-journal">Lancet Oncol 2024;25:470–481</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1016/S1470-2045(24)00068-3" target="_blank">doi:10.1016/S1470-2045(24)00068-3</a> · <a href="https://clinicaltrials.gov/study/NCT02567435" target="_blank">NCT02567435</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">[2]</span><div>
+        <div class="ref-authors">Raney RB, Walterhouse DO, Meza JL, et al.</div>
+        <div class="ref-title">D9602 (IRS-V) — Results of low-risk rhabdomyosarcoma</div>
+        <div class="ref-journal">JCO 2011;29:1312–1318</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.2010.30.6175" target="_blank">doi:10.1200/JCO.2010.30.6175</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">[3]</span><div>
+        <div class="ref-authors">Walterhouse DO, Pappo AS, Meza JL, et al.</div>
+        <div class="ref-title">ARST 0331 (IRS-VI) — Shorter-duration therapy using VAC/VA</div>
+        <div class="ref-journal">JCO 2014 ; Cancer 2017</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.2013.51.6441" target="_blank">doi:10.1200/JCO.2013.51.6441</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">[4]</span><div>
+        <div class="ref-authors">Weigel BJ, Lyden E, Anderson JR, et al.</div>
+        <div class="ref-title">ARST 0431 — Intensive multiagent therapy for metastatic rhabdomyosarcoma</div>
+        <div class="ref-journal">JCO 2016;34:117–122</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.2015.63.4048" target="_blank">doi:10.1200/JCO.2015.63.4048</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">[5]</span><div>
+        <div class="ref-authors">Arndt CA, Stoner JA, Hawkins DS, et al.</div>
+        <div class="ref-title">D9803 (IRS-V) — Vincristine, actinomycin, and cyclophosphamide compared with VAC alternating with topotecan for intermediate-risk RMS</div>
+        <div class="ref-journal">JCO 2009;27:5182–5188</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.2009.22.3768" target="_blank">doi:10.1200/JCO.2009.22.3768</a></div>
+      </div></div>
+    </div>
+    <div class="print-footer">Outil d'aide à la décision — Ne se substitue pas au jugement clinique ni aux recommandations en vigueur.<br>Généré le <span id="printDate"></span> · COG/IRSG ARST 1431</div>
+  </div>
+</div>
+
+<!-- PANEL FLOWCHART -->
+<div class="panel" id="panel-flow">
+  <button class="btn-reset-zoom" id="btnReset">⊙ Recentrer</button>
+  <div class="flow-legend">
+    <div class="leg-it"><div class="leg-dot" style="background:var(--text3)"></div>Question</div>
+    <div class="leg-it"><div class="leg-dot" style="background:var(--lr)"></div>Bas Risque</div>
+    <div class="leg-it"><div class="leg-dot" style="background:var(--sr)"></div>Risque Intermédiaire</div>
+    <div class="leg-it"><div class="leg-dot" style="background:var(--hr)"></div>Haut Risque</div>
+  </div>
+  <svg id="chart"></svg>
+  <div class="tooltip" id="tooltip"></div>
+</div>
+
+<script>
+// ═══ DONNÉES RÉSULTATS ═══
+const SG = {
+  LR_A: {
+    risk:'lr',label:'Bas Risque — Groupe A',
+    criteria:'Embryonal / Fusion– · Site favorable ("BONG") · Groupe IRS I–II (GTR ou marge +) · Orbite groupe III',
+    chemo:'VAC ×4 (CPM dose réduite) → VA jusqu\'à semaine 24 — Régime ARST 0331',
+    rtIndication:false,
+    noRT_reason:'Groupe I embryonal : RT omise après résection complète (marges négatives). Pas de résidu, pas de N+.',
+    outcomes:{pfs:'~90%',os:'~99%',ec:'outcome-good',oc:'outcome-good'},
+    trial:'ARST 0331 · D9602',refs:[1,2,3]
+  },
+  LR_B: {
+    risk:'lr',label:'Bas Risque — Groupe B',
+    criteria:'Embryonal / Fusion– · Site défavorable ≤5 cm · N0 · Groupe IRS I–II (après GTR ou marge +)',
+    chemo:'VAC ×4 (CPM dose réduite) → VA jusqu\'à semaine 24 — Régime ARST 0331',
+    rtIndication:true,
+    rtWeek:'Semaine 13',
+    volumes:[
+      {l:'GTV',v:'Masse pré-chimio (si résidu macroscopique) ou lit tumoral post-chirurgical'},
+      {l:'CTV',v:'GTV + 1 cm (peut être réduit aux barrières anatomiques)'},
+      {l:'PTV',v:'CTV + 3–5 mm'},
+    ],
+    doses:[
+      {label:'Groupe IIA (marge microscopique +)',dose:'36 Gy / 20 fr',sub:'1,8 Gy/fr · Site primitif',esc:false},
+      {label:'Groupe IIB/C (N+)',dose:'41,4 Gy / 23 fr',sub:'1,8 Gy/fr · Inclure chaîne ganglionnaire N+',esc:true},
+    ],
+    nodeRT:'41,4 Gy sur chaîne ganglionnaire si N+ (groupe IIB/C)',
+    outcomes:{pfs:'~88%',os:'~99%',ec:'outcome-good',oc:'outcome-good'},
+    trial:'ARST 0331 · D9602',refs:[1,2,3]
+  },
+  IR: {
+    risk:'sr',label:'Risque Intermédiaire',
+    criteria:'Embryonal groupe III non-orbite · Embryonal stade II–III groupe III · Embryonal stade III groupes I–II · Alvéolaire / Fusion+ non métastatique (tout groupe I–III) · Embryonal IV ≤ 10 ans',
+    chemo:'42 semaines — VAC/VI alternés (ARST 1431) : 2× VAC → 1× VI → éval sem 9 → poursuite alternance → RT sem 13',
+    rtIndication:true,
+    rtWeek:'Semaine 13 (après induction)',
+    volumes:[
+      {l:'GTV1',v:'Volume pré-chimio + marges — utilisé pour la phase d\'irradiation initiale'},
+      {l:'GTV2',v:'Volume résiduel post-chimio semaine 9 — utilisé pour le boost si persistance'},
+      {l:'CTV1',v:'GTV1 + 1 cm (adapté aux barrières anatomiques)'},
+      {l:'CTV2',v:'GTV2 + 1 cm (boost)'},
+      {l:'PTV',v:'CTV + 3–5 mm'},
+      {l:'Ganglions',v:'Inclure chaîne ganglionnaire complète si N+ (pas de RT élective sinon)'},
+    ],
+    doses:[
+      {label:'Groupe I (GTR) — Alvéolaire',dose:'36 Gy / 20 fr',sub:'1,8 Gy/fr — Après résection complète, histologie alvéolaire',esc:false},
+      {label:'Groupe II — Marge + ou N+',dose:'36 Gy / 20 fr',sub:'1,8 Gy/fr · +41,4 Gy si N+ sur chaîne ganglionnaire',esc:false},
+      {label:'Groupe III — Résidu ≤5 cm',dose:'50,4 Gy / 28 fr',sub:'1,8 Gy/fr · Orbite : 45 Gy si RC complète à la chimio',esc:true},
+      {label:'Groupe III — Résidu >5 cm persistant à sem 9',dose:'59,4 Gy / 33 fr',sub:'1,8 Gy/fr · GTV1 45 Gy → boost GTV2 14,4 Gy',highesc:true},
+      {label:'Orbite — Résidu, CR à la chimio',dose:'45 Gy / 25 fr',sub:'1,8 Gy/fr · Si CR histologique post-chimio',esc:true},
+    ],
+    nodeRT:'41,4 Gy / 23 fr sur chaîne ganglionnaire régionale si N+ (simultané avec irradiation du primitif)',
+    dpe:{text:'Excision primaire différée (DPE) — D9803 : induction CHT → éval sem 12 → résection → RT dose réduite. GTR : 36 Gy · Marge+ : 41,4 Gy · Résidu : 50,4 Gy'},
+    outcomes:{pfs:'~65–70%',os:'~73%',ec:'outcome-mid',oc:'outcome-mid'},
+    trial:'ARST 1431 · ARST 0531 · D9803',refs:[1,5]
+  },
+  HR: {
+    risk:'hr',label:'Haut Risque — Métastatique',
+    criteria:'Alvéolaire / Fusion+ métastatique · Embryonal métastatique ≥ 10 ans (Oberlin ≥ 2)',
+    chemo:'54 semaines — VI (sem 1–6) → alternance VDC/EI (sem 7–19) → VAC (sem 38–46) → VI (sem 47–52)\nVDC = vincristine, doxorubicine, cyclophosphamide · EI = étoposide, ifosfamide',
+    rtIndication:true,
+    rtWeek:'Semaine 20–25 (concurrent avec VI — irinotecan comme radiosensibilisant)',
+    rtWeekAlt:'Sem 1–6 si extension intracrânienne ou compression médullaire symptomatique',
+    volumes:[
+      {l:'GTV',v:'Volume pré-chimio (si résidu macroscopique) ou lit opératoire'},
+      {l:'CTV',v:'GTV + 1 cm (adapté aux barrières anatomiques)'},
+      {l:'PTV',v:'CTV + 3–5 mm'},
+      {l:'Métas',v:'Chaque site métastatique irradié individuellement selon protocole'},
+    ],
+    doses:[
+      {label:'Primitif — Résidu macroscopique',dose:'50,4 Gy / 28 fr',sub:'1,8 Gy/fr · Site non réséqué · Irinotecan concurrent (radiosensibilisation)',esc:true},
+      {label:'Primitif — Résidu microscopique / N+',dose:'36–41,4 Gy',sub:'1,8 Gy/fr · Selon résidu chirurgical',esc:false},
+      {label:'Métastases pulmonaires — WLI',dose:'12–15 Gy / 8–10 fr',sub:'1,5 Gy/fr · Irradiation pulmonaire totale + boost tumoral 41,4 Gy',esc:false},
+      {label:'Métastases osseuses < 5 cm',dose:'SBRT — dose par protocole local',sub:'Stéréotaxie si volume limité',esc:false},
+      {label:'Autres métastases',dose:'50,4 Gy / 28 fr',sub:'1,8 Gy/fr · Après chimio complète',esc:true},
+    ],
+    nodeRT:'Irradiation ganglionnaire incluse dans le volume du primitif ou des métastases concernées',
+    outcomes:{pfs:'~30–38%',os:'~56%',ec:'outcome-bad',oc:'outcome-bad'},
+    oberlin:'0–1 facteur : EFS 69% · ≥2 facteurs : EFS 19%',
+    trial:'ARST 0431',refs:[4]
+  }
+};
+
+// ═══ BUILD RT BLOCK ═══
+function buildRT(sgKey) {
+  const s = SG[sgKey];
+  if (!s.rtIndication) {
+    return '<div class="rt-block"><div class="rt-block-title">Radiothérapie</div>'
+      + '<div class="rt-section"><div class="rt-section-hdr"><span class="rt-tag no-rt">RT non indiquée</span></div>'
+      + '<div class="rt-note">' + s.noRT_reason + '</div></div></div>';
+  }
+  let h = '<div class="rt-block"><div class="rt-block-title">Radiothérapie</div>';
+
+  // Timing
+  h += '<div class="rt-section"><div class="rt-section-hdr">Timing <span class="rt-tag">' + s.rtWeek + '</span></div>';
+  if (s.rtWeekAlt) h += '<div class="rt-note"><strong style="color:var(--vhr)">Alternative :</strong> ' + s.rtWeekAlt + '</div>';
+  h += '</div>';
+
+  // Volumes
+  h += '<div class="rt-section"><div class="rt-section-hdr">Volumes cibles</div><div class="rt-2col">';
+  s.volumes.forEach(function(v) {
+    h += '<div class="rt-box"><div class="rt-box-label">' + v.l + '</div><div class="rt-box-val">' + v.v + '</div></div>';
+  });
+  h += '</div></div>';
+
+  // Doses
+  h += '<div class="rt-section"><div class="rt-section-hdr">Doses prescrites</div>';
+  s.doses.forEach(function(d) {
+    var doseClass = d.highesc ? 'rt-dose highesc' : (d.esc ? 'rt-dose esc' : 'rt-dose');
+    h += '<div class="rt-box" style="margin-bottom:6px"><div class="rt-box-label">' + d.label + '</div>'
+      + '<div class="rt-box-val"><span class="' + doseClass + '">' + d.dose + '</span>'
+      + (d.sub ? '<div class="rt-sub">' + d.sub + '</div>' : '')
+      + '</div></div>';
+  });
+  h += '</div>';
+
+  // Node RT
+  if (s.nodeRT) {
+    h += '<div class="rt-section"><div class="rt-section-hdr">RT ganglionnaire <span class="rt-tag yellow">N+</span></div>'
+      + '<div class="rt-note">' + s.nodeRT + '</div></div>';
+  }
+
+  // DPE
+  if (s.dpe) {
+    h += '<div class="rt-section"><div class="rt-section-hdr">Excision primaire différée (DPE) <span class="rt-tag yellow">Option D9803</span></div>'
+      + '<div class="rt-note">' + s.dpe.text + '</div></div>';
+  }
+
+  h += '</div>';
+  return h;
+}
+
+// ═══ BUILD RESULT ═══
+function buildResult(sgKey) {
+  var s = SG[sgKey];
+  var rnames = {lr:'Bas Risque',sr:'Risque Intermédiaire',hr:'Haut Risque'};
+  var rn = rnames[s.risk];
+
+  var oberlinBlock = s.oberlin
+    ? '<div class="r-row"><div class="r-label">Facteurs Oberlin</div><div class="r-val">' + s.oberlin + '</div></div>'
+    : '';
+
+  return '<div class="result-card ' + s.risk + '">'
+    + '<div class="result-header">'
+    + '<div><div class="result-subgroup">COG/IRSG · ' + s.label + '</div><div class="result-title">' + rn + '</div></div>'
+    + '<span class="risk-badge ' + s.risk + '">' + rn.toUpperCase() + '</span>'
+    + '</div>'
+    + '<div class="result-grid">'
+    + '<div class="r-row"><div class="r-label">Critères d\'inclusion</div><div class="r-val">' + s.criteria + '</div></div>'
+    + '<div class="r-row"><div class="r-label">Chimiothérapie</div><div class="r-val">' + s.chemo + '</div></div>'
+    + oberlinBlock
+    + '</div>'
+    + buildRT(sgKey)
+    + '<div class="outcomes-block">'
+    + '<div class="r-label" style="margin-bottom:8px">Données d\'efficacité <sup style="color:var(--text3);font-size:8px">[' + s.refs.join(',') + ']</sup></div>'
+    + '<div class="outcome-row"><span class="outcome-label">PFS / EFS estimée</span><span class="outcome-val ' + s.outcomes.ec + '">' + s.outcomes.pfs + '</span></div>'
+    + '<div class="outcome-row"><span class="outcome-label">OS estimée</span><span class="outcome-val ' + s.outcomes.oc + '">' + s.outcomes.os + '</span></div>'
+    + '</div>'
+    + '<div class="r-row"><div class="r-label">Protocole(s) de référence</div><div class="r-val">' + s.trial + '</div></div>'
+    + '<div class="result-actions">'
+    + '<button class="btn-restart" onclick="restart()">⟳ Nouvelle stratification</button>'
+    + '<button class="btn-pdf" onclick="printResult()">⬇ Exporter PDF</button>'
+    + '</div></div>';
+}
+
+// ═══ STEPS ═══
+const STEPS = {
+  fusion:{
+    label:'Statut Fusion / Histologie',num:1,total:5,
+    q:'Statut du gène de fusion PAX-FOXO1',
+    sub:'Tester PAX3-FOXO1 et PAX7-FOXO1. En l\'absence de résultat : alvéolaire = Fusion+, non-alvéolaire (embryonal, botryoïde, fusiforme) = Fusion–.',
+    opts:[
+      {val:'neg',label:'Fusion– (négatif)',desc:'Embryonal, botryoïde, fusiforme — ou alvéolaire PAX-FOXO1 non détecté'},
+      {val:'pos',label:'Fusion+ (positif)',desc:'PAX3-FOXO1 ou PAX7-FOXO1 détecté — ou histologie alvéolaire non testée'}
+    ],
+    next:function(){return 'meta';}
+  },
+  meta:{
+    label:'Statut métastatique',num:2,total:5,
+    q:'Présence de métastases à distance (stade IV / Groupe IRS IV)',
+    sub:'Métastases = localisations à distance non contiguës. Inclure poumon, os, moelle osseuse, foie, adénopathies à distance.',
+    opts:[
+      {val:'no',label:'Non métastatique',desc:'Maladie localisée ou régionale'},
+      {val:'yes',label:'Métastatique (Groupe IV / Stade IV)',desc:'→ Haut Risque si Fusion+ ou embryonal ≥ 10 ans'}
+    ],
+    next:function(v){
+      if(v==='yes'){
+        if(state.fusion==='pos') return '_result_HR';
+        return 'age_meta';
+      }
+      return 'irs';
+    }
+  },
+  age_meta:{
+    label:'Âge — Embryonal métastatique',num:3,total:5,
+    q:'Âge du patient (embryonal Fusion– métastatique)',
+    sub:'Pour l\'embryonal métastatique Fusion–, l\'âge conditionne le niveau de risque.',
+    opts:[
+      {val:'young',label:'≤ 10 ans',desc:'Risque intermédiaire (EFS ~35–40% dans Oberlin 0–1)'},
+      {val:'old',label:'> 10 ans',desc:'Haut Risque'}
+    ],
+    next:function(v){return v==='young'?'_result_IR':'_result_HR';}
+  },
+  irs:{
+    label:'Groupe IRS post-chirurgical',num:3,total:5,
+    q:'Groupe IRS (étendue de la résection chirurgicale initiale)',
+    sub:'Groupe I = R0 · Groupe II = résidu microscopique ou N+ réséqués · Groupe III = résidu macroscopique / biopsie seule.',
+    opts:[
+      {val:'I',label:'Groupe I — Résection complète R0',desc:'Pas de résidu microscopique détectable'},
+      {val:'II',label:'Groupe II — Marge + ou N+ réséqués',desc:'Résection macroscopique mais résidu microscopique et/ou adénopathies régionales réséquées'},
+      {val:'III',label:'Groupe III — Résidu macroscopique',desc:'Biopsie seule ou résection partielle < 50%'}
+    ],
+    next:function(){return 'site';}
+  },
+  site:{
+    label:'Localisation tumorale',num:4,total:5,
+    q:'Site primitif — Favorable ou Défavorable ?',
+    sub:'BONG = sites favorables. Tout autre site = défavorable.',
+    opts:[
+      {val:'fav',label:'Site Favorable — "BONG"',desc:'Biliaire · Orbite · Non-paraméningé H&N · GU non-vessie / non-prostate (paratesticulaire, vagin, utérus)'},
+      {val:'unfav',label:'Site Défavorable',desc:'Paraméningé · Vessie · Prostate · Extrémité · Foie (non biliaire) · Périnée · Péri-anal · Intrathoracique · Digestif · Rétropéritoine'}
+    ],
+    next:function(){return 'sizenode';}
+  },
+  sizenode:{
+    label:'Taille et statut ganglionnaire',num:5,total:5,
+    q:'Taille tumorale et statut ganglionnaire',
+    sub:'Taille ≤ 5 cm et N0 = critère favorable. Ces deux éléments conditionnent la frontière Bas Risque / Risque Intermédiaire pour les sites défavorables.',
+    opts:[
+      {val:'small_n0',label:'Taille ≤ 5 cm ET N0',desc:'Ganglions négatifs, tumeur ≤ 5 cm'},
+      {val:'big_or_n1',label:'Taille > 5 cm OU N+',desc:'Au moins un critère défavorable'}
+    ],
+    next:function(v){
+      var fusion = state.fusion;
+      var irs = state.irs;
+      var site = state.site;
+      // Fusion+ non méta → Risque Intermédiaire quel que soit le reste
+      if(fusion==='pos') return '_result_IR';
+      // Embryonal (Fusion–) non méta
+      // Bas Risque : groupe I–II, site favorable OU site défav ≤5cm N0
+      if(irs==='I' || irs==='II'){
+        if(site==='fav') return '_result_LR_A';
+        // site défav
+        if(v==='small_n0') return '_result_LR_B';
+        return '_result_IR';
+      }
+      // Groupe III
+      if(irs==='III'){
+        if(site==='fav' && irs==='III') return '_result_LR_A'; // orbite groupe III = LR
+        return '_result_IR';
+      }
+      return '_result_IR';
+    }
+  }
+};
+
+let state = {}, history = [], currentStep = 'fusion';
+
+function navigate(sid, val) {
+  history.push({step:currentStep, state:JSON.parse(JSON.stringify(state))});
+  if(sid==='fusion') state.fusion = val;
+  if(sid==='meta') state.meta = val;
+  if(sid==='age_meta') state.age_meta = val;
+  if(sid==='irs') state.irs = val;
+  if(sid==='site') state.site = val;
+  if(sid==='sizenode') state.sizenode = val;
+  var step = STEPS[sid];
+  var nxt = step.next(val);
+  if(nxt.startsWith('_result_')){
+    currentStep = 'result';
+    renderResult(nxt.slice(8));
+  } else {
+    currentStep = nxt;
+    renderStep(nxt);
+  }
+}
+
+function renderStep(sid) {
+  var s = STEPS[sid];
+  var pct = Math.round(s.num / s.total * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepLabel').textContent = 'Étape ' + s.num + ' / ' + s.total;
+  document.getElementById('stepName').textContent = s.label;
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('refsSection').style.display = 'none';
+  var back = history.length ? '<button class="btn-back" onclick="goBack()">← Retour</button>' : '';
+  var opts = s.opts.map(function(o) {
+    return '<button class="opt-btn" onclick="navigate(\'' + sid + '\',\'' + o.val + '\')">'
+      + '<span>' + o.label + '</span>'
+      + (o.desc ? '<div class="opt-desc">' + o.desc + '</div>' : '')
+      + '</button>';
+  }).join('');
+  document.getElementById('app').innerHTML = back
+    + '<div class="step-card"><div class="section-label">Question ' + s.num + '</div>'
+    + '<div class="q-title">' + s.q + '</div>'
+    + '<div class="q-sub">' + s.sub + '</div>'
+    + '<div class="options">' + opts + '</div></div>';
+}
+
+function renderResult(sgKey) {
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('stepLabel').textContent = 'Résultat';
+  document.getElementById('stepName').textContent = SG[sgKey] ? SG[sgKey].label : sgKey;
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('refsSection').style.display = 'block';
+  document.getElementById('app').innerHTML = '<button class="btn-back" onclick="goBack()">← Retour</button>'
+    + buildResult(sgKey);
+}
+
+function goBack() {
+  if(!history.length) return;
+  var prev = history.pop();
+  state = prev.state;
+  currentStep = prev.step;
+  document.getElementById('refsSection').style.display = 'none';
+  renderStep(prev.step);
+}
+
+function restart() {
+  state = {}; history = []; currentStep = 'fusion';
+  document.getElementById('refsSection').style.display = 'none';
+  renderStep('fusion');
+}
+
+function printResult() {
+  document.getElementById('printDate').textContent = new Date().toLocaleDateString('fr-FR');
+  document.getElementById('progressWrap').style.display = 'none';
+  document.querySelectorAll('.btn-back').forEach(function(b){b.style.display='none';});
+  window.print();
+  document.getElementById('progressWrap').style.display = 'block';
+  document.querySelectorAll('.btn-back').forEach(function(b){b.style.display='';});
+}
+
+// ═══ TAB SWITCH ═══
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if(tab === 'flow' && !window._flowBuilt) { buildFlow(); window._flowBuilt = true; }
+}
+
+// ═══ D3 FLOWCHART ═══
+function buildFlow() {
+  var nodes = [
+    {id:'start',label:'Histologie\n& Fusion',type:'q',x:0,y:0},
+    {id:'neg',label:'Fusion–\n(Embryonal)',type:'q',x:-220,y:110},
+    {id:'pos',label:'Fusion+\n(Alvéolaire)',type:'q',x:220,y:110},
+    {id:'neg_meta',label:'Métastases ?',type:'q',x:-220,y:220},
+    {id:'pos_meta',label:'Métastases ?',type:'q',x:220,y:220},
+    {id:'neg_no_irs',label:'Groupe IRS',type:'q',x:-340,y:330},
+    {id:'neg_yes_age',label:'Âge ?',type:'q',x:-100,y:330},
+    {id:'pos_no_result',label:'Risque\nIntermédiaire',type:'sr',x:220,y:330},
+    {id:'pos_yes_result',label:'Haut\nRisque',type:'hr',x:380,y:330},
+    {id:'irs_I_II',label:'Groupe I–II',type:'q',x:-460,y:440},
+    {id:'irs_III',label:'Groupe III',type:'q',x:-220,y:440},
+    {id:'age_young',label:'≤ 10 ans',type:'sr',x:-140,y:440},
+    {id:'age_old',label:'> 10 ans',type:'hr',x:-60,y:440},
+    {id:'site_I_II',label:'Site primitif',type:'q',x:-460,y:550},
+    {id:'site_III',label:'Site primitif',type:'q',x:-220,y:550},
+    {id:'orbit_lr',label:'Orbite\nBas Risque',type:'lr',x:-280,y:650},
+    {id:'nonorbit_ir',label:'Non-orbite\nRisque Interm.',type:'sr',x:-160,y:650},
+    {id:'fav_I_II',label:'Site Fav.\n"BONG"',type:'q',x:-560,y:650},
+    {id:'unfav_I_II',label:'Site Déf.',type:'q',x:-360,y:650},
+    {id:'lr_a',label:'BAS RISQUE A\nGTR / Orbite III',type:'lr',x:-560,y:760},
+    {id:'size_node',label:'Taille & N',type:'q',x:-360,y:760},
+    {id:'lr_b',label:'BAS RISQUE B\n≤5cm N0',type:'lr',x:-440,y:870},
+    {id:'ir_unfav',label:'RISQUE\nINTERM.',type:'sr',x:-280,y:870},
+  ];
+
+  var edges = [
+    {s:'start',t:'neg',l:'Fusion–'},
+    {s:'start',t:'pos',l:'Fusion+'},
+    {s:'neg',t:'neg_meta',l:''},
+    {s:'pos',t:'pos_meta',l:''},
+    {s:'neg_meta',t:'neg_no_irs',l:'Non'},
+    {s:'neg_meta',t:'neg_yes_age',l:'Oui'},
+    {s:'pos_meta',t:'pos_no_result',l:'Non'},
+    {s:'pos_meta',t:'pos_yes_result',l:'Oui'},
+    {s:'neg_no_irs',t:'irs_I_II',l:'I–II'},
+    {s:'neg_no_irs',t:'irs_III',l:'III'},
+    {s:'neg_yes_age',t:'age_young',l:'≤10a'},
+    {s:'neg_yes_age',t:'age_old',l:'>10a'},
+    {s:'irs_I_II',t:'site_I_II',l:''},
+    {s:'irs_III',t:'site_III',l:''},
+    {s:'site_III',t:'orbit_lr',l:'Orbite'},
+    {s:'site_III',t:'nonorbit_ir',l:'Autre'},
+    {s:'site_I_II',t:'fav_I_II',l:'Fav.'},
+    {s:'site_I_II',t:'unfav_I_II',l:'Déf.'},
+    {s:'fav_I_II',t:'lr_a',l:'→ LR A'},
+    {s:'unfav_I_II',t:'size_node',l:''},
+    {s:'size_node',t:'lr_b',l:'≤5cm N0'},
+    {s:'size_node',t:'ir_unfav',l:'>5cm / N+'},
+  ];
+
+  var nodeStyle = {
+    q:{fill:'#1c2330',stroke:'#30363d',textFill:'#e6edf3',r:38},
+    lr:{fill:'rgba(63,185,80,.12)',stroke:'#3fb950',textFill:'#3fb950',r:42},
+    sr:{fill:'rgba(56,139,253,.12)',stroke:'#388bfd',textFill:'#388bfd',r:42},
+    hr:{fill:'rgba(248,81,73,.12)',stroke:'#f85149',textFill:'#f85149',r:42},
+  };
+
+  var tooltips = {
+    lr_a:{
+      title:'BAS RISQUE A',label:'Bas Risque — Groupe A',
+      chemo:'VAC×4 → VA · 24 sem.',
+      rt:'Groupe I : PAS de RT · Groupe II : 36 Gy / 20 fr · Orbite III : 45 Gy si RC chimio',
+      timing:'RT sem 13 si résidu',
+      efs:'PFS ~90% · OS ~99%',ec:'efs-good'
+    },
+    lr_b:{
+      title:'BAS RISQUE B',label:'Bas Risque — Groupe B',
+      chemo:'VAC×4 → VA · 24 sem.',
+      rt:'36 Gy (marge+) · 41,4 Gy (N+)',
+      timing:'RT sem 13',
+      efs:'PFS ~88% · OS ~99%',ec:'efs-good'
+    },
+    pos_no_result:{
+      title:'RISQUE INTERMÉDIAIRE',label:'Fusion+ non métastatique',
+      chemo:'VAC/VI alternés · 42 sem.',
+      rt:'36–59,4 Gy selon groupe/résidu',
+      timing:'RT sem 13',
+      efs:'PFS ~65% · OS ~73%',ec:'efs-mid'
+    },
+    nonorbit_ir:{
+      title:'RISQUE INTERMÉDIAIRE',label:'Embryonal Groupe III non-orbite',
+      chemo:'VAC/VI alternés · 42 sem.',
+      rt:'50,4 Gy (≤5cm) · 59,4 Gy (>5cm persistant sem 9)',
+      timing:'RT sem 13',
+      efs:'PFS ~65–70%',ec:'efs-mid'
+    },
+    orbit_lr:{
+      title:'BAS RISQUE — Orbite',label:'Orbite Groupe III',
+      chemo:'VAC×4 → VA · 24 sem.',
+      rt:'45 Gy (RC chimio) · 50,4 Gy (résidu)',
+      timing:'RT sem 13',
+      efs:'PFS ~90%',ec:'efs-good'
+    },
+    ir_unfav:{
+      title:'RISQUE INTERMÉDIAIRE',label:'Embryonal site déf. — Intermédiaire',
+      chemo:'VAC/VI alternés · 42 sem.',
+      rt:'50,4 Gy (≤5cm) · 59,4 Gy (>5cm)',
+      timing:'RT sem 13',
+      efs:'PFS ~65%',ec:'efs-mid'
+    },
+    age_young:{
+      title:'RISQUE INTERMÉDIAIRE',label:'Embryonal méta ≤10 ans',
+      chemo:'VAC/VI alternés · 42 sem.',
+      rt:'WLI 12–15 Gy + boost · Métas : 50,4 Gy',
+      timing:'RT après chimio',
+      efs:'PFS ~35–40% (Oberlin 0–1)',ec:'efs-mid'
+    },
+    pos_yes_result:{
+      title:'HAUT RISQUE',label:'Fusion+ métastatique',
+      chemo:'VI / VDC-EI / VAC · 54 sem.',
+      rt:'50,4 Gy primitif · WLI 12–15 Gy · SBRT os',
+      timing:'RT sem 20–25',
+      efs:'PFS ~30% · OS ~56%',ec:'efs-bad'
+    },
+    age_old:{
+      title:'HAUT RISQUE',label:'Embryonal méta >10 ans',
+      chemo:'VI / VDC-EI / VAC · 54 sem.',
+      rt:'50,4 Gy primitif · WLI 12–15 Gy',
+      timing:'RT sem 20–25',
+      efs:'PFS ~30%',ec:'efs-bad'
+    }
+  };
+
+  var svg = d3.select('#chart');
+  var panel = document.getElementById('panel-flow');
+  var W = panel.clientWidth, H = panel.clientHeight;
+  svg.attr('width', W).attr('height', H);
+
+  var g = svg.append('g');
+
+  // Arrowhead
+  svg.append('defs').append('marker')
+    .attr('id','arrow').attr('viewBox','0 0 8 8').attr('refX',8).attr('refY',4)
+    .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+    .append('path').attr('d','M0,0 L8,4 L0,8 Z').attr('fill','#30363d');
+
+  // Edges
+  edges.forEach(function(e) {
+    var src = nodes.find(function(n){return n.id===e.s;});
+    var tgt = nodes.find(function(n){return n.id===e.t;});
+    if(!src||!tgt) return;
+    var mx = (src.x+tgt.x)/2, my = (src.y+tgt.y)/2;
+    g.append('line')
+      .attr('x1',src.x).attr('y1',src.y).attr('x2',tgt.x).attr('y2',tgt.y)
+      .attr('stroke','#2a3441').attr('stroke-width',1.5).attr('marker-end','url(#arrow)');
+    if(e.l) {
+      g.append('text').attr('x',mx).attr('y',my-4)
+        .attr('text-anchor','middle').attr('font-size','9').attr('font-family','DM Mono, monospace')
+        .attr('fill','#6e7681').text(e.l);
+    }
+  });
+
+  // Nodes
+  nodes.forEach(function(n) {
+    var st = nodeStyle[n.type];
+    var grp = g.append('g').attr('transform','translate('+n.x+','+n.y+')').style('cursor', tooltips[n.id]?'pointer':'default');
+    grp.append('ellipse')
+      .attr('rx',st.r).attr('ry',26)
+      .attr('fill',st.fill).attr('stroke',st.stroke).attr('stroke-width',1.5);
+    var lines = n.label.split('\n');
+    var dy0 = lines.length===1 ? '0.35em' : '-0.3em';
+    var txt = grp.append('text').attr('text-anchor','middle').attr('font-size','9.5')
+      .attr('font-family','DM Sans, sans-serif').attr('fill',st.textFill).attr('font-weight','500');
+    lines.forEach(function(line,i){
+      txt.append('tspan').attr('x',0).attr('dy', i===0 ? dy0 : '1.2em').text(line);
+    });
+    if(tooltips[n.id]){
+      grp.on('mouseover', function(event){ showTT(event, tooltips[n.id]); })
+         .on('mousemove', function(event){ moveTT(event); })
+         .on('mouseout', function(){ hideTT(); });
+    }
+  });
+
+  // Zoom
+  var minX = d3.min(nodes,function(n){return n.x;})-80;
+  var maxX = d3.max(nodes,function(n){return n.x;})+80;
+  var minY = d3.min(nodes,function(n){return n.y;})-50;
+  var maxY = d3.max(nodes,function(n){return n.y;})+60;
+  var scaleW = W/(maxX-minX), scaleH = H/(maxY-minY);
+  var initScale = Math.min(scaleW, scaleH, 1.2) * 0.88;
+  var initTx = W/2 - (minX+maxX)/2*initScale;
+  var initTy = H/2 - (minY+maxY)/2*initScale;
+
+  var zoom = d3.zoom().scaleExtent([0.2,3]).on('zoom',function(event){
+    g.attr('transform', event.transform);
+  });
+  svg.call(zoom);
+  var initT = d3.zoomIdentity.translate(initTx, initTy).scale(initScale);
+  svg.call(zoom.transform, initT);
+
+  document.getElementById('btnReset').onclick = function(){
+    svg.transition().duration(600).call(zoom.transform, initT);
+  };
+}
+
+// ═══ TOOLTIP FLOWCHART ═══
+var tt = document.getElementById('tooltip');
+function showTT(event, d) {
+  var cls = d.ec === 'efs-good' ? 'efs-good' : d.ec === 'efs-bad' ? 'efs-bad' : 'efs-mid';
+  tt.innerHTML = '<div class="tt-title">' + d.title + '</div>'
+    + '<div class="tt-q">' + d.label + '</div>'
+    + '<div class="tt-section"><div class="tt-section-lbl">Chimiothérapie</div><div class="tt-row"><span class="tt-val">' + d.chemo + '</span></div></div>'
+    + '<div class="tt-section"><div class="tt-section-lbl">Radiothérapie</div><div class="tt-row"><span class="tt-val">' + d.rt + '</span></div></div>'
+    + '<div class="tt-section"><div class="tt-section-lbl">Timing RT</div><div class="tt-row"><span class="tt-val">' + d.timing + '</span></div></div>'
+    + '<div class="tt-outcome"><span class="tt-efs ' + cls + '">' + d.efs + '</span></div>';
+  tt.style.display = 'block';
+  moveTT(event);
+}
+function moveTT(event) {
+  var x = event.clientX + 14, y = event.clientY + 14;
+  var tw = 300, th = tt.offsetHeight;
+  if(x + tw > window.innerWidth - 10) x = event.clientX - tw - 14;
+  if(y + th > window.innerHeight - 10) y = event.clientY - th - 14;
+  tt.style.left = x + 'px'; tt.style.top = y + 'px';
+}
+function hideTT(){ tt.style.display = 'none'; }
+
+// ═══ THÈME ═══
+var THEME_KEY = 'theme-us-rms-cog';
+function initTheme(){
+  try{ if(localStorage.getItem(THEME_KEY)==='light') applyTheme('light'); } catch(e){}
+}
+function toggleTheme(){
+  applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+}
+function applyTheme(mode){
+  var btn = document.getElementById('btn-theme');
+  if(mode==='light'){
+    document.body.classList.add('light');
+    btn.textContent='☀'; btn.title='Passer en mode sombre';
+    try{ localStorage.setItem(THEME_KEY,'light'); }catch(e){}
+  } else {
+    document.body.classList.remove('light');
+    btn.textContent='◑'; btn.title='Passer en mode clair';
+    try{ localStorage.setItem(THEME_KEY,'dark'); }catch(e){}
+  }
+}
+
+// ═══ INIT ═══
+initTheme();
+renderStep('fusion');
+
+// Ajuster top du tab-nav selon hauteur réelle du header
+(function(){
+  function fixLayout(){
+    var hh = document.querySelector('header').offsetHeight;
+    var nav = document.querySelector('.tab-nav');
+    nav.style.top = hh + 'px';
+    var navH = nav.offsetHeight;
+    var pf = document.getElementById('panel-flow');
+    pf.style.height = (window.innerHeight - hh - navH) + 'px';
+  }
+  fixLayout();
+  window.addEventListener('resize', fixLayout);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>RMS · FaR-RMS vs COG — Divergences Protocoles</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;
+  --border:#2a3441;--border2:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --lr:#3fb950;--sr:#388bfd;--hr:#f85149;--vhr:#d29922;
+  --accent:#388bfd;--purple:#a371f7;--cyan:#39c5cf;
+  --far:#a371f7;--cog:#39c5cf;
+  --radius:10px;
+  --impact-high:#f85149;--impact-mid:#d29922;--impact-low:#3fb950;
+}
+body.light{
+  --bg:#f5f0e8;--surface:#ffffff;--surface2:#ede8dc;--surface3:#e6e0d2;
+  --border:#c8bfaa;--border2:#d4ccba;
+  --text:#1a1208;--text2:#5a4f3a;--text3:#9a8f7a;
+  --lr:#2d7a3a;--sr:#1a5fa8;--hr:#c0392b;--vhr:#a0720a;
+  --accent:#1a5fa8;--purple:#6b3fa0;--cyan:#1a7a8a;
+  --far:#6b3fa0;--cog:#1a7a8a;
+  --impact-high:#c0392b;--impact-mid:#a0720a;--impact-low:#2d7a3a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;transition:background .25s,color .25s;}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:100;background:rgba(13,17,23,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;}
+body.light header{background:rgba(245,240,232,0.97);}
+.hdr-logo{width:32px;height:32px;border:1.5px solid var(--purple);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--purple);font-weight:500;flex-shrink:0;line-height:1.1;text-align:center;}
+.hdr-titles{flex:1;min-width:0;}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:15px;}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px;}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto;}
+.hdr-badge{font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;border-radius:20px;background:rgba(163,113,247,0.1);border:1px solid rgba(163,113,247,0.3);color:var(--purple);}
+.btn-theme{width:30px;height:30px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:14px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-theme:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── LAYOUT ── */
+.container{max-width:1000px;margin:0 auto;padding:32px 20px 80px;}
+
+/* ── INTRO ── */
+.intro{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:28px;display:flex;gap:24px;align-items:flex-start;}
+@media(max-width:640px){.intro{flex-direction:column;gap:14px;}}
+.intro-text{flex:1;font-size:13px;color:var(--text2);line-height:1.7;}
+.intro-text strong{color:var(--text);}
+.legend-wrap{display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+.legend-item{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;}
+.leg-pill{padding:2px 10px;border-radius:12px;font-size:9px;font-weight:500;}
+.leg-pill.far{background:rgba(163,113,247,.15);color:var(--far);border:1px solid rgba(163,113,247,.3);}
+.leg-pill.cog{background:rgba(57,197,207,.15);color:var(--cog);border:1px solid rgba(57,197,207,.3);}
+.imp-row{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
+.imp-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;align-items:center;}
+.filter-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-right:4px;}
+.filter-btn{padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:all .18s;}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent);}
+.filter-btn.active{background:rgba(56,139,253,.1);border-color:var(--accent);color:var(--accent);}
+.filter-btn.f-high.active{background:rgba(248,81,73,.1);border-color:var(--impact-high);color:var(--impact-high);}
+.filter-btn.f-mid.active{background:rgba(210,153,34,.1);border-color:var(--impact-mid);color:var(--impact-mid);}
+.filter-btn.f-low.active{background:rgba(63,185,80,.1);border-color:var(--impact-low);color:var(--impact-low);}
+
+/* ── SECTION TITLE ── */
+.section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin:28px 0 12px;display:flex;align-items:center;gap:10px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── CARD ── */
+.div-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;transition:opacity .2s;}
+.div-card.hidden{display:none;}
+.div-card-header{padding:14px 18px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;user-select:none;}
+.div-card-header:hover{background:rgba(255,255,255,.02);}
+body.light .div-card-header:hover{background:rgba(0,0,0,.02);}
+.div-card-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.div-card-meta{flex:1;min-width:0;}
+.div-card-title{font-size:14px;font-weight:500;margin-bottom:3px;}
+.div-card-sub{font-size:11px;color:var(--text2);}
+.div-card-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.impact-badge{font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:500;}
+.impact-high{background:rgba(248,81,73,.12);color:var(--impact-high);border:1px solid rgba(248,81,73,.25);}
+.impact-mid{background:rgba(210,153,34,.12);color:var(--impact-mid);border:1px solid rgba(210,153,34,.25);}
+.impact-low{background:rgba(63,185,80,.12);color:var(--impact-low);border:1px solid rgba(63,185,80,.25);}
+.chevron{color:var(--text3);font-size:12px;transition:transform .2s;flex-shrink:0;}
+.div-card.open .chevron{transform:rotate(90deg);}
+
+.div-card-body{display:none;border-top:1px solid var(--border);}
+.div-card.open .div-card-body{display:block;}
+
+/* ── SIDE-BY-SIDE ── */
+.sbs{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+@media(max-width:600px){.sbs{grid-template-columns:1fr;}}
+.sbs-col{padding:16px 18px;}
+.sbs-col.far-col{border-right:1px solid var(--border);}
+@media(max-width:600px){.sbs-col.far-col{border-right:none;border-bottom:1px solid var(--border);}}
+.sbs-proto{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:10px;}
+.sbs-proto.far{background:rgba(163,113,247,.12);color:var(--far);}
+.sbs-proto.cog{background:rgba(57,197,207,.12);color:var(--cog);}
+.sbs-val{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px;}
+.sbs-detail{font-size:11px;color:var(--text2);line-height:1.6;}
+.sbs-highlight{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.sbs-highlight.far{color:var(--far);}
+.sbs-highlight.cog{color:var(--cog);}
+.sbs-highlight.good{color:var(--lr);}
+.sbs-highlight.warn{color:var(--vhr);}
+.sbs-highlight.bad{color:var(--hr);}
+
+/* ── VERDICT ── */
+.verdict{background:var(--surface2);border-top:1px solid var(--border);padding:14px 18px;display:flex;gap:10px;align-items:flex-start;}
+.verdict-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.verdict-text{font-size:12px;color:var(--text2);line-height:1.6;}
+.verdict-text strong{color:var(--text);}
+
+/* ── SUMMARY TABLE ── */
+.summary-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:28px;}
+.summary-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px 12px;border-bottom:2px solid var(--border);text-align:left;}
+.summary-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.summary-table tr:last-child td{border-bottom:none;}
+.summary-table .col-far{color:var(--far);}
+.summary-table .col-cog{color:var(--cog);}
+.summary-table .col-topic{color:var(--text);font-weight:500;}
+.summary-table .col-imp{text-align:center;}
+.tbl-dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+/* ── PRINT ── */
+.print-footer{display:none;}
+@media print{
+  body,body.light{background:#fff!important;color:#000!important;}
+  header,body.light header{position:static!important;background:#fff!important;border-bottom:1px solid #ccc!important;}
+  .btn-theme,.filter-bar{display:none!important;}
+  .div-card-body{display:block!important;}
+  .div-card{break-inside:avoid;}
+  :root,body.light{--text:#000;--text2:#444;--text3:#888;--surface:#fff;--surface2:#f5f5f5;--border:#ddd;--border2:#eee;}
+  .print-footer{display:block;font-size:8pt;color:#999;margin-top:22px;border-top:1px solid #ddd;padding-top:8px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">∆</div>
+  <div class="hdr-titles">
+    <div class="hdr-title">FaR-RMS vs COG — Divergences de prise en charge</div>
+    <div class="hdr-sub">EpSSG FaR-RMS v2.0c · COG ARST 1431/D9803/D9602 · Analyse comparative</div>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-badge">RMS · Comparatif</span>
+    <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Passer en mode clair">◑</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="intro">
+    <div class="intro-text">
+      <strong>FaR-RMS</strong> (EpSSG, Europe) et <strong>COG</strong> (Amérique du Nord) partagent la même philosophie trimodale — chirurgie, chimiothérapie, radiothérapie — mais divergent sur des points cliniquement significatifs : choix des alkylants, maintenance, classification du risque et philosophie de la radiothérapie. Ces divergences reflètent des essais randomisés distincts et des hypothèses biologiques parfois opposées.
+    </div>
+    <div class="legend-wrap">
+      <div class="legend-item"><span class="leg-pill far">FaR-RMS</span> EpSSG · Europe</div>
+      <div class="legend-item"><span class="leg-pill cog">COG</span> Amérique du Nord</div>
+      <div style="height:6px"></div>
+      <div class="imp-row"><div class="imp-dot" style="background:var(--impact-high)"></div> Impact clinique majeur</div>
+      <div class="imp-row"><div class="imp-dot" style="background:var(--impact-mid)"></div> Impact clinique modéré</div>
+      <div class="imp-row"><div class="imp-dot" style="background:var(--impact-low)"></div> Différence organisationnelle</div>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <span class="filter-label">Filtrer</span>
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">Tout</button>
+    <button class="filter-btn f-high" data-filter="high" onclick="setFilter('high',this)">Impact majeur</button>
+    <button class="filter-btn f-mid" data-filter="mid" onclick="setFilter('mid',this)">Impact modéré</button>
+    <button class="filter-btn" data-filter="chimio" onclick="setFilter('chimio',this)">Chimiothérapie</button>
+    <button class="filter-btn" data-filter="rt" onclick="setFilter('rt',this)">Radiothérapie</button>
+    <button class="filter-btn" data-filter="strat" onclick="setFilter('strat',this)">Stratification</button>
+  </div>
+
+  <!-- SECTION : CHIMIOTHÉRAPIE -->
+  <div class="section-title">Chimiothérapie</div>
+
+  <!-- 1. Alkylant backbone -->
+  <div class="div-card" data-tags="chimio high" data-impact="high">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">⚗️</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Alkylant de référence — IVA vs VAC</div>
+        <div class="div-card-sub">Choix du backbone de chimiothérapie · Impact sur la toxicité et la substitution possible</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-high">Impact majeur</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val"><span class="sbs-highlight far">IVA</span> — Ifosfamide + Vincristine + Actinomycine D</div>
+          <div class="sbs-detail">L'ifosfamide est l'alkylant historique européen. Profil de toxicité : <strong>néphrotoxicité</strong> (tubulopathie, syndrome de Fanconi), encéphalopathie, uroépithéliale (prévenue par mesna). Efficacité considérée supérieure sur certaines localisations dans les méta-analyses.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val"><span class="sbs-highlight cog">VAC</span> — Vincristine + Actinomycine D + Cyclophosphamide</div>
+          <div class="sbs-detail">Le cyclophosphamide est l'alkylant COG historique depuis IRS-I. Profil de toxicité : <strong>cystite hémorragique</strong> (prévenue par hyperhydratation ± mesna), myélosuppression, gonadotoxicité cumulative. ARST 0331 a validé la réduction de dose CPM chez le bas risque.</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>Aucun essai randomisé direct IVA vs VAC.</strong> La substitution ifosfamide ↔ cyclophosphamide reste controversée. L'EpSSG évite le cyclophosphamide en induction pour limiter la toxicité gonadique ; le COG évite l'ifosfamide pour limiter la néphrotoxicité. Les deux approches coexistent sans supériorité démontrée en survie globale.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Maintenance -->
+  <div class="div-card" data-tags="chimio high" data-impact="high">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">🔄</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Chimiothérapie de maintenance</div>
+        <div class="div-card-sub">Vinorelbine + CPM faible dose post-induction (FaR-RMS) vs absence de maintenance (COG)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-high">Impact majeur</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val"><span class="sbs-highlight far">Maintenance systématique</span> pour HR et VHR</div>
+          <div class="sbs-detail">Vinorelbine (25 mg/m² J1, J8) + Cyclophosphamide oral (25 mg/m²/j) — 6 mois après fin d'induction. Issu de l'essai <strong>RMS2005 (Bisogno, Lancet Oncol 2019)</strong> : bénéfice EFS démontré en randomisé (HR, VHR). Toxicité hématologique modérée, administrable en ambulatoire.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val"><span class="sbs-highlight cog">Pas de maintenance</span></div>
+          <div class="sbs-detail">Le COG n'intègre pas de phase de maintenance dans ses protocoles actuels (ARST 1431, ARST 0431). L'arrêt du traitement se fait à la fin de la chimiothérapie d'induction/consolidation. Des essais explorant la maintenance sont en cours mais non intégrés au standard.</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>Divergence majeure avec preuve de niveau I côté européen.</strong> Le bénéfice de la maintenance (Bisogno 2019) est reconnu par l'EpSSG mais pas encore intégré dans les recommandations COG. C'est probablement la divergence avec le plus haut niveau de preuve en faveur de l'approche FaR-RMS.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. VI / Irinotecan -->
+  <div class="div-card" data-tags="chimio mid" data-impact="mid">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">💊</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Place de l'irinotécan / topotécan</div>
+        <div class="div-card-sub">Alternance VAC/VI (COG) vs IVA sans camptothécines (FaR-RMS induction)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-mid">Impact modéré</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val">Camptothécines <span class="sbs-highlight far">absentes de l'induction</span></div>
+          <div class="sbs-detail">L'irinotecan n'est pas utilisé en induction dans FaR-RMS. Réservé à certains cas de rechute (protocole CT3). L'essai D9803 n'avait pas montré de bénéfice du topotécan — cohérent avec la position européenne.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val">VI = <span class="sbs-highlight cog">Vincristine + Irinotécan</span> en alternance avec VAC (Risque Intermédiaire et Haut)</div>
+          <div class="sbs-detail">ARST 0531 et ARST 1431 utilisent l'alternance VAC/VI. Avantage : réduction de la toxicité hématologique vs VAC seul. Irinotécan aussi utilisé comme <strong>radiosensibilisant concurrent</strong> lors de la RT (ARST 0431 Haut Risque sem 20–25).</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>Approches différentes de la modulation de toxicité.</strong> COG utilise VI pour réduire la myélosuppression du VAC. FaR-RMS module via la dose d'ifosfamide. La radiosensibilisation par irinotécan (COG) est un usage sans équivalent direct dans FaR-RMS.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION : STRATIFICATION -->
+  <div class="section-title">Stratification du risque</div>
+
+  <!-- 4. Niveaux de risque -->
+  <div class="div-card" data-tags="strat mid" data-impact="mid">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">📊</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Granularité des niveaux de risque</div>
+        <div class="div-card-sub">4 niveaux (FaR-RMS) vs 3 niveaux (COG)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-mid">Impact modéré</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val">4 niveaux : <span class="sbs-highlight good">LR</span> · <span class="sbs-highlight" style="color:var(--sr)">SR</span> · <span class="sbs-highlight bad">HR</span> · <span class="sbs-highlight warn">VHR</span></div>
+          <div class="sbs-detail">Sous-groupes A–H (8 au total). La distinction HR / VHR permet d'identifier les patients pour l'intensification maximale (induction IVADo = + doxorubicine). Groupes G (Fusion+, N1) et H (métastatique) séparément traités en VHR.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val">3 niveaux : <span class="sbs-highlight good">Low Risk</span> · <span class="sbs-highlight" style="color:var(--sr)">Intermediate</span> · <span class="sbs-highlight bad">High Risk</span></div>
+          <div class="sbs-detail">Classification plus large par niveau. Le Haut Risque COG regroupe tous les patients métastatiques (Fusion+ et Embryonal >10 ans), sans distinction pronostique interne formalisée autre que le <strong>score Oberlin</strong> (0–1 vs ≥2 facteurs).</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>FaR-RMS affine davantage la granularité pronostique</strong>, en particulier à l'extrémité haute du spectre. Le score Oberlin (COG) apporte néanmoins une stratification pronostique utile au sein du Haut Risque, sans pour autant modifier le protocole de traitement.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Embryonal métastatique ≤10 ans -->
+  <div class="div-card" data-tags="strat high" data-impact="high">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">⚠️</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Embryonal Fusion– métastatique ≤ 10 ans</div>
+        <div class="div-card-sub">Risque Intermédiaire (COG) vs Très Haut Risque groupe H (FaR-RMS) — classification opposée</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-high">Impact majeur</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val"><span class="sbs-highlight warn">Très Haut Risque — Groupe H</span></div>
+          <div class="sbs-detail">Tout patient métastatique (quel que soit fusion, âge, histologie) est classé VHR groupe H dans FaR-RMS. Traitement : IVADo (induction avec doxorubicine) + maintenance. Pas d'exception pour les jeunes enfants avec embryonal Fusion–, même si leur pronostic est meilleur au sein du groupe H.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val"><span class="sbs-highlight" style="color:var(--sr)">Risque Intermédiaire</span></div>
+          <div class="sbs-detail">L'embryonal Fusion– métastatique <strong>≤ 10 ans</strong> est classé Risque Intermédiaire par le COG, reconnaissant le pronostic distinctement meilleur de cette population. Traitement VAC/VI 42 semaines — significativement moins intensif qu'un protocole Haut Risque.</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>Divergence philosophique majeure.</strong> Le COG individualise le pronostic favorable de l'embryonal métastatique jeune (Oberlin 0–1 : EFS ~35–40%) pour éviter la surtraitement. FaR-RMS préfère une classification uniforme du métastatique pour homogénéiser les essais. Ces deux visions sont biologiquement défendables.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Alvéolaire Fusion– -->
+  <div class="div-card" data-tags="strat high" data-impact="high">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">🔬</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Alvéolaire PAX-FOXO1 Fusion– non métastatique</div>
+        <div class="div-card-sub">Pronostic identique à l'embryonal (COG) vs Haut Risque groupe F (FaR-RMS)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-high">Impact majeur</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val"><span class="sbs-highlight bad">HR — Groupe F</span> (IRS I–III, N0)</div>
+          <div class="sbs-detail">Dans FaR-RMS, <strong>tout alvéolaire</strong> — qu'il soit Fusion+ ou Fusion– — est classé HR. Le statut fusion module la randomisation (CT1A vs CT1B) mais pas le niveau de risque. La justification : l'histologie alvéolaire per se reste un facteur défavorable indépendant de la fusion dans certaines cohortes.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val"><span class="sbs-highlight" style="color:var(--sr)">Risque Intermédiaire</span> (pronostic ~embryonal)</div>
+          <div class="sbs-detail">Le COG reclassifie l'alvéolaire Fusion– en <strong>Risque Intermédiaire</strong> sur la base de données moléculaires : son pronostic est superposable à l'embryonal Fusion– de même stade (Williamson 2010, Barr 2009). Évite la surtraitement d'un sous-groupe dont le comportement est favorable.</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>Divergence moléculaire vs histologique.</strong> COG intègre le statut fusion comme critère de classification primaire ; FaR-RMS maintient l'histologie alvéolaire comme marqueur de risque. Les données moléculaires semblent valider l'approche COG, mais FaR-RMS génère des données prospectives pour trancher.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Orbite groupe III -->
+  <div class="div-card" data-tags="strat mid" data-impact="mid">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">👁️</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Orbite groupe III (résidu macroscopique)</div>
+        <div class="div-card-sub">Bas Risque avec RT conservatrice (COG) vs SR ou HR selon fusion (FaR-RMS)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-mid">Impact modéré</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val">Orbite III Fusion– → <span class="sbs-highlight" style="color:var(--sr)">SR (groupe C)</span><br>Orbite III Fusion+ → <span class="sbs-highlight bad">HR (groupe F)</span></div>
+          <div class="sbs-detail">L'orbite n'est pas traitée comme site "magique" dans FaR-RMS : le statut fusion prime. IVA × 9 cycles pour le SR, avec RT adaptée. L'approche est plus intensive que le COG pour les embryonaux orbitaires.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val">Orbite III embryonal → <span class="sbs-highlight good">Bas Risque A</span></div>
+          <div class="sbs-detail">L'orbite est un <strong>site "BONG" favorable</strong>. L'embryonal orbitaire groupe III est traité comme Bas Risque : VAC×4 → VA, 24 semaines. RT 45 Gy si RC à la chimio, 50,4 Gy si résidu. Pronostic excellent (~90% PFS) validé dans de larges cohortes IRS.</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>Le COG reconnaît le pronostic exceptionnel de l'orbite embryonale</strong> pour déintensifier le traitement. FaR-RMS applique une stratification moléculaire uniforme. Dans les deux cas le résultat fonctionnel (conservation oculaire) guide les décisions de RT.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION : RADIOTHÉRAPIE -->
+  <div class="section-title">Radiothérapie</div>
+
+  <!-- 8. Timing RT -->
+  <div class="div-card" data-tags="rt mid" data-impact="mid">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">📅</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Timing de la radiothérapie</div>
+        <div class="div-card-sub">Décision après C3, préop ou postop flexible (FaR-RMS) vs semaines fixes 13 / 20 (COG)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-mid">Impact modéré</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val"><span class="sbs-highlight far">Timing flexible</span> — décision après C3</div>
+          <div class="sbs-detail">La RT peut être <strong>préopératoire</strong> (après C4 = semaine 13) ou <strong>postopératoire</strong> (dès le 2ème cycle post-chirurgical). La randomisation RT1A évalue précisément cette question pré- vs post-op. La flexibilité permet d'adapter à la réponse tumorale et à la résécabilité après chimio.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val"><span class="sbs-highlight cog">Timing fixe</span> — Semaine 13 (LR/IR) ou 20 (HR)</div>
+          <div class="sbs-detail">La RT démarre systématiquement à la semaine 13 pour les Bas et Risque Intermédiaire, et à la semaine 20 pour le Haut Risque (concurrent avec VI dans ARST 0431). Exception : compression médullaire ou extension intracrânienne → RT d'emblée. Approche plus standardisée et reproductible.</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>FaR-RMS cherche à individualiser et à répondre à une question scientifique</strong> (RT1A). Le COG standardise pour faciliter la conduite d'essais multicentriques. Les deux approches convergent sur l'importance de ne pas retarder la RT au-delà de la semaine 16–20 en dehors des protocoles.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Philosophie des doses RT -->
+  <div class="div-card" data-tags="rt high" data-impact="high">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">⚡</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Escalade de dose RT — HLFR vs doses fixes</div>
+        <div class="div-card-sub">3 randomisations RT actives avec HLFR (FaR-RMS) vs grille de doses fixes selon groupe/résidu (COG)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-high">Impact majeur</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val"><span class="sbs-highlight far">3 randomisations RT actives</span></div>
+          <div class="sbs-detail">
+            <strong>RT1A</strong> : RT préopératoire vs postopératoire (résécable)<br>
+            <strong>RT1B</strong> : HLFR escaladé (50,4 Gy) vs standard (41,4 Gy) — site défavorable ou ≥18 ans<br>
+            <strong>RT1C</strong> : HLFR très escaladé (59,4 Gy) vs standard — non résécable avec résidu macroscopique<br><br>
+            FaR-RMS explore activement si l'escalade de dose améliore le contrôle local, question restée ouverte depuis des décennies.
+          </div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val"><span class="sbs-highlight cog">Grille de doses fixes</span> selon groupe IRS et résidu</div>
+          <div class="sbs-detail">
+            Doses standardisées par situation clinique :<br>
+            <strong>Groupe I alvéolaire / II marge+</strong> : 36 Gy<br>
+            <strong>Groupe II N+</strong> : 41,4 Gy<br>
+            <strong>Groupe III résidu ≤5 cm</strong> : 50,4 Gy<br>
+            <strong>Groupe III résidu >5 cm persistant sem 9</strong> : 59,4 Gy<br>
+            <strong>Orbite CR chimio</strong> : 45 Gy<br>
+            Pas de randomisation RT en cours : les doses sont considérées établies.
+          </div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>FaR-RMS génère des preuves sur l'escalade de dose que le COG applique déjà empiriquement.</strong> La dose de 59,4 Gy pour les résidus >5 cm est commune aux deux protocoles, mais FaR-RMS la met en compétition avec un bras standard en randomisé. Les résultats RT1B/C seront déterminants pour les pratiques futures.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. RT ganglionnaire -->
+  <div class="div-card" data-tags="rt mid" data-impact="mid">
+    <div class="div-card-header" onclick="toggle(this)">
+      <div class="div-card-icon">🔗</div>
+      <div class="div-card-meta">
+        <div class="div-card-title">Radiothérapie ganglionnaire (N1)</div>
+        <div class="div-card-sub">Irradiation de tous les ganglions N1 (FaR-RMS) vs inclusion dans le volume primitif (COG)</div>
+      </div>
+      <div class="div-card-right">
+        <span class="impact-badge impact-mid">Impact modéré</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div class="div-card-body">
+      <div class="sbs">
+        <div class="sbs-col far-col">
+          <div class="sbs-proto far">FaR-RMS · EpSSG</div>
+          <div class="sbs-val"><span class="sbs-highlight far">Irradiation systématique de tous les ganglions N1</span></div>
+          <div class="sbs-detail">Tous les ganglions régionaux envahis au diagnostic doivent être inclus dans le volume irradié, quel que soit le résultat de la chirurgie ganglionnaire. Dose : 41,4 Gy sur CTVn (GTVn + 1 cm). Principe : la chirurgie ne remplace pas la RT ganglionnaire.</div>
+        </div>
+        <div class="sbs-col">
+          <div class="sbs-proto cog">COG · Amérique du Nord</div>
+          <div class="sbs-val"><span class="sbs-highlight cog">41,4 Gy sur chaîne ganglionnaire N+</span> — simultané avec le primitif</div>
+          <div class="sbs-detail">La RT ganglionnaire est également recommandée (41,4 Gy) dans ARST 1431. GTV1 = volume pré-chimio, inclusion de la chaîne ganglionnaire si N+ mais <strong>pas de RT élective</strong> sur ganglions cliniquement N0. Cohérent avec FaR-RMS sur ce point.</div>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="verdict-icon">⚖️</div>
+        <div class="verdict-text"><strong>Convergence sur la dose (41,4 Gy) et l'indication.</strong> La principale nuance : FaR-RMS est plus explicite sur l'irradiation systématique indépendamment du geste chirurgical, alors que COG laisse plus de latitude à la chirurgie ganglionnaire préalable (curage RP paratesticulaire ≥10 ans).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLEAU RÉSUMÉ -->
+  <div class="section-title">Tableau récapitulatif</div>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>Domaine</th>
+        <th class="col-far">FaR-RMS (EpSSG)</th>
+        <th class="col-cog">COG</th>
+        <th class="col-imp">Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-topic">Alkylant backbone</td>
+        <td class="col-far">Ifosfamide (IVA)</td>
+        <td class="col-cog">Cyclophosphamide (VAC)</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-high)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">Maintenance</td>
+        <td class="col-far">Vinorelbine + CPM 6 mois (HR/VHR)</td>
+        <td class="col-cog">Aucune</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-high)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">Embryonal méta ≤10 ans</td>
+        <td class="col-far">Très Haut Risque (VHR)</td>
+        <td class="col-cog">Risque Intermédiaire</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-high)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">Alvéolaire Fusion–</td>
+        <td class="col-far">HR (histologie prime)</td>
+        <td class="col-cog">Risque Intermédiaire (fusion prime)</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-high)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">RT : philosophie d'escalade</td>
+        <td class="col-far">3 randomisations HLFR actives</td>
+        <td class="col-cog">Grille de doses fixes établies</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-high)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">Timing RT</td>
+        <td class="col-far">Flexible — préop ou postop après C3</td>
+        <td class="col-cog">Fixe — semaine 13 ou 20</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-mid)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">Camptothécines (induction)</td>
+        <td class="col-far">Absentes</td>
+        <td class="col-cog">Irinotécan (VI alternant avec VAC)</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-mid)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">Orbite groupe III embryonal</td>
+        <td class="col-far">SR (Fusion–) / HR (Fusion+)</td>
+        <td class="col-cog">Bas Risque</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-mid)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">Niveaux de risque</td>
+        <td class="col-far">4 niveaux (LR/SR/HR/VHR)</td>
+        <td class="col-cog">3 niveaux (Low/IR/High)</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-mid)"></div></td>
+      </tr>
+      <tr>
+        <td class="col-topic">RT ganglionnaire N+</td>
+        <td class="col-far">41,4 Gy systématique</td>
+        <td class="col-cog">41,4 Gy — cohérent</td>
+        <td class="col-imp"><div class="tbl-dot" style="background:var(--impact-low)"></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="print-footer">Analyse comparative FaR-RMS v2.0c vs COG ARST 1431 — Outil d'aide à la décision. Ne se substitue pas au jugement clinique.<br>Généré le <span id="printDate"></span></div>
+</div>
+
+<script>
+// ═══ TOGGLE CARDS ═══
+function toggle(hdr) {
+  hdr.parentElement.classList.toggle('open');
+}
+
+// ═══ FILTER ═══
+function setFilter(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.div-card').forEach(function(c) {
+    if(f === 'all') {
+      c.classList.remove('hidden');
+    } else if(f === 'high' || f === 'mid' || f === 'low') {
+      c.classList.toggle('hidden', c.dataset.impact !== f);
+    } else {
+      c.classList.toggle('hidden', !c.dataset.tags.includes(f));
+    }
+  });
+}
+
+// ═══ THÈME ═══
+var THEME_KEY = 'theme-rms-comparatif';
+function initTheme() {
+  try { if(localStorage.getItem(THEME_KEY) === 'light') applyTheme('light'); } catch(e) {}
+}
+function toggleTheme() {
+  applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+}
+function applyTheme(mode) {
+  var btn = document.getElementById('btn-theme');
+  if(mode === 'light') {
+    document.body.classList.add('light');
+    btn.textContent = '☀'; btn.title = 'Passer en mode sombre';
+    try { localStorage.setItem(THEME_KEY, 'light'); } catch(e) {}
+  } else {
+    document.body.classList.remove('light');
+    btn.textContent = '◑'; btn.title = 'Passer en mode clair';
+    try { localStorage.setItem(THEME_KEY, 'dark'); } catch(e) {}
+  }
+}
+
+// ═══ INIT ═══
+initTheme();
+document.getElementById('printDate').textContent = new Date().toLocaleDateString('fr-FR');
+</script>
+</body>
+</html>
