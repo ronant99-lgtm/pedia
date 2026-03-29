@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>COG · Neuroblastome rechute — Logigramme thérapeutique</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f0e8;--surface:#ede8dc;--surface2:#e6e0d2;--surface3:#ddd7c8;
+  --border:#c8bfaa;--border2:#d4ccba;
+  --text:#1a1208;--text2:#5a4f3a;--text3:#9a8f7a;
+  --lr:#2d7a3a;--sr:#1a5fa8;--hr:#c0392b;--special:#a0720a;
+  --purple:#6b3fa0;--orange:#c45a10;--cyan:#1a7a8a;
+  --radius:10px;
+}
+body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+header{flex-shrink:0;z-index:10;background:rgba(245,240,232,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px}
+.hdr-mark{width:34px;height:34px;border-radius:6px;border:1.5px solid var(--hr);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--hr);flex-shrink:0}
+.hdr-content{display:flex;flex-direction:column;gap:1px;min-width:0}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap}
+.hdr-badge{font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.35);color:var(--hr);margin-left:auto;white-space:nowrap;flex-shrink:0}
+.btn-reset-zoom{font-family:'DM Mono',monospace;font-size:10px;background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:5px 10px;cursor:pointer;transition:all 0.18s;flex-shrink:0;margin-left:8px}
+.btn-reset-zoom:hover{border-color:var(--hr);color:var(--hr)}
+.legend{flex-shrink:0;display:flex;align-items:center;gap:16px;padding:6px 20px;border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;background:var(--bg)}
+.legend-item{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)}
+.legend-swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+.legend-swatch.circle{border-radius:50%}
+.legend-help{margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);font-style:italic}
+#chart{flex:1;overflow:hidden;cursor:grab}
+#chart:active{cursor:grabbing}
+.tooltip{position:fixed;pointer-events:none;z-index:100;background:rgba(245,240,232,0.97);border:1px solid var(--border);border-radius:8px;padding:14px 16px;max-width:380px;min-width:240px;box-shadow:0 4px 20px rgba(0,0,0,0.12);font-family:'DM Sans',sans-serif;font-size:12px;opacity:0;transition:opacity 0.15s}
+.tooltip.visible{opacity:1}
+.tt-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.tt-q{font-weight:500;font-size:13px;margin-bottom:10px;color:var(--text)}
+.tt-row{display:flex;gap:8px;margin-bottom:4px;font-size:11px;line-height:1.5}
+.tt-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:70px;flex-shrink:0}
+.tt-val{color:var(--text2)}
+.tt-outcome{font-family:'DM Mono',monospace;font-size:10px;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-mark">R</div>
+  <div class="hdr-content">
+    <div class="hdr-title">Neuroblastome rechute — Logigramme</div>
+    <div class="hdr-sub">Arbre décisionnel thérapeutique · PDQ NCI 2025 · Zoom + drag</div>
+  </div>
+  <span class="hdr-badge">COG · RECHUTE 2025</span>
+  <button class="btn-reset-zoom" id="btnReset">⊙ Recentrer</button>
+</header>
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch circle" style="background:#dce8f5;border:1.5px solid #1a5fa8"></div>Décision</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#d5edd8;border:1.5px solid #2d7a3a"></div>Bon pronostic</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#d5e4f5;border:1.5px solid #1a5fa8"></div>Chimio-immuno</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#f5d8d5;border:1.5px solid #c0392b"></div>Pronostic réservé</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#f5ead5;border:1.5px solid #a0720a"></div>Thérapie ciblée</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#ece0f5;border:1.5px solid #6b3fa0"></div>SNC</div>
+  <div class="legend-help">Survoler pour les détails</div>
+</div>
+<div id="chart"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+var TREE = {
+  id:'root', label:'Neuroblastome\nRechute / Réfractaire', type:'decision',
+  detail:{title:'Rechute NB', q:'Stratification thérapeutique à la rechute', outcome:'OS post-rechute globale : ~20 % (HR), > 95 % (LR/IR) [8]'},
+  children:[
+    {id:'lr_ir', label:'Risque initial\nLR ou IR', type:'decision', edgeLabel:'LR / IR',
+      detail:{title:'Rechute LR/IR', q:'Excellent pronostic de rattrapage', outcome:'OS 5 ans : 96–97 % [16,17]'},
+      children:[
+        {id:'lrir_loc', label:'Rechute\nlocorégionale', type:'result_lr', edgeLabel:'Locale',
+          detail:{title:'LR/IR locale', q:'Chirurgie ± chimio modérée', protocol:'Résection puis observation ou chimio si résidu', outcome:'EFS 5 ans : 89 % · OS : 97 %', ref:'[16,17]'}},
+        {id:'lrir_4s', label:'Métastatique\npattern 4S', type:'result_lr', edgeLabel:'Pattern 4S\n(nourrisson)',
+          detail:{title:'LR/IR 4S', q:'Observation si < 3 mois post-diag, bio fav', protocol:'Observation ou chimio modérée', outcome:'Excellent', ref:'[17]'}},
+        {id:'lrir_meta', label:'Métastatique\nnon-4S', type:'result_hr', edgeLabel:'Méta\nnon-4S',
+          detail:{title:'LR/IR → HR', q:'Escalade vers traitement HR', protocol:'Traitement HR complet', outcome:'Selon protocole HR', ref:'[16]'}}
+      ]
+    },
+    {id:'hr', label:'Risque initial\nHaut risque', type:'decision', edgeLabel:'HR',
+      detail:{title:'Rechute HR', q:'Pronostic très réservé — essais cliniques', outcome:'OS globale : ~20 % · PFS 4 ans : 6 % [8,20]'},
+      children:[
+        {id:'hr_cns', label:'Rechute\nSNC', type:'form', edgeLabel:'SNC\n(3–10 %)',
+          detail:{title:'Rechute SNC', q:'Neurochirurgie + CSI 18–21 Gy + cRIT', protocol:'CSI + boost ± cRIT intrathécale (MSKCC)', outcome:'Médiane survie : 6 mois · DFS 5 ans SNC : 69 % (post-CSI) · OS 5 ans : 45 %', ref:'[56,59,60]'}},
+        {id:'hr_sys', label:'Rechute\nsystémique', type:'decision', edgeLabel:'Systémique',
+          detail:{title:'HR systémique', q:'Biopsie rechute + NGS obligatoire'},
+          children:[
+            {id:'hr_alk', label:'ALK\nmuté', type:'result_special', edgeLabel:'ALK+\n(~18 %)',
+              detail:{title:'HR ALK+', q:'Lorlatinib ± I/T/DIN', protocol:'Lorlatinib 95 mg/m²/j ± chimio-immuno',
+                outcome:'Réponse lorlatinib pédiatrique : 30 % · Adulte : 67 % · I/T/DIN : 49 %', ref:'[23,24,30]'}},
+            {id:'hr_mibg', label:'MIBG\navide', type:'decision', edgeLabel:'MIBG+\nALK−',
+              detail:{title:'HR MIBG+', q:'Chimio-immuno puis MIBG thérapie si échec'},
+              children:[
+                {id:'hr_itdin', label:'1re ligne\nI/T/DIN', type:'result_sr', edgeLabel:'1re ligne',
+                  detail:{title:'I/T/DIN/GM-CSF', q:'Standard 1re ligne rechute HR', protocol:'Iri 50 + Temo 100 + DIN 17,5 + GM-CSF',
+                    outcome:'Réponse : 49 % · PFS médiane : 13,1 mois · PFS 1 an : 50 %', ref:'[21,30,31]'}},
+                {id:'hr_mibg_rx', label:'2e ligne\n¹³¹I-MIBG', type:'result_hr', edgeLabel:'2e ligne\n(si échec)',
+                  detail:{title:'¹³¹I-MIBG thérapie', q:'MIBG + vorinostat = meilleur bras', protocol:'MIBG 18 mCi/kg + vorinostat 180 mg/m²/j',
+                    outcome:'Réponse MIBG+vorin : 32 % · MIBG seul : 14 %', ref:'[43]'}}
+              ]
+            },
+            {id:'hr_other', label:'ALK−\nMIBG−', type:'decision', edgeLabel:'ALK−\nMIBG−',
+              detail:{title:'HR sans cible', q:'Chimio-immunothérapie ± essais'},
+              children:[
+                {id:'hr_itdin2', label:'I/T/DIN\nGM-CSF', type:'result_sr', edgeLabel:'1re ligne',
+                  detail:{title:'I/T/DIN/GM-CSF', q:'Standard', protocol:'Iri/Temo/DIN/GM-CSF (21j cycles)',
+                    outcome:'Réponse : 49 % · PFS 1 an : 50 %', ref:'[30,31]'}},
+                {id:'hr_2line', label:'2e ligne\noptions', type:'decision', edgeLabel:'Si échec',
+                  detail:{title:'Options 2e ligne', q:'Selon profil moléculaire et disponibilité'},
+                  children:[
+                    {id:'beacon', label:'BEACON\nBeva+I/T', type:'result_special', edgeLabel:'BEACON',
+                      detail:{title:'BEACON trial', q:'Bevacizumab + Iri/Temo', protocol:'Beva 10 mg/kg J1 + Iri/Temo',
+                        outcome:'PFS 1 an : 67 % (meilleur bras) · Réponse : 26 %', ref:'[26]'}},
+                    {id:'rist', label:'RIST\nDasa/Rapa', type:'result_special', edgeLabel:'RIST',
+                      detail:{title:'RIST regimen', q:'Dasatinib/Rapamycin + Iri/Temo', protocol:'RIST vs Iri/Temo',
+                        outcome:'PFS médiane : 11 vs 5 mois (HR 0,62) · MYCN-amp : 6 vs 2 mois', ref:'[27]'}},
+                    {id:'cart', label:'CAR-T\nGD2', type:'result_special', edgeLabel:'CAR-T',
+                      detail:{title:'CAR-T GD2-CART01', q:'CAR-T autologues anti-GD2', protocol:'Phase I/II (Del Bufalo)',
+                        outcome:'Réponse : 63 % · Accès limité, essais en cours', ref:'[55]'}},
+                    {id:'haplo', label:'Haplogreffe\n+ anti-GD2', type:'result_hr', edgeLabel:'Haplogreffe',
+                      detail:{title:'Haplogreffe + DIN + IL-2', q:'Greffe haplo → DIN/IL-2', protocol:'RIC haplo-SCT → DIN beta + IL-2 SC',
+                        outcome:'EFS 5 ans : 43 % · RC post-greffe : 35 %', ref:'[52]'}}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+var NODE_STYLE = {
+  decision:{fill:'#dce8f5',stroke:'#1a5fa8',text:'#0a1020'},
+  form:{fill:'#ece0f5',stroke:'#6b3fa0',text:'#0a1020'},
+  result_lr:{fill:'#d5edd8',stroke:'#2d7a3a',text:'#0a1a0a'},
+  result_sr:{fill:'#d5e4f5',stroke:'#1a5fa8',text:'#0a1020'},
+  result_hr:{fill:'#f5d8d5',stroke:'#c0392b',text:'#200505'},
+  result_special:{fill:'#f5ead5',stroke:'#a0720a',text:'#201000'}
+};
+var RISK_LABELS = {result_lr:'LR',result_sr:'IR',result_hr:'HR',result_special:'Ciblé',form:'SNC'};
+var NODE_W=115,NODE_H=42,RESULT_W=120,DX=155,DY=72;
+
+var chartEl=document.getElementById('chart');
+var W=chartEl.clientWidth,H=chartEl.clientHeight;
+var svg=d3.select('#chart').append('svg').attr('width',W).attr('height',H);
+var g=svg.append('g');
+var root=d3.hierarchy(TREE);
+var treeLayout=d3.tree().nodeSize([DY,DX]).separation(function(a,b){return a.parent===b.parent?1.1:1.5});
+treeLayout(root);
+root.each(function(d){var t=d.x;d.x=d.y;d.y=t});
+
+var linkGen=d3.linkHorizontal().x(function(d){return d.x}).y(function(d){return d.y});
+g.selectAll('.link').data(root.links()).enter().append('path').attr('class','link')
+  .attr('d',function(d){return linkGen({source:{x:d.source.x,y:d.source.y},target:{x:d.target.x,y:d.target.y}})})
+  .attr('fill','none').attr('stroke',function(d){return(NODE_STYLE[d.target.data.type]||NODE_STYLE.decision).stroke})
+  .attr('stroke-width',1.5).attr('stroke-opacity',0.35);
+
+// Edge label bgs + labels
+g.selectAll('.edge-bg').data(root.links().filter(function(d){return d.target.data.edgeLabel})).enter()
+  .append('rect').attr('class','edge-bg').each(function(d){
+    var lines=d.target.data.edgeLabel.split('\n');var ml=0;
+    for(var i=0;i<lines.length;i++){if(lines[i].length>ml)ml=lines[i].length}
+    var w=ml*5.5+10,h=lines.length*11+6;
+    d3.select(this).attr('x',(d.source.x+d.target.x)/2-w/2).attr('y',(d.source.y+d.target.y)/2-h/2-4)
+      .attr('width',w).attr('height',h).attr('rx',3).attr('fill','rgba(245,240,232,0.85)');
+  });
+g.selectAll('.edge-label').data(root.links().filter(function(d){return d.target.data.edgeLabel})).enter()
+  .append('text').attr('class','edge-label').attr('text-anchor','middle')
+  .attr('font-family','DM Mono, monospace').attr('font-size','8px').attr('fill','#5a4f3a')
+  .each(function(d){
+    var lines=d.target.data.edgeLabel.split('\n');var el=d3.select(this);el.text('');
+    for(var i=0;i<lines.length;i++){
+      el.append('tspan').attr('x',(d.source.x+d.target.x)/2).attr('y',(d.source.y+d.target.y)/2-4)
+        .attr('dy',i===0?0:11).text(lines[i]);
+    }
+  });
+
+var nodeGroups=g.selectAll('.node').data(root.descendants()).enter().append('g').attr('class','node')
+  .attr('transform',function(d){return'translate('+d.x+','+d.y+')'});
+
+nodeGroups.append('rect')
+  .attr('x',function(d){var w=d.data.type.startsWith('result')||d.data.type==='form'?RESULT_W:NODE_W;return-w/2+2})
+  .attr('y',-NODE_H/2+2)
+  .attr('width',function(d){return d.data.type.startsWith('result')||d.data.type==='form'?RESULT_W:NODE_W})
+  .attr('height',NODE_H).attr('rx',function(d){return d.data.type.startsWith('result')||d.data.type==='form'?8:4})
+  .attr('fill','rgba(0,0,0,0.06)');
+
+nodeGroups.append('rect')
+  .attr('x',function(d){var w=d.data.type.startsWith('result')||d.data.type==='form'?RESULT_W:NODE_W;return-w/2})
+  .attr('y',-NODE_H/2)
+  .attr('width',function(d){return d.data.type.startsWith('result')||d.data.type==='form'?RESULT_W:NODE_W})
+  .attr('height',NODE_H).attr('rx',function(d){return d.data.type.startsWith('result')||d.data.type==='form'?8:4})
+  .attr('fill',function(d){return(NODE_STYLE[d.data.type]||NODE_STYLE.decision).fill})
+  .attr('stroke',function(d){return(NODE_STYLE[d.data.type]||NODE_STYLE.decision).stroke})
+  .attr('stroke-width',1.5);
+
+nodeGroups.filter(function(d){return d.data.type==='decision'}).append('rect')
+  .attr('x',-NODE_W/2).attr('y',-NODE_H/2).attr('width',NODE_W).attr('height',3).attr('rx',2)
+  .attr('fill',NODE_STYLE.decision.stroke);
+
+nodeGroups.filter(function(d){return d.data.type.startsWith('result')||d.data.type==='form'}).append('text')
+  .attr('x',function(){return RESULT_W/2-6}).attr('y',-NODE_H/2+12).attr('text-anchor','end')
+  .attr('font-family','DM Mono, monospace').attr('font-size','8px').attr('font-weight','500')
+  .attr('fill',function(d){return(NODE_STYLE[d.data.type]||NODE_STYLE.decision).stroke})
+  .text(function(d){return RISK_LABELS[d.data.type]||''});
+
+nodeGroups.each(function(d){
+  var el=d3.select(this);var lines=d.data.label.split('\n');
+  var fs=d.data.type.startsWith('result')||d.data.type==='form'?9:10;
+  var ff=d.data.type.startsWith('result')||d.data.type==='form'?'DM Mono, monospace':'DM Sans, sans-serif';
+  var tc=(NODE_STYLE[d.data.type]||NODE_STYLE.decision).text;
+  var sy=-(lines.length-1)*(fs*1.2)/2;
+  for(var i=0;i<lines.length;i++){
+    el.append('text').attr('x',0).attr('y',sy+i*(fs*1.2)+1).attr('text-anchor','middle')
+      .attr('dominant-baseline','central').attr('font-family',ff).attr('font-size',fs+'px')
+      .attr('font-weight',i===0?'500':'400').attr('fill',tc).text(lines[i]);
+  }
+});
+
+var tooltipEl=document.getElementById('tooltip');
+nodeGroups.on('mouseenter',function(ev,d){
+  var det=d.data.detail;if(!det)return;
+  var html='<div class="tt-title">'+( det.title||'')+'</div><div class="tt-q">'+(det.q||'')+'</div>';
+  if(det.protocol)html+='<div class="tt-row"><span class="tt-label">Protocole</span><span class="tt-val">'+det.protocol+'</span></div>';
+  if(det.outcome)html+='<div class="tt-outcome">'+det.outcome+'</div>';
+  if(det.ref)html+='<div style="font-size:9px;color:#9a8f7a;margin-top:4px">'+det.ref+'</div>';
+  tooltipEl.innerHTML=html;tooltipEl.classList.add('visible');
+  d3.select(this).selectAll('rect').filter(function(dd,i){return i===1}).attr('stroke-width',2.5);
+}).on('mousemove',function(ev){
+  var x=ev.clientX+16,y=ev.clientY-10;
+  if(x+390>window.innerWidth)x=ev.clientX-390;
+  if(y+200>window.innerHeight)y=ev.clientY-200;
+  tooltipEl.style.left=x+'px';tooltipEl.style.top=y+'px';
+}).on('mouseleave',function(){
+  tooltipEl.classList.remove('visible');
+  d3.select(this).selectAll('rect').filter(function(dd,i){return i===1}).attr('stroke-width',1.5);
+});
+
+var zoom=d3.zoom().scaleExtent([0.12,3]).on('zoom',function(e){g.attr('transform',e.transform)});
+svg.call(zoom);
+var bounds=g.node().getBBox();
+var scale=Math.min(0.85,W/(bounds.width+80),H/(bounds.height+80))*0.85;
+var tx=W/2-(bounds.x+bounds.width/2)*scale;
+var ty=H/2-(bounds.y+bounds.height/2)*scale;
+var initTransform=d3.zoomIdentity.translate(tx,ty).scale(scale);
+svg.call(zoom.transform,initTransform);
+document.getElementById('btnReset').addEventListener('click',function(){svg.transition().duration(500).call(zoom.transform,initTransform)});
+window.addEventListener('resize',function(){W=chartEl.clientWidth;H=chartEl.clientHeight;svg.attr('width',W).attr('height',H)});
+</script>
+</body>
+</html>

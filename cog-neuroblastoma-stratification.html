@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>COG · Neuroblastome — Stratification du risque</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── VARIABLES ── */
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;
+  --border:#2a3441;--border2:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --lr:#3fb950;--sr:#388bfd;--hr:#f85149;--special:#d29922;
+  --purple:#a371f7;--orange:#f0883e;--cyan:#39c5cf;
+  --radius:10px;
+}
+
+/* ── BODY ── */
+body{
+  font-family:'DM Sans',sans-serif;font-weight:300;
+  background:var(--bg);color:var(--text);
+  line-height:1.6;min-height:100vh;
+}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,17,23,0.94);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:12px 24px;
+  display:flex;align-items:center;gap:12px;
+}
+.hdr-mark{
+  width:34px;height:34px;border-radius:6px;
+  border:1.5px solid var(--cyan);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:500;
+  color:var(--cyan);flex-shrink:0;
+}
+.hdr-content{display:flex;flex-direction:column;gap:1px;min-width:0}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-badge{
+  font-family:'DM Mono',monospace;font-size:9px;
+  padding:2px 8px;border-radius:20px;
+  background:rgba(57,197,207,0.1);border:1px solid rgba(57,197,207,0.35);
+  color:var(--cyan);margin-left:auto;white-space:nowrap;flex-shrink:0;
+}
+
+/* ── CONTAINER ── */
+.container{max-width:860px;margin:0 auto;padding:36px 24px 80px}
+
+/* ── PROGRESS ── */
+.progress-wrap{margin-bottom:32px}
+.progress-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
+.progress-bar{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--cyan);border-radius:2px;transition:width 0.4s ease;width:0%}
+
+/* ── STEP CARDS ── */
+.step-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:28px 24px;margin-bottom:20px;position:relative;
+  animation:fadeUp 0.35s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.step-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:var(--radius) var(--radius) 0 0;
+}
+.step-card[data-accent="cyan"]::before{background:var(--cyan)}
+.step-card[data-accent="purple"]::before{background:var(--purple)}
+.step-card[data-accent="orange"]::before{background:var(--orange)}
+.step-card[data-accent="sr"]::before{background:var(--sr)}
+.step-card[data-accent="hr"]::before{background:var(--hr)}
+.step-card[data-accent="lr"]::before{background:var(--lr)}
+
+.section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:12px}
+.step-question{font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;margin-bottom:18px;line-height:1.5}
+.step-note{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;padding:8px 12px;background:var(--surface2);border-radius:6px;border-left:2px solid var(--text3)}
+
+/* ── OPTIONS ── */
+.opt-grid{display:flex;flex-direction:column;gap:8px}
+.opt-btn{
+  display:block;width:100%;text-align:left;
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;
+  cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;
+}
+.opt-btn::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--cyan);transform:scaleX(0);transition:transform 0.25s ease;
+}
+.opt-btn:hover{border-color:var(--cyan);background:rgba(57,197,207,0.05)}
+.opt-btn:hover::before{transform:scaleX(1)}
+.opt-btn .opt-label{font-weight:500;display:block}
+.opt-btn .opt-desc{font-size:11px;color:var(--text2);margin-top:3px;display:block}
+
+/* ── RESULT CARD ── */
+.result-card{
+  border-radius:var(--radius);padding:28px 24px;margin-bottom:20px;
+  position:relative;animation:fadeUp 0.4s ease;
+}
+.result-card.lr{border:1px solid var(--lr);border-left:4px solid var(--lr);background:rgba(63,185,80,0.05)}
+.result-card.ir{border:1px solid var(--sr);border-left:4px solid var(--sr);background:rgba(56,139,253,0.05)}
+.result-card.hr{border:1px solid var(--hr);border-left:4px solid var(--hr);background:rgba(248,81,73,0.05)}
+
+.risk-badge{
+  display:inline-block;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;
+  padding:3px 10px;border-radius:20px;margin-bottom:14px;
+}
+.risk-badge.lr{background:rgba(63,185,80,0.15);color:var(--lr);border:1px solid rgba(63,185,80,0.3)}
+.risk-badge.ir{background:rgba(56,139,253,0.15);color:var(--sr);border:1px solid rgba(56,139,253,0.3)}
+.risk-badge.hr{background:rgba(248,81,73,0.15);color:var(--hr);border:1px solid rgba(248,81,73,0.3)}
+
+.result-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:16px}
+.result-section{margin-bottom:16px}
+.result-section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.result-text{font-size:13px;line-height:1.7;color:var(--text)}
+.result-text strong{font-weight:500;color:var(--text)}
+
+/* ── RT BLOCK ── */
+.rt-block{border-left:3px solid var(--sr);padding-left:16px;margin:12px 0}
+.rt-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--sr);text-transform:uppercase;margin-bottom:8px}
+.rt-section{margin-bottom:8px;font-size:12px;color:var(--text2);line-height:1.6}
+.rt-dose{font-family:'DM Mono',monospace;font-weight:500;color:var(--sr)}
+.rt-none{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);font-style:italic}
+
+/* ── OUTCOME ROW ── */
+.outcome-block{background:var(--surface2);border-radius:8px;padding:12px 16px;margin-top:12px}
+.outcome-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px}
+.outcome-label{color:var(--text2);font-family:'DM Sans',sans-serif}
+.outcome-val{font-family:'DM Mono',monospace;font-weight:500}
+.outcome-val.good{color:var(--lr)}
+.outcome-val.moderate{color:var(--special)}
+.outcome-val.poor{color:var(--hr)}
+
+/* ── REFS ── */
+.refs-section{margin-top:32px;border-top:1px solid var(--border);padding-top:20px}
+.refs-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.ref-item{display:flex;gap:10px;margin-bottom:12px;font-size:11px;line-height:1.5}
+.ref-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:18px;padding-top:1px}
+.ref-authors{font-weight:500;color:var(--text)}
+.ref-title-r{color:var(--text2);margin-top:1px}
+.ref-journal{color:var(--text3);font-size:10px}
+
+/* ── BUTTONS ── */
+.btn-reset{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'DM Mono',monospace;font-size:11px;
+  background:transparent;border:1px solid var(--border2);border-radius:6px;
+  color:var(--text2);padding:8px 14px;cursor:pointer;transition:all 0.18s;margin-top:12px;
+}
+.btn-reset:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-pdf{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'DM Mono',monospace;font-size:11px;
+  background:transparent;border:1px solid var(--border2);border-radius:6px;
+  color:var(--text2);padding:8px 14px;cursor:pointer;transition:all 0.18s;margin-top:8px;margin-left:8px;
+}
+.btn-pdf:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── PRINT ── */
+.print-footer{display:none}
+@media print{
+  body{background:#fff!important;color:#000!important;font-size:11pt}
+  header{position:static!important;background:#fff!important;border-bottom:1px solid #ccc!important}
+  .btn-pdf,.btn-reset,.progress-wrap{display:none!important}
+  .step-card:not(.result){display:none!important}
+  .result-card{border:1.5px solid #333!important;background:#fff!important;box-shadow:none!important;break-inside:avoid}
+  .refs-section{break-before:auto}
+  .print-footer{display:block;font-size:8pt;color:#999;margin-top:24px;border-top:1px solid #ddd;padding-top:8px}
+  :root{--text:#000;--text2:#444;--text3:#888;--surface:#fff;--surface2:#f5f5f5;--border:#ddd}
+}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .container{padding:24px 16px 80px}
+  .hdr-title{font-size:14px}
+  .step-card{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="hdr-mark">NB</div>
+  <div class="hdr-content">
+    <div class="hdr-title">Neuroblastome — Stratification COG</div>
+    <div class="hdr-sub">Classification du risque · PDQ NCI 2025 · Irwin et al. JCO 2021</div>
+  </div>
+  <span class="hdr-badge">COG · INRGSS 2021</span>
+</header>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="container" id="app">
+  <div class="progress-wrap">
+    <div class="progress-label" id="progressLabel">Étape 1 / 6</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <div id="stepsContainer"></div>
+</div>
+
+<div class="print-footer">
+  Outil d'aide à la décision — Ne se substitue pas au jugement clinique ni aux recommandations en vigueur.<br>
+  Source : PDQ® Neuroblastoma Treatment, NCI, avril 2025 · COG Risk Classification (Irwin et al., JCO 2021)
+</div>
+
+<script>
+// ═══ DONNÉES DE STRATIFICATION COG ═══
+// Basées sur Table 3 (Irwin MS et al. JCO 2021) et PDQ NCI 2025
+
+var STATE = {};
+var STEP = 0;
+var TOTAL_STEPS = 6;
+
+// ═══ STEPS DEFINITIONS ═══
+var STEPS = [
+  {
+    id: 'stage',
+    accent: 'cyan',
+    label: 'STADE INRGSS',
+    question: 'Quel est le stade INRGSS au diagnostic ?',
+    note: 'Le stade INRGSS est déterminé par imagerie pré-opératoire et la présence/absence d\'image-defined risk factors (IDRFs). Le stade M exclut le stade MS.',
+    options: [
+      {value:'L1', label:'L1 — Localisé, sans IDRF', desc:'Tumeur localisée, pas d\'atteinte de structures vitales, confinée à un compartiment'},
+      {value:'L2', label:'L2 — Localisé, IDRF présent(s)', desc:'Tumeur locorégionale avec un ou plusieurs IDRFs'},
+      {value:'M', label:'M — Métastatique', desc:'Maladie métastatique à distance (hors stade MS)'},
+      {value:'MS', label:'MS — Métastatique spécial', desc:'< 18 mois, métastases limitées à la peau, foie et/ou moelle osseuse'}
+    ]
+  },
+  {
+    id: 'age',
+    accent: 'purple',
+    label: 'ÂGE AU DIAGNOSTIC',
+    question: 'Quel est l\'âge du patient au diagnostic ?',
+    note: 'L\'âge est un facteur pronostique majeur. Le seuil de 18 mois (547 jours) est le plus déterminant pour la classification COG.[10]',
+    options: function() {
+      var s = STATE.stage;
+      if (s === 'L1') return [
+        {value:'any', label:'Tout âge', desc:'Le stade L1 sans MYCN-amplification est bas risque quel que soit l\'âge'}
+      ];
+      if (s === 'L2') return [
+        {value:'<18m', label:'< 18 mois (< 547 jours)', desc:''},
+        {value:'>=18m', label:'≥ 18 mois (≥ 547 jours)', desc:''}
+      ];
+      if (s === 'M') return [
+        {value:'<12m', label:'< 12 mois (< 365 jours)', desc:''},
+        {value:'12-18m', label:'12 à < 18 mois (365–546 jours)', desc:''},
+        {value:'>=18m', label:'≥ 18 mois (≥ 547 jours)', desc:''}
+      ];
+      if (s === 'MS') return [
+        {value:'<12m', label:'< 12 mois', desc:''},
+        {value:'12-18m', label:'12 à < 18 mois', desc:''}
+      ];
+      return [];
+    }
+  },
+  {
+    id: 'mycn',
+    accent: 'hr',
+    label: 'STATUT MYCN',
+    question: 'Quel est le statut de l\'amplification MYCN ?',
+    note: 'L\'amplification de MYCN est le facteur biologique le plus défavorable. Présente dans 16–25 % des neuroblastomes, elle confère un pronostic péjoratif à tous les stades.[18,23]',
+    options: function() {
+      return [
+        {value:'NA', label:'Non amplifié (NA)', desc:'Pas d\'amplification de MYCN'},
+        {value:'AMP', label:'Amplifié', desc:'Amplification de MYCN détectée (FISH ou NGS)'}
+      ];
+    },
+    skip: function() {
+      // Stage M >=18 mois = toujours HR quel que soit MYCN
+      if (STATE.stage === 'M' && STATE.age === '>=18m') {
+        STATE.mycn = 'any';
+        return true;
+      }
+      return false;
+    }
+  },
+  {
+    id: 'histology',
+    accent: 'orange',
+    label: 'HISTOLOGIE INPC',
+    question: 'Quelle est la classification histologique INPC (Shimada) ?',
+    note: 'Classification de l\'International Neuroblastoma Pathology Classification. L\'histologie favorable/défavorable dépend de l\'âge, du degré de différenciation et du MKI.[2-6]',
+    options: function() {
+      return [
+        {value:'FH', label:'Favorable (FH)', desc:'Favorable histology selon critères INPC/Shimada'},
+        {value:'UH', label:'Défavorable (UH)', desc:'Unfavorable histology (indifférencié, MKI élevé, ≥ 5 ans)'}
+      ];
+    },
+    skip: function() {
+      var s = STATE.stage, a = STATE.age, m = STATE.mycn;
+      // L1 non amplifié → LR quel que soit l'histologie
+      if (s === 'L1' && m === 'NA') { STATE.histology = 'any'; return true; }
+      // L1 AMP → besoin de savoir résection
+      if (s === 'L1' && m === 'AMP') { STATE.histology = 'any'; return true; }
+      // M >=18m → toujours HR
+      if (s === 'M' && a === '>=18m') { STATE.histology = 'any'; return true; }
+      // M <12m AMP → HR
+      if (s === 'M' && a === '<12m' && m === 'AMP') { STATE.histology = 'any'; return true; }
+      // MS AMP → HR
+      if (s === 'MS' && m === 'AMP') { STATE.histology = 'any'; return true; }
+      return false;
+    }
+  },
+  {
+    id: 'genomics',
+    accent: 'sr',
+    label: 'GÉNOMIQUE TUMORALE',
+    question: 'Quels sont les résultats génomiques complémentaires ?',
+    note: 'La ploïdie (DNA index) et les aberrations chromosomiques segmentaires (SCA : perte 1p, 11q, gain 17q…) affinent la stratification, en particulier pour les stades M et MS.[1-7]',
+    options: function() {
+      var s = STATE.stage, a = STATE.age, m = STATE.mycn, h = STATE.histology;
+
+      // L2, <18m, NA
+      if (s === 'L2' && a === '<18m' && m === 'NA') return [
+        {value:'fav_all', label:'Biologie favorable complète', desc:'FH + Hyperdiploïde (DI > 1) + Pas de SCA'},
+        {value:'unfav_any', label:'Au moins un facteur défavorable', desc:'UH, et/ou diploïde (DI = 1), et/ou SCA présentes'}
+      ];
+      // L2, >=18m, NA
+      if (s === 'L2' && a === '>=18m' && m === 'NA') return [
+        {value:'fh_diff', label:'FH + Différenciant', desc:'Histologie favorable, tumeur en voie de différenciation'},
+        {value:'uh_or_undiff', label:'UH ou peu/non différencié', desc:'Histologie défavorable ou tumeur indifférenciée/peu différenciée'}
+      ];
+      // M <12m NA
+      if (s === 'M' && a === '<12m' && m === 'NA') return [
+        {value:'hyper_fav', label:'Hyperdiploïde + Biologie favorable', desc:'DI > 1, FH, pas de SCA'},
+        {value:'diploid_or_unfav', label:'Diploïde et/ou facteur(s) défavorable(s)', desc:'DI = 1, et/ou UH, et/ou SCA'}
+      ];
+      // M 12-18m NA
+      if (s === 'M' && (a === '12-18m') && m === 'NA') return [
+        {value:'all_fav', label:'Tous critères favorables', desc:'FH + Hyperdiploïde (DI > 1) + Pas de SCA'},
+        {value:'any_unfav', label:'Au moins un critère défavorable', desc:'UH, et/ou diploïde, et/ou SCA'}
+      ];
+      // MS <12m NA
+      if (s === 'MS' && a === '<12m' && m === 'NA') return [
+        {value:'fav_asympt', label:'Asymptomatique + Biologie favorable', desc:'FH + Hyperdiploïde + Pas de SCA + Asymptomatique'},
+        {value:'sympt_or_unfav', label:'Symptomatique ou biologie défavorable', desc:'Symptômes et/ou UH et/ou diploïde et/or SCA'}
+      ];
+      // MS 12-18m NA
+      if (s === 'MS' && a === '12-18m' && m === 'NA') return [
+        {value:'fh_hyper_nosca', label:'FH + Hyperdiploïde + Pas de SCA', desc:''},
+        {value:'unfav_any', label:'UH et/ou diploïde et/ou SCA', desc:''}
+      ];
+      return null;
+    },
+    skip: function() {
+      var s = STATE.stage, a = STATE.age, m = STATE.mycn;
+      // Cases that don't need genomics
+      if (s === 'L1') { STATE.genomics = 'na'; return true; }
+      if (s === 'L2' && m === 'AMP') { STATE.genomics = 'na'; return true; }
+      if (s === 'M' && a === '>=18m') { STATE.genomics = 'na'; return true; }
+      if (s === 'M' && m === 'AMP') { STATE.genomics = 'na'; return true; }
+      if (s === 'MS' && m === 'AMP') { STATE.genomics = 'na'; return true; }
+
+      var opts = this.options();
+      if (!opts || opts.length === 0) { STATE.genomics = 'na'; return true; }
+      return false;
+    }
+  },
+  {
+    id: 'resection',
+    accent: 'cyan',
+    label: 'RÉSECTION CHIRURGICALE',
+    question: 'Quel est le résultat de la résection chirurgicale ?',
+    note: 'Pour les tumeurs L1 avec MYCN amplifié, le statut de résection détermine le groupe de risque.[19]',
+    options: function() {
+      return [
+        {value:'complete', label:'Résection complète (R0)', desc:'Pas de résidu macroscopique'},
+        {value:'incomplete', label:'Résection incomplète', desc:'Résidu tumoral macroscopique'}
+      ];
+    },
+    skip: function() {
+      if (STATE.stage === 'L1' && STATE.mycn === 'AMP') return false;
+      STATE.resection = 'na';
+      return true;
+    }
+  }
+];
+
+// ═══ RISK DETERMINATION ═══
+function determineRisk() {
+  var s = STATE.stage, a = STATE.age, m = STATE.mycn, h = STATE.histology, g = STATE.genomics, r = STATE.resection;
+
+  // ── HIGH RISK ──
+  // 1. Stage M, ≥18 mois
+  if (s === 'M' && a === '>=18m') return makeResult('hr', 'Haut risque', 'Stage M, ≥ 18 mois', 'high_risk_standard');
+  // 2. Stage M, <18 mois, MYCN amplifié
+  if (s === 'M' && m === 'AMP') return makeResult('hr', 'Haut risque', 'Stage M, MYCN amplifié', 'high_risk_standard');
+  // 3. Stage MS ou L2 avec MYCN amplifié
+  if ((s === 'MS' || s === 'L2') && m === 'AMP') return makeResult('hr', 'Haut risque', 'Stage ' + s + ', MYCN amplifié', 'high_risk_standard');
+  // 4. L2, ≥18m, UH
+  if (s === 'L2' && a === '>=18m' && g === 'uh_or_undiff') return makeResult('hr', 'Haut risque', 'Stage L2, ≥ 18 mois, histologie défavorable', 'high_risk_standard');
+  // 5. M ou MS, 12-18m, ≥1 facteur défavorable
+  if (s === 'M' && a === '12-18m' && m === 'NA' && g === 'any_unfav') return makeResult('hr', 'Haut risque', 'Stage M, 12–18 mois, facteur(s) défavorable(s)', 'high_risk_standard');
+  if (s === 'MS' && a === '12-18m' && m === 'NA' && g === 'unfav_any') return makeResult('hr', 'Haut risque', 'Stage MS, 12–18 mois, facteur(s) défavorable(s)', 'high_risk_standard');
+  // 6. L1 résection incomplète + MYCN amplifié
+  if (s === 'L1' && m === 'AMP' && r === 'incomplete') return makeResult('hr', 'Haut risque', 'Stage L1, MYCN amplifié, résection incomplète', 'high_risk_standard');
+
+  // ── LOW RISK ──
+  // 1. L1, MYCN NA
+  if (s === 'L1' && m === 'NA') return makeResult('lr', 'Bas risque', 'Stage L1, MYCN non amplifié', 'low_risk_l1');
+  // 2. L1, MYCN AMP, résection complète
+  if (s === 'L1' && m === 'AMP' && r === 'complete') return makeResult('lr', 'Bas risque', 'Stage L1, MYCN amplifié, résection complète R0', 'low_risk_l1_amp');
+  // 3. MS, <12m, tous favorables, asymptomatique
+  if (s === 'MS' && a === '<12m' && m === 'NA' && g === 'fav_asympt') return makeResult('lr', 'Bas risque', 'Stage MS, < 12 mois, asymptomatique, biologie favorable', 'low_risk_ms');
+
+  // ── INTERMEDIATE RISK ──
+  // L2 <18m NA favorable
+  if (s === 'L2' && a === '<18m' && m === 'NA' && g === 'fav_all') return makeResult('ir', 'Risque intermédiaire', 'Stage L2, < 18 mois, biologie favorable', 'intermediate_l2_fav');
+  // L2 <18m NA unfav
+  if (s === 'L2' && a === '<18m' && m === 'NA' && g === 'unfav_any') return makeResult('ir', 'Risque intermédiaire', 'Stage L2, < 18 mois, facteur(s) défavorable(s)', 'intermediate_l2_unfav');
+  // L2 >=18m NA FH diff
+  if (s === 'L2' && a === '>=18m' && m === 'NA' && g === 'fh_diff') return makeResult('ir', 'Risque intermédiaire', 'Stage L2, ≥ 18 mois, FH, différenciant', 'intermediate_l2_older');
+  // M <12m NA hyper fav
+  if (s === 'M' && a === '<12m' && m === 'NA' && g === 'hyper_fav') return makeResult('ir', 'Risque intermédiaire', 'Stage M, < 12 mois, hyperdiploïde, biologie favorable', 'intermediate_m_infant_fav');
+  // M <12m NA diploid/unfav
+  if (s === 'M' && a === '<12m' && m === 'NA' && g === 'diploid_or_unfav') return makeResult('ir', 'Risque intermédiaire', 'Stage M, < 12 mois, diploïde/défavorable', 'intermediate_m_infant_unfav');
+  // M 12-18m NA all fav
+  if (s === 'M' && a === '12-18m' && m === 'NA' && g === 'all_fav') return makeResult('ir', 'Risque intermédiaire', 'Stage M, 12–18 mois, biologie favorable', 'intermediate_m_toddler');
+  // MS <12m sympt/unfav
+  if (s === 'MS' && a === '<12m' && m === 'NA' && g === 'sympt_or_unfav') return makeResult('ir', 'Risque intermédiaire', 'Stage MS, < 12 mois, symptomatique ou biologie défavorable', 'intermediate_ms');
+  // MS 12-18m fav
+  if (s === 'MS' && a === '12-18m' && m === 'NA' && g === 'fh_hyper_nosca') return makeResult('ir', 'Risque intermédiaire', 'Stage MS, 12–18 mois, biologie favorable', 'intermediate_ms_toddler');
+
+  return makeResult('ir', 'Risque intermédiaire', 'Classification par défaut — vérifier les critères', 'intermediate_default');
+}
+
+// ═══ TREATMENT TEMPLATES ═══
+function makeResult(risk, riskLabel, reason, template) {
+  return {risk: risk, riskLabel: riskLabel, reason: reason, template: template};
+}
+
+function getResultHTML(res) {
+  var T = TEMPLATES[res.template] || TEMPLATES['intermediate_default'];
+  var riskClass = res.risk;
+
+  var html = '<div class="result-card ' + riskClass + '">';
+  html += '<span class="risk-badge ' + riskClass + '">' + res.riskLabel.toUpperCase() + '</span>';
+  html += '<div class="result-title">' + T.title + '</div>';
+  html += '<div style="font-size:12px;color:var(--text2);margin-bottom:16px;font-family:\'DM Mono\',monospace">' + res.reason + '</div>';
+
+  // Treatment
+  html += '<div class="result-section"><div class="result-section-title">Traitement recommandé</div>';
+  html += '<div class="result-text">' + T.treatment + '</div></div>';
+
+  // Chirurgie
+  if (T.surgery) {
+    html += '<div class="result-section"><div class="result-section-title">Chirurgie</div>';
+    html += '<div class="result-text">' + T.surgery + '</div></div>';
+  }
+
+  // Chimio
+  if (T.chemo) {
+    html += '<div class="result-section"><div class="result-section-title">Chimiothérapie</div>';
+    html += '<div class="result-text">' + T.chemo + '</div></div>';
+  }
+
+  // RT
+  if (T.rt) {
+    html += '<div class="rt-block"><div class="rt-block-title">Radiothérapie</div>';
+    html += '<div class="rt-section">' + T.rt + '</div></div>';
+  } else {
+    html += '<div style="margin:12px 0"><span class="rt-none">Pas de radiothérapie systématique dans ce groupe de risque</span></div>';
+  }
+
+  // Immunothérapie
+  if (T.immuno) {
+    html += '<div class="result-section"><div class="result-section-title">Immunothérapie / Post-consolidation</div>';
+    html += '<div class="result-text">' + T.immuno + '</div></div>';
+  }
+
+  // Outcomes
+  if (T.outcomes) {
+    html += '<div class="outcome-block">';
+    for (var i = 0; i < T.outcomes.length; i++) {
+      var o = T.outcomes[i];
+      html += '<div class="outcome-row"><span class="outcome-label">' + o.label + '</span><span class="outcome-val ' + (o.cls || '') + '">' + o.val + '</span></div>';
+    }
+    html += '</div>';
+  }
+
+  // Notes
+  if (T.notes) {
+    html += '<div class="step-note" style="margin-top:16px">' + T.notes + '</div>';
+  }
+
+  html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:16px">';
+  html += '<button class="btn-reset" onclick="resetAll()">⟳ Nouvelle stratification</button>';
+  html += '<button class="btn-pdf" onclick="printResult()">⬇ Exporter en PDF</button>';
+  html += '</div>';
+  html += '</div>';
+
+  // REFERENCES
+  html += buildRefsHTML();
+
+  return html;
+}
+
+// ═══ TEMPLATES ═══
+var TEMPLATES = {
+  low_risk_l1: {
+    title: 'Neuroblastome — Bas risque',
+    treatment: 'Chirurgie seule suivie d\'observation. Chimiothérapie réservée aux patients symptomatiques ou en cas de progression non résécable après chirurgie.',
+    surgery: 'Résection primaire par chirurgien expérimenté. Pour les nourrissons < 6 mois avec masse surrénalienne isolée ≤ 3,1 cm (solide) ou ≤ 5 cm (≥ 25 % kystique) : <strong>observation sans biopsie</strong> recommandée.<sup>[4]</sup>',
+    chemo: 'Réservée aux patients symptomatiques ou en progression : carboplatin, cyclophosphamide, doxorubicine, étoposide (doses cumulatives basses).<sup>[3]</sup>',
+    rt: null,
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 5 ans (L1)', val: '90 %', cls: 'good'},
+      {label: 'OS 5 ans (L1)', val: '98 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL00B1 [1]', cls: ''}
+    ],
+    notes: 'Le résidu tumoral après chirurgie n\'est PAS un facteur de risque de rechute si la biologie est favorable. EFS > 90 % et OS 99–100 % même avec résection incomplète.<sup>[3]</sup>'
+  },
+  low_risk_l1_amp: {
+    title: 'Neuroblastome — Bas risque (MYCN amplifié, R0)',
+    treatment: 'Résection complète R0 obtenue. Surveillance rapprochée. Malgré l\'amplification MYCN, la résection complète confère un pronostic favorable.',
+    surgery: 'Résection complète (R0) réalisée. Surveillance post-opératoire rapprochée.',
+    chemo: 'Non systématique si résection complète. À discuter en RCP si progression.',
+    rt: null,
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 5 ans (L1 MYCN-amp)', val: '70 %', cls: 'moderate'},
+      {label: 'OS 5 ans (L1 MYCN-amp)', val: '80 %', cls: 'moderate'},
+      {label: 'Source', val: 'P9641 [3]', cls: ''}
+    ],
+    notes: '⚠ L\'amplification MYCN en stade L1 confère un EFS inférieur (70 % vs 93 %, P = 0.0042) même après résection complète. Surveillance clinique et biologique étroite recommandée.<sup>[3]</sup>'
+  },
+  low_risk_ms: {
+    title: 'Neuroblastome MS — Bas risque',
+    treatment: 'Observation avec soins de support. Pas de chimiothérapie ni de résection du primitif en l\'absence de symptômes.',
+    surgery: 'Résection du primitif non recommandée — pas d\'amélioration de la survie.<sup>[5-7]</sup>',
+    chemo: 'Non indiquée si asymptomatique avec biologie favorable.',
+    rt: null,
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 5 ans (MS)', val: '86 %', cls: 'good'},
+      {label: 'OS 5 ans (MS)', val: '92 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL00B1 [1]', cls: ''}
+    ],
+    notes: 'Les patients MS asymptomatiques avec biologie entièrement favorable ont des résultats comparables au stade 4S historique. Régression spontanée fréquente.'
+  },
+  intermediate_l2_fav: {
+    title: 'Neuroblastome L2 — Risque intermédiaire (biologie favorable)',
+    treatment: 'Chimiothérapie néoadjuvante (2–4 cycles) suivie de résection chirurgicale. Approche biologie-guidée et réponse-guidée.',
+    surgery: 'Résection après chimiothérapie. L\'objectif est une résection ≥ 50 % ; la résection complète n\'est pas obligatoire si biologie favorable.<sup>[9]</sup>',
+    chemo: '<strong>2 à 4 cycles</strong> : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine. Évaluation de la réponse après chaque paire de cycles.<sup>[9,10]</sup>',
+    rt: null,
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 3 ans (L2 fav)', val: '92 %', cls: 'good'},
+      {label: 'OS 3 ans', val: '98 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL0531 [9]', cls: ''}
+    ],
+    notes: 'Pour les nourrissons < 18 mois avec L2 et biologie favorable, certains protocoles européens proposent une observation après biopsie sans chimiothérapie.<sup>[5,12]</sup>'
+  },
+  intermediate_l2_unfav: {
+    title: 'Neuroblastome L2 — Risque intermédiaire (facteur défavorable)',
+    treatment: 'Chimiothérapie néoadjuvante (4–8 cycles) suivie de résection. Intensification si réponse insuffisante.',
+    surgery: 'Résection après chimiothérapie. Discussion multidisciplinaire si résidu persistant.',
+    chemo: '<strong>4 à 8 cycles</strong> : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine. Si réponse < RP après 8 cycles : cyclophosphamide/topotecan.<sup>[9]</sup>',
+    rt: 'Réservée aux cas de progression sous chimiothérapie ou maladie progressive non résécable après chirurgie de second look.',
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 10 ans (IR global)', val: '82 %', cls: 'good'},
+      {label: 'OS 10 ans (IR global)', val: '94,7 %', cls: 'good'},
+      {label: 'EFS si 11q LOH', val: '68 %', cls: 'moderate'},
+      {label: 'Source', val: 'ANBL0531 [9,10]', cls: ''}
+    ],
+    notes: 'La perte de 11q est associée à un EFS inférieur (68 % vs 84 %, P = 0.03) mais pas à une différence significative d\'OS.<sup>[10]</sup>'
+  },
+  intermediate_l2_older: {
+    title: 'Neuroblastome L2 — Risque intermédiaire (≥ 18 mois, FH différenciant)',
+    treatment: 'Chimiothérapie néoadjuvante (4 cycles) suivie de résection. Approche biologie-guidée.',
+    surgery: 'Résection après chimiothérapie. Évaluation IDRFs résiduels avant chirurgie.',
+    chemo: '<strong>4 cycles</strong> : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine.<sup>[9]</sup>',
+    rt: 'Réservée aux cas de progression sous traitement.',
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 3 ans (stade 3 FH)', val: '92 %', cls: 'good'},
+      {label: 'OS 3 ans', val: '98 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL0531 [9]', cls: ''}
+    ],
+    notes: null
+  },
+  intermediate_m_infant_fav: {
+    title: 'Neuroblastome M — Risque intermédiaire (nourrisson, biologie favorable)',
+    treatment: 'Chimiothérapie (4 cycles) avec évaluation de la réponse. Résection du primitif si faisable.',
+    surgery: 'Résection du primitif envisagée après chimiothérapie si faisable.',
+    chemo: '<strong>4 cycles</strong> : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine.<sup>[9]</sup>',
+    rt: null,
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 10 ans (M infant fav)', val: '86,9 %', cls: 'good'},
+      {label: 'OS 10 ans', val: '95 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL0531 [10]', cls: ''}
+    ],
+    notes: 'Les nourrissons stade M avec biologie favorable ont un excellent pronostic malgré la maladie métastatique.<sup>[10]</sup>'
+  },
+  intermediate_m_infant_unfav: {
+    title: 'Neuroblastome M — Risque intermédiaire (nourrisson, facteur défavorable)',
+    treatment: 'Chimiothérapie (8 cycles). Approche intensifiée par rapport aux nourrissons à biologie favorable.',
+    surgery: 'Résection du primitif discutée après chimiothérapie.',
+    chemo: '<strong>8 cycles</strong> : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine. Cyclophosphamide/topotecan si réponse insuffisante.<sup>[9]</sup>',
+    rt: 'Réservée aux situations de menace vitale ou progression.',
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 10 ans (M infant unfav)', val: '66,8 %', cls: 'moderate'},
+      {label: 'OS 10 ans', val: '84,4 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL0531 [10]', cls: ''}
+    ],
+    notes: 'La diploïdie est associée à un pronostic inférieur dans ce sous-groupe (P = 0.03).<sup>[9]</sup>'
+  },
+  intermediate_m_toddler: {
+    title: 'Neuroblastome M — Risque intermédiaire (12–18 mois, biologie favorable)',
+    treatment: 'Chimiothérapie de type risque intermédiaire. Ces patients étaient historiquement traités en haut risque mais ont des résultats équivalents avec un traitement intermédiaire.<sup>[14]</sup>',
+    surgery: 'Résection du primitif discutée après chimiothérapie.',
+    chemo: '<strong>4–8 cycles</strong> : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine, adapté à la réponse.<sup>[9]</sup>',
+    rt: null,
+    immuno: null,
+    outcomes: [
+      {label: 'EFS (12–18m M fav)', val: '62,5 %', cls: 'moderate'},
+      {label: 'OS', val: '100 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL0531 [9]', cls: ''}
+    ],
+    notes: 'Analyse rétrospective COG confirmant que la réduction d\'intensité est sûre dans ce sous-groupe (survie équivalente au traitement HR).<sup>[14]</sup>'
+  },
+  intermediate_ms: {
+    title: 'Neuroblastome MS — Risque intermédiaire',
+    treatment: 'Chimiothérapie pour patients symptomatiques ou avec biologie défavorable. Intervention immédiate si hépatomégalie rapidement progressive.',
+    surgery: 'Résection du primitif non systématique. Laparotomie de décompression si syndrome compartimental abdominal.<sup>[13,14]</sup>',
+    chemo: '<strong>2 à 8 cycles</strong> selon biologie et symptômes : carboplatin/étoposide ou cyclophosphamide/doxorubicine/vincristine. Doses réduites chez les nourrissons < 2 mois.<sup>[9]</sup>',
+    rt: 'Exceptionnellement : irradiation hépatique à très faible dose en cas d\'hépatomégalie menaçante réfractaire à la chimiothérapie.',
+    immuno: null,
+    outcomes: [
+      {label: 'OS 3 ans (MS ANBL0531)', val: '81,4 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL0531 [9]', cls: ''}
+    ],
+    notes: '⚠ Les nourrissons < 2 mois avec hépatomégalie évolutive ont un risque de décès > 13× supérieur. Chimiothérapie immédiate obligatoire dans ce sous-groupe.<sup>[9]</sup>'
+  },
+  intermediate_ms_toddler: {
+    title: 'Neuroblastome MS — Risque intermédiaire (12–18 mois)',
+    treatment: 'Chimiothérapie de type risque intermédiaire, adaptée à la réponse et à la biologie.',
+    surgery: 'Résection du primitif discutée après chimiothérapie.',
+    chemo: '<strong>4–8 cycles</strong> : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine.<sup>[9]</sup>',
+    rt: null,
+    immuno: null,
+    outcomes: [
+      {label: 'EFS 5 ans (MS)', val: '86 %', cls: 'good'},
+      {label: 'OS 5 ans', val: '92 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL00B1 [1]', cls: ''}
+    ],
+    notes: 'Les toddlers 12–18 mois avec biologie favorable MS ont des résultats comparables aux nourrissons < 12 mois avec 4S.<sup>[2]</sup>'
+  },
+  intermediate_default: {
+    title: 'Neuroblastome — Risque intermédiaire',
+    treatment: 'Chimiothérapie néoadjuvante suivie de résection. Nombre de cycles adapté à la biologie et à la réponse.',
+    surgery: 'Résection après chimiothérapie.',
+    chemo: '2 à 8 cycles : carboplatin/étoposide alternant avec cyclophosphamide/doxorubicine.<sup>[9]</sup>',
+    rt: 'Réservée aux cas de progression.',
+    immuno: null,
+    outcomes: [
+      {label: 'OS 5 ans (IR global)', val: '~95 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL00B1 [1]', cls: ''}
+    ],
+    notes: null
+  },
+  high_risk_standard: {
+    title: 'Neuroblastome — Haut risque',
+    treatment: 'Traitement multimodal intensif en 3 phases : induction, consolidation, post-consolidation. Essais cliniques à considérer (ANBL2131, ANBL1531).',
+    surgery: '<strong>Résection après induction :</strong> résection ≥ 90 % du primitif recommandée après chimiothérapie d\'induction. Associée à un meilleur contrôle local (récidive locale 8,5 % vs 20 %).<sup>[15]</sup> Néphrectomie à éviter.',
+    chemo: '<strong>Induction (5–6 cycles) :</strong> cisplatine/étoposide alternant avec vincristine/cyclophosphamide/doxorubicine ± topotecan/cyclophosphamide.<sup>[6,7]</sup><br><br>' +
+           '<strong>Consolidation :</strong> chimiothérapie myéloablative en tandem :<br>' +
+           '• Cycle 1 : cyclophosphamide/thiotépa<br>' +
+           '• Cycle 2 : carboplatine/étoposide/melphalan (doses réduites)<br>' +
+           'Suivi d\'autogreffe de cellules souches (tandem HSCT supérieur au simple, EFS 3 ans 62 % vs 48 %, P = 0.006).<sup>[30]</sup>',
+    rt: '<strong>Indication :</strong> Radiothérapie au lit tumoral après chimiothérapie myéloablative et autogreffe.<br><br>' +
+        '<strong>Dose :</strong> <span class="rt-dose">21,6 Gy</span> sur le volume tumoral pré-opératoire.<sup>[36,38]</sup><br><br>' +
+        '<strong>Boost :</strong> Pas de bénéfice démontré du boost pour résidu macroscopique (étude prospective COG ANBL0532).<sup>[38]</sup><br><br>' +
+        '<strong>Sites métastatiques :</strong> Irradiation des sites MIBG-positifs persistants après induction. Ne pas irradier > 50 % de la moelle osseuse.<sup>[46]</sup><br><br>' +
+        '<strong>Volumes :</strong> Volume tumoral pré-opératoire pour le primitif. Sites métastatiques : sites résiduels MIBG-avides.',
+    immuno: '<strong>Dinutuximab</strong> (anti-GD2) + GM-CSF + isotrétinoïne (6 mois). Supérieur à l\'isotrétinoïne seule (EFS 5 ans 56,6 % vs 46,1 %, P = 0.042).<sup>[48,51]</sup><br><br>' +
+            '<strong>Éflornithine</strong> (DFMO) : approuvée FDA en continuation post-immunothérapie (EFS 4 ans 84 % vs 73 % en analyse appariée).<sup>[60]</sup><br><br>' +
+            '<em>Note : l\'IL-2 a été retirée du schéma standard suite aux essais SIOPEN négatifs.<sup>[56,57]</sup></em>',
+    outcomes: [
+      {label: 'EFS 5 ans (HR global)', val: '~60 %', cls: 'moderate'},
+      {label: 'OS 5 ans (HR)', val: '~62 %', cls: 'moderate'},
+      {label: 'EFS 3 ans (tandem HSCT + immuno)', val: '73 %', cls: 'moderate'},
+      {label: 'OS 3 ans (tandem + immuno)', val: '84 %', cls: 'good'},
+      {label: 'Source', val: 'ANBL00B1/ANBL0532 [1,30]', cls: ''}
+    ],
+    notes: '⚠ <strong>Curie score</strong> : un score post-induction > 2 (MYCN NA) ou > 0 (MYCN amplifié) est associé à un pronostic péjoratif et peut justifier un traitement de bridge.<sup>[28,29]</sup><br><br>' +
+           '<strong>Essai en cours :</strong> ANBL2131 (NCT06172296) — addition précoce de dinutuximab + GM-CSF à l\'induction standard. Phase III randomisée.'
+  }
+};
+
+// ═══ REFERENCES ═══
+function buildRefsHTML() {
+  var refs = [
+    {n:'1', authors:'Irwin MS, Naranjo A, Zhang FF, et al.', title:'Revised Neuroblastoma Risk Classification System: A Report From the Children\'s Oncology Group.', journal:'J Clin Oncol. 2021;39(29):3229-3241.', pmid:'34319759'},
+    {n:'2', authors:'Taggart DR, London WB, Schmidt ML, et al.', title:'Prognostic value of the stage 4S metastatic pattern and tumor biology.', journal:'J Clin Oncol. 2011;29(33):4358-64.', pmid:'21969516'},
+    {n:'3', authors:'Strother DR, London WB, Schmidt ML, et al.', title:'Outcome after surgery alone or with restricted use of chemotherapy for patients with low-risk neuroblastoma: COG P9641.', journal:'J Clin Oncol. 2012;30(15):1842-8.', pmid:'22529259'},
+    {n:'4', authors:'Nuchtern JG, London WB, Barnewolt CE, et al.', title:'A prospective study of expectant observation as primary therapy for neuroblastoma in young infants: a COG study.', journal:'Ann Surg. 2012;256(4):573-80.', pmid:'22964741'},
+    {n:'5', authors:'Hero B, Simon T, Spitz R, et al.', title:'Localized infant neuroblastomas often show spontaneous regression: NB95-S and NB97.', journal:'J Clin Oncol. 2008;26(9):1504-10.', pmid:'18349403'},
+    {n:'6', authors:'Kushner BH, LaQuaglia MP, Bonilla MA, et al.', title:'Highly effective induction therapy for stage 4 neuroblastoma.', journal:'J Clin Oncol. 1994;12(12):2607-13.', pmid:'7527454'},
+    {n:'7', authors:'Park JR, Scott JR, Stewart CF, et al.', title:'Pilot induction regimen incorporating pharmacokinetically guided topotecan: a COG study.', journal:'J Clin Oncol. 2011;29(33):4351-7.', pmid:'22010014'},
+    {n:'9', authors:'Twist CJ, Schmidt ML, Naranjo A, et al.', title:'Maintaining Outstanding Outcomes Using Response- and Biology-Based Therapy for Intermediate-Risk Neuroblastoma: COG ANBL0531.', journal:'J Clin Oncol. 2019;37(34):3243-3255.', pmid:'31386611'},
+    {n:'10', authors:'Barr EK, Naranjo A, Twist CJ, et al.', title:'Long-term follow-up of patients with intermediate-risk neuroblastoma: COG ANBL0531.', journal:'Pediatr Blood Cancer. 2024;71(8):e31089.', pmid:'38822537'},
+    {n:'14', authors:'Bender HG, Irwin MS, Hogarty MD, et al.', title:'Survival of Patients With Neuroblastoma After Assignment to Reduced Therapy Because of the 12- to 18-Month Change in Age Cutoff.', journal:'J Clin Oncol. 2023;41(17):3149-3159.', pmid:'37098238'},
+    {n:'15', authors:'von Allmen D, Davidoff AM, London WB, et al.', title:'Impact of Extent of Resection on Local Control and Survival: COG A3973.', journal:'J Clin Oncol. 2017;35(2):208-216.', pmid:'27870572'},
+    {n:'28', authors:'Yanik GA, Parisi MT, Shulkin BL, et al.', title:'Semiquantitative mIBG scoring as a prognostic indicator in stage 4 neuroblastoma.', journal:'J Nucl Med. 2013;54(4):541-8.', pmid:'23440556'},
+    {n:'29', authors:'Yanik GA, Parisi MT, Naranjo A, et al.', title:'Validation of Postinduction Curie Scores in High-Risk Neuroblastoma: COG and SIOPEN Report.', journal:'J Nucl Med. 2018;59(3):502-508.', pmid:'28887399'},
+    {n:'30', authors:'Park JR, Kreissman SG, London WB, et al.', title:'Effect of Tandem Autologous Stem Cell Transplant vs Single Transplant on Event-Free Survival: a Randomized Clinical Trial.', journal:'JAMA. 2019;322(8):746-755.', pmid:'31454045'},
+    {n:'36', authors:'Casey DL, Kushner BH, Cheung NK, et al.', title:'Local Control With 21-Gy Radiation Therapy for High-Risk Neuroblastoma.', journal:'Int J Radiat Oncol Biol Phys. 2016;96(2):393-400.', pmid:'27473818'},
+    {n:'38', authors:'Liu KX, Naranjo A, Zhang FF, et al.', title:'Prospective Evaluation of Radiation Dose Escalation in Patients With High-Risk Neuroblastoma: COG ANBL0532.', journal:'J Clin Oncol. 2020;38(24):2741-2752.', pmid:'32530765'},
+    {n:'46', authors:'Casey DL, Pitter KL, Kushner BH, et al.', title:'Radiation Therapy to Sites of Metastatic Disease as Part of Consolidation in High-Risk Neuroblastoma.', journal:'Int J Radiat Oncol Biol Phys. 2018;100(5):1204-1209.', pmid:'29439882'},
+    {n:'48', authors:'Yu AL, Gilman AL, Ozkaynak MF, et al.', title:'Anti-GD2 antibody with GM-CSF, interleukin-2, and isotretinoin for neuroblastoma.', journal:'N Engl J Med. 2010;363(14):1324-34.', pmid:'20879881'},
+    {n:'51', authors:'Yu AL, Gilman AL, Ozkaynak MF, et al.', title:'Long-Term Follow-up of a Phase III Study of ch14.18 (Dinutuximab) + Cytokine Immunotherapy: COG ANBL0032.', journal:'Clin Cancer Res. 2021;27(8):2179-2189.', pmid:'33504555'},
+    {n:'56', authors:'Ladenstein R, Pötschger U, Valteau-Couanet D, et al.', title:'Interleukin 2 with anti-GD2 antibody ch14.18/CHO (dinutuximab beta): HR-NBL1/SIOPEN phase 3 trial.', journal:'Lancet Oncol. 2018;19(12):1617-1629.', pmid:'30442501'},
+    {n:'57', authors:'Ladenstein RL, Poetschger U, Valteau-Couanet D, et al.', title:'Randomization of dose-reduced subcutaneous IL2 in maintenance immunotherapy.', journal:'J Clin Oncol. 2019;37(suppl 15):A-10013.', pmid:''},
+    {n:'60', authors:'Oesterheld J, Ferguson W, Kraveka JM, et al.', title:'Eflornithine as Postimmunotherapy Maintenance in High-Risk Neuroblastoma.', journal:'J Clin Oncol. 2024;42(1):90-102.', pmid:'37883734'}
+  ];
+
+  var html = '<div class="refs-section"><div class="refs-title">Références</div>';
+  for (var i = 0; i < refs.length; i++) {
+    var r = refs[i];
+    html += '<div class="ref-item"><span class="ref-num">[' + r.n + ']</span><div>';
+    html += '<span class="ref-authors">' + r.authors + '</span>';
+    html += '<div class="ref-title-r">' + r.title + '</div>';
+    html += '<div class="ref-journal">' + r.journal;
+    if (r.pmid) html += ' <a href="https://pubmed.ncbi.nlm.nih.gov/' + r.pmid + '/" target="_blank" style="color:var(--cyan);font-family:\'DM Mono\',monospace;font-size:10px;text-decoration:none">PMID: ' + r.pmid + '</a>';
+    html += '</div></div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ═══ RENDERING ENGINE ═══
+function renderStep(index) {
+  var stepDef = STEPS[index];
+  if (!stepDef) return;
+
+  // Check skip
+  if (stepDef.skip && stepDef.skip()) {
+    STEP = index + 1;
+    if (STEP >= STEPS.length) {
+      showResult();
+    } else {
+      renderStep(STEP);
+    }
+    return;
+  }
+
+  var options = typeof stepDef.options === 'function' ? stepDef.options() : stepDef.options;
+  if (!options || options.length === 0) {
+    STATE[stepDef.id] = 'na';
+    STEP = index + 1;
+    if (STEP >= STEPS.length) {
+      showResult();
+    } else {
+      renderStep(STEP);
+    }
+    return;
+  }
+
+  // Single option = auto select
+  if (options.length === 1 && stepDef.id !== 'stage') {
+    STATE[stepDef.id] = options[0].value;
+    STEP = index + 1;
+    if (STEP >= STEPS.length) {
+      showResult();
+    } else {
+      renderStep(STEP);
+    }
+    return;
+  }
+
+  updateProgress(index);
+
+  var html = '<div class="step-card" data-accent="' + stepDef.accent + '">';
+  html += '<div class="section-label">' + stepDef.label + '</div>';
+  html += '<div class="step-question">' + stepDef.question + '</div>';
+  if (stepDef.note) html += '<div class="step-note">' + stepDef.note + '</div>';
+  html += '<div class="opt-grid">';
+  for (var i = 0; i < options.length; i++) {
+    var o = options[i];
+    html += '<button class="opt-btn" onclick="selectOption(\'' + stepDef.id + '\',\'' + o.value + '\',' + (index + 1) + ')">';
+    html += '<span class="opt-label">' + o.label + '</span>';
+    if (o.desc) html += '<span class="opt-desc">' + o.desc + '</span>';
+    html += '</button>';
+  }
+  html += '</div></div>';
+
+  document.getElementById('stepsContainer').innerHTML += html;
+  scrollToBottom();
+}
+
+function selectOption(field, value, nextIndex) {
+  STATE[field] = value;
+  STEP = nextIndex;
+  if (STEP >= STEPS.length) {
+    showResult();
+  } else {
+    renderStep(STEP);
+  }
+}
+
+function showResult() {
+  var res = determineRisk();
+  updateProgress(STEPS.length);
+  document.getElementById('stepsContainer').innerHTML += getResultHTML(res);
+  scrollToBottom();
+}
+
+function updateProgress(current) {
+  var total = STEPS.length;
+  var pct = Math.min(100, Math.round((current / total) * 100));
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = current >= total ? 'Résultat' : 'Étape ' + (current + 1) + ' / ' + total;
+}
+
+function scrollToBottom() {
+  setTimeout(function() {
+    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+  }, 100);
+}
+
+function resetAll() {
+  STATE = {};
+  STEP = 0;
+  document.getElementById('stepsContainer').innerHTML = '';
+  updateProgress(0);
+  renderStep(0);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function printResult() {
+  document.querySelectorAll('.step-card:not(.result-card)').forEach(function(el) {
+    el.dataset.hiddenForPrint = 'true';
+    el.style.display = 'none';
+  });
+  document.querySelector('.progress-wrap').style.display = 'none';
+  window.print();
+  document.querySelectorAll('[data-hidden-for-print]').forEach(function(el) {
+    el.style.display = '';
+    delete el.dataset.hiddenForPrint;
+  });
+  document.querySelector('.progress-wrap').style.display = '';
+}
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded', function() {
+  renderStep(0);
+});
+</script>
+</body>
+</html>
