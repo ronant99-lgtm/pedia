@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>UMBRELLA · Néphroblastome — Stratification &amp; Logigramme</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+/* ── RESET ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── THÈME (root = sombre / body.light = parchemin) ── */
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b22;
+  --surface2: #1c2330;
+  --surface3: #21262d;
+  --border:   #2a3441;
+  --border2:  #30363d;
+  --text:     #e6edf3;
+  --text2:    #8b949e;
+  --text3:    #6e7681;
+  --green:    #3fb950;
+  --blue:     #388bfd;
+  --red:      #f85149;
+  --yellow:   #d29922;
+  --purple:   #a371f7;
+  --orange:   #f0883e;
+  --cyan:     #39c5cf;
+  --accent:   #388bfd;
+  --accent-rgb: 56,139,253;
+  --lr:       #3fb950; --lr-bg: rgba(63,185,80,0.08);  --lr-border: rgba(63,185,80,0.25);
+  --sr:       #388bfd; --sr-bg: rgba(56,139,253,0.08);  --sr-border: rgba(56,139,253,0.25);
+  --hr:       #f85149; --hr-bg: rgba(248,81,73,0.08);   --hr-border: rgba(248,81,73,0.25);
+  --sp:       #d29922; --sp-bg: rgba(210,153,34,0.08);  --sp-border: rgba(210,153,34,0.25);
+  --radius:   10px;
+}
+body.light {
+  --bg:       #f5f0e8;
+  --surface:  #ffffff;
+  --surface2: #ede8dc;
+  --surface3: #e6e0d2;
+  --border:   #c8bfaa;
+  --border2:  #d4ccba;
+  --text:     #1a1208;
+  --text2:    #5a4f3a;
+  --text3:    #9a8f7a;
+  --green:    #2d7a3a;
+  --blue:     #1a5fa8;
+  --red:      #c0392b;
+  --yellow:   #a0720a;
+  --purple:   #6b3fa0;
+  --orange:   #c45a10;
+  --cyan:     #1a7a8a;
+  --accent:   #1a5fa8;
+  --accent-rgb: 26,95,168;
+  --lr:       #2d7a3a; --lr-bg: rgba(45,122,58,0.08);   --lr-border: rgba(45,122,58,0.3);
+  --sr:       #1a5fa8; --sr-bg: rgba(26,95,168,0.08);   --sr-border: rgba(26,95,168,0.3);
+  --hr:       #c0392b; --hr-bg: rgba(192,57,43,0.08);   --hr-border: rgba(192,57,43,0.3);
+  --sp:       #a0720a; --sp-bg: rgba(160,114,10,0.08);  --sp-border: rgba(160,114,10,0.3);
+}
+
+/* ── BASE ── */
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(13,17,23,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;
+}
+body.light header {
+  background: rgba(245,240,232,0.97);
+  backdrop-filter: blur(10px);
+}
+.hdr-logo {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border: 1.5px solid var(--accent); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500;
+  color: var(--accent);
+}
+.hdr-texts { flex: 1; min-width: 0; }
+.hdr-title {
+  font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hdr-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); margin-top: 2px; }
+.hdr-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(var(--accent-rgb), .1); border: 1px solid rgba(var(--accent-rgb), .3);
+  color: var(--accent); margin-left: auto; flex-shrink: 0; white-space: nowrap;
+}
+.btn-theme {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text2); font-size: 14px; cursor: pointer;
+  transition: all .18s; display: flex; align-items: center; justify-content: center;
+  margin-left: 8px; flex-shrink: 0;
+}
+.btn-theme:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── TAB NAV ── */
+.tab-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  z-index: 150;
+}
+body.light .tab-nav { background: var(--surface2); }
+.tab-btn {
+  flex: 1; padding: 11px 16px;
+  border: none; background: none; color: var(--text2);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all .2s;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+body.light .tab-btn:hover { background: rgba(0,0,0,.04); }
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+#panel-flow { overflow: hidden; position: relative; }
+#chart { width: 100%; height: 100%; cursor: grab; }
+#chart:active { cursor: grabbing; }
+
+/* ── WIZARD LAYOUT ── */
+.container { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+.progress-wrap { margin-bottom: 24px; }
+.progress-header {
+  display: flex; justify-content: space-between;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--text3); margin-bottom: 8px;
+}
+.progress-bar-bg { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.progress-fill {
+  height: 100%; background: var(--accent);
+  border-radius: 2px; transition: width .4s ease;
+}
+.breadcrumb {
+  display: flex; flex-wrap: wrap; gap: 0;
+  margin-bottom: 20px;
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3);
+}
+.bc-item { display: flex; align-items: center; }
+.bc-item::after { content: ' ›'; margin: 0 5px; color: var(--border2); }
+.bc-item:last-child::after { display: none; }
+.bc-item span { color: var(--accent); opacity: 0.75; }
+
+/* ── CARDS QUESTIONS ── */
+.step-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 14px;
+  position: relative; animation: fadeSlide .3s ease; overflow: hidden;
+}
+.step-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; background: var(--accent);
+}
+body.light .step-card { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+@keyframes fadeSlide { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+.step-num { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+.step-question { font-family: 'DM Serif Display', serif; font-size: clamp(16px,2.5vw,20px); color: var(--text); line-height: 1.35; margin-bottom: 6px; }
+.step-hint { font-size: 12px; color: var(--text2); font-style: italic; margin-bottom: 22px; line-height: 1.55; }
+
+/* ── CHOICES ── */
+.choices { display: grid; gap: 10px; }
+.choices.cols2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.choices.cols1 { grid-template-columns: 1fr; }
+.choice-btn {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 13px 16px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px;
+  cursor: pointer; text-align: left; transition: all .2s;
+  position: relative; overflow: hidden;
+}
+.choice-btn::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--accent);
+  transform: scaleY(0); transition: transform .2s;
+}
+.choice-btn:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), .06); transform: translateX(2px); }
+.choice-btn:hover::before { transform: scaleY(1); }
+body.light .choice-btn:hover { background: rgba(var(--accent-rgb), .06); }
+.choice-label { font-weight: 600; display: block; margin-bottom: 3px; }
+.choice-sub { font-size: 11.5px; color: var(--text3); font-style: italic; }
+
+/* ── RESULT CARD ── */
+.result-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px;
+  animation: fadeSlide .3s ease; position: relative; overflow: hidden;
+}
+body.light .result-card { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.result-card.lr { border-color: var(--lr-border); border-left: 3px solid var(--lr); }
+.result-card.sr { border-color: var(--sr-border); border-left: 3px solid var(--sr); }
+.result-card.hr { border-color: var(--hr-border); border-left: 3px solid var(--hr); }
+.result-card.sp { border-color: var(--sp-border); border-left: 3px solid var(--sp); }
+.result-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.result-icon { width: 46px; height: 46px; flex-shrink: 0; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.lr .result-icon { background: var(--lr-bg); border: 1px solid var(--lr-border); }
+.sr .result-icon { background: var(--sr-bg); border: 1px solid var(--sr-border); }
+.hr .result-icon { background: var(--hr-bg); border: 1px solid var(--hr-border); }
+.sp .result-icon { background: var(--sp-bg); border: 1px solid var(--sp-border); }
+.result-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); margin-bottom: 3px; }
+.result-subtitle { font-size: 12px; color: var(--text2); }
+
+/* ── TAGS ── */
+.tag { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.8px; padding: 3px 9px; border-radius: 4px; margin: 2px; text-transform: uppercase; }
+.tag-lr { background: var(--lr-bg); color: var(--lr); }
+.tag-sr { background: var(--sr-bg); color: var(--sr); }
+.tag-hr { background: var(--hr-bg); color: var(--hr); }
+.tag-sp { background: var(--sp-bg); color: var(--sp); }
+.tag-info { background: rgba(var(--accent-rgb),.1); color: var(--accent); }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 2px; color: var(--text3); text-transform: uppercase;
+  margin-bottom: 10px; margin-top: 20px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+
+/* ── PROTO LINES ── */
+.proto-line { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 6px; margin-bottom: 6px; font-size: 13px; line-height: 1.55; }
+.proto-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.proto-line strong { color: var(--text); font-weight: 500; }
+.proto-line em { color: var(--text2); }
+
+/* ── OUTCOMES ── */
+.outcome-block { background: var(--surface2); border-radius: 8px; padding: 14px 16px; margin-top: 6px; }
+body.light .outcome-block { box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.outcome-row { display: flex; align-items: baseline; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.outcome-row:last-child { border-bottom: none; }
+.outcome-label { color: var(--text2); }
+.outcome-val { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 13px; }
+.outcome-good { color: var(--green); }
+.outcome-mid  { color: var(--yellow); }
+.outcome-poor { color: var(--red); }
+.outcome-ref  { font-size: 9px; color: var(--text3); vertical-align: super; margin-left: 2px; }
+
+/* ── RT BLOCK ── */
+.rt-block { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 8px; padding: 16px; margin-bottom: 10px; }
+body.light .rt-block { box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.rt-block-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; color: var(--blue); text-transform: uppercase; margin-bottom: 12px; }
+.rt-section { margin-bottom: 11px; padding-bottom: 11px; border-bottom: 1px solid var(--border); }
+.rt-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.rt-section-hdr { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 7px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.rt-tag { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 4px; background: rgba(var(--accent-rgb),.12); color: var(--blue); flex-shrink: 0; }
+.rt-tag.yellow { background: rgba(210,153,34,.12); color: var(--yellow); }
+.rt-tag.alert  { background: rgba(248,81,73,.12);  color: var(--red); }
+.rt-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 560px) { .rt-2col { grid-template-columns: 1fr; } }
+.rt-box { background: var(--surface3); border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; margin-bottom: 6px; }
+.rt-box-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.rt-box-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+.rt-sub { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
+.rt-note { font-size: 11px; color: var(--text2); margin-top: 5px; line-height: 1.5; }
+.rt-dose          { color: var(--blue); font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+.rt-dose.esc      { color: var(--yellow); }
+.rt-dose.highesc  { color: var(--red); }
+.no-rt-box { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--text3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--text3); margin-bottom: 10px; }
+
+/* ── CHEMO TABLE ── */
+.chemo-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.chemo-table th { text-align: left; font-family: 'DM Mono', monospace; font-size: 9.5px; color: var(--accent); letter-spacing: 1px; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.chemo-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.4; }
+.chemo-table tr:last-child td { border-bottom: none; }
+.chemo-table td:first-child { font-weight: 500; }
+
+/* ── ALERT ── */
+.alert-box { background: var(--sp-bg); border: 1px solid var(--sp-border); border-radius: 8px; padding: 11px 14px; font-size: 12px; color: var(--yellow); line-height: 1.6; display: flex; gap: 9px; margin-top: 10px; }
+
+/* ── SUMMARY PANEL ── */
+.summary-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; margin-bottom: 18px; }
+.sp-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text3); text-transform: uppercase; margin-bottom: 9px; }
+.sp-row { display: flex; gap: 10px; font-size: 12px; margin-bottom: 4px; }
+.sp-key { color: var(--text2); min-width: 130px; flex-shrink: 0; }
+.sp-val { color: var(--text); font-weight: 500; }
+
+/* ── MATRIX ── */
+.matrix-row { margin-bottom: 14px; }
+.matrix-stage { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 1.5px; margin-bottom: 5px; }
+.matrix-inner { background: var(--surface2); border-radius: 6px; padding: 11px 14px; font-size: 12.5px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mi-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+.mi-val { color: var(--text); font-weight: 400; }
+.mi-val.rt { color: var(--red); }
+.mi-note { grid-column: 1/-1; font-size: 11px; color: var(--text3); font-style: italic; border-top: 1px solid var(--border); padding-top: 6px; margin-top: 4px; }
+
+/* ── RESULT ACTIONS ── */
+.result-actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; align-items: center; }
+.btn-back, .btn-restart, .btn-pdf {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  padding: 9px 18px; border-radius: 6px; cursor: pointer;
+  transition: all 0.18s; border: 1px solid var(--border);
+  background: transparent; color: var(--text2);
+}
+.btn-back:hover, .btn-restart:hover { border-color: var(--accent); color: var(--accent); }
+.btn-pdf { border-color: rgba(63,185,80,0.4); color: var(--green); }
+.btn-pdf:hover { background: rgba(63,185,80,0.08); }
+
+/* ── REFS ── */
+.refs-section { margin-top: 48px; border-top: 1px solid var(--border); padding-top: 24px; }
+.refs-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+.ref-item { display: flex; gap: 12px; margin-bottom: 14px; font-size: 11.5px; }
+.ref-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); min-width: 18px; padding-top: 2px; }
+.ref-body { flex: 1; }
+.ref-authors { font-weight: 500; color: var(--text); }
+.ref-title-text { color: var(--text2); margin-top: 2px; line-height: 1.4; }
+.ref-journal { color: var(--text3); font-size: 10.5px; margin-top: 1px; }
+.ref-doi a { color: var(--accent); font-size: 10.5px; font-family: 'DM Mono', monospace; text-decoration: none; }
+.ref-doi a:hover { text-decoration: underline; }
+
+/* ── D3 FLOWCHART ── */
+.btn-reset-zoom {
+  position: absolute; top: 14px; right: 14px;
+  background: var(--surface); border: 1px solid var(--border2); color: var(--text2);
+  padding: 7px 14px; border-radius: 6px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  cursor: pointer; z-index: 10; transition: all .2s;
+}
+.btn-reset-zoom:hover { border-color: var(--accent); color: var(--accent); }
+body.light .btn-reset-zoom { background: var(--surface); }
+.flow-legend {
+  position: absolute; bottom: 14px; left: 14px;
+  display: flex; flex-wrap: wrap; gap: 8px; z-index: 10; pointer-events: none;
+}
+.leg-it { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text2); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+/* ── TOOLTIP D3 (fixe — sombre dans les deux modes) ── */
+.tt-body {
+  position: fixed; pointer-events: none; z-index: 300;
+  background: rgba(13,17,23,.97);
+  border-radius: 10px; padding: 14px 16px; width: 310px;
+  box-shadow: 0 6px 28px rgba(0,0,0,.35);
+  border: 1px solid rgba(56,139,253,.2);
+  display: none;
+}
+.tt-title { font-family: 'DM Mono', monospace; font-size: 9px; color: #6e7681; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 7px; }
+.tt-q { font-size: 13px; font-weight: 500; color: #e6edf3; margin-bottom: 10px; line-height: 1.4; }
+.tt-section { margin-bottom: 9px; padding-bottom: 9px; border-bottom: 1px solid #2a3441; }
+.tt-section:last-of-type { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.tt-section-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: #6e7681; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+.tt-val { font-size: 11px; color: #8b949e; line-height: 1.5; }
+.tt-outcome-line { margin-top: 8px; font-family: 'DM Mono', monospace; font-size: 11px; }
+.efs-good { color: #3fb950; }
+.efs-mid  { color: #d29922; }
+.efs-bad  { color: #f85149; }
+
+/* ── PRINT ── */
+.print-footer { display: none; }
+@media print {
+  body, body.light { background: #fff !important; color: #000 !important; }
+  header, body.light header { position: static !important; background: #fff !important; border-bottom: 1px solid #ccc !important; }
+  .tab-nav, .btn-pdf, .btn-restart, .progress-wrap,
+  .btn-back, #panel-flow, .btn-theme, .breadcrumb { display: none !important; }
+  .panel { display: block !important; }
+  .result-card { border: 1.5px solid #333 !important; background: #fff !important; break-inside: avoid; }
+  .rt-block { border-left: 3px solid #1a5fa8 !important; background: #f5f5f5 !important; }
+  .rt-dose { color: #1a5fa8 !important; }
+  .rt-dose.esc { color: #a0720a !important; }
+  .rt-dose.highesc { color: #c0392b !important; }
+  .print-footer { display: block; font-size: 8pt; color: #999; margin-top: 22px; border-top: 1px solid #ddd; padding-top: 8px; }
+  :root, body.light { --text: #000; --text2: #444; --text3: #888; --surface: #fff; --surface2: #f5f5f5; --surface3: #eee; --border: #ddd; --border2: #eee; --blue: #1a5fa8; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">SI</div>
+  <div class="hdr-texts">
+    <div class="hdr-title">Tumeurs rénales pédiatriques — Stratification &amp; Logigramme</div>
+    <div class="hdr-sub">SIOP–RTSG UMBRELLA 2016 · Outil d'aide à la décision clinique</div>
+  </div>
+  <span class="hdr-badge">UMBRELLA 2016</span>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Passer en mode clair">◑</button>
+</header>
+
+<div class="tab-nav" id="tab-nav">
+  <button class="tab-btn active" id="tab-wizard" onclick="switchTab('wizard')">⬡ Stratification pas-à-pas</button>
+  <button class="tab-btn" id="tab-flow" onclick="switchTab('flow')">⬡ Logigramme interactif</button>
+</div>
+
+<!-- PANEL WIZARD -->
+<div class="panel active" id="panel-wizard">
+  <div class="container">
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-header">
+        <span id="progress-label">Étape 0 / ~9</span>
+        <span id="progress-step-name"></span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div id="breadcrumb" class="breadcrumb"></div>
+    <div id="app"></div>
+
+    <div class="refs-section" id="refs-section" style="display:none">
+      <div class="refs-title">Références</div>
+      <div style="margin-bottom:14px;font-size:11.5px;">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-right:8px">[0]</span>
+        <span style="color:var(--text2)">Protocole complet SIOPE :</span>
+        <a href="https://siope.eu/media/documents/escp-treatment-of-renal-tumours.pdf" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:10.5px;text-decoration:none">ESCP Treatment of Renal Tumours (SIOPE 2023) ↗</a>
+      </div>
+      <div id="refs-list"></div>
+    </div>
+
+    <div class="print-footer">
+      Outil d'aide à la décision — Ne se substitue pas au jugement clinique ni aux recommandations en vigueur.<br>
+      Protocole SIOPE complet : <strong>https://siope.eu/media/documents/escp-treatment-of-renal-tumours.pdf</strong>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL FLOW -->
+<div class="panel" id="panel-flow">
+  <div id="chart"></div>
+  <button class="btn-reset-zoom" id="btnReset">⊙ Recentrer</button>
+  <div class="flow-legend">
+    <div class="leg-it"><div class="leg-dot" style="background:#1a5fa8"></div>Décision</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#6b3fa0"></div>Histologie</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#2d7a3a"></div>Bas risque (LR)</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#1a5fa8;opacity:.55"></div>Risque standard (SR)</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#c0392b"></div>Haut risque (HR)</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#a0720a"></div>Spécial / Discussion</div>
+  </div>
+  <div class="tt-body" id="tt-body"></div>
+</div>
+
+<script>
+// ═══ THÈME ═══
+var THEME_KEY = 'theme-umbrella-nephroblastome';
+
+function initTheme() {
+  try { if (localStorage.getItem(THEME_KEY) === 'light') applyTheme('light'); } catch(e) {}
+}
+
+function toggleTheme() {
+  applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+}
+
+function applyTheme(mode) {
+  var btn = document.getElementById('btn-theme');
+  if (mode === 'light') {
+    document.body.classList.add('light');
+    btn.textContent = '☀';
+    btn.title = 'Passer en mode sombre';
+    try { localStorage.setItem(THEME_KEY, 'light'); } catch(e) {}
+  } else {
+    document.body.classList.remove('light');
+    btn.textContent = '◑';
+    btn.title = 'Passer en mode clair';
+    try { localStorage.setItem(THEME_KEY, 'dark'); } catch(e) {}
+  }
+}
+
+// ═══ TABS ═══
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.style.display = 'none'; p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  var panel = document.getElementById('panel-' + tab);
+  panel.style.display = (tab === 'flow') ? 'block' : 'block';
+  panel.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  fixLayout();
+  if (tab === 'flow' && !window._flowBuilt) {
+    buildFlow();
+    window._flowBuilt = true;
+  }
+}
+
+function fixLayout() {
+  var hh = document.querySelector('header').offsetHeight;
+  var navH = document.querySelector('.tab-nav').offsetHeight;
+  var tabNav = document.querySelector('.tab-nav');
+  tabNav.style.top = hh + 'px';
+  var fp = document.getElementById('panel-flow');
+  fp.style.height = (window.innerHeight - hh - navH) + 'px';
+}
+
+window.addEventListener('resize', fixLayout);
+
+// ═══ RÉFÉRENCES ═══
+var REFS = {
+  0: { authors: 'SIOPE Renal Tumour Study Group (SIOP–RTSG)', title: 'ESCP Treatment of Renal Tumours — Standard Clinical Practice Document', journal: 'SIOPE. 2023 (mise à jour)', doi: 'https://siope.eu/media/documents/escp-treatment-of-renal-tumours.pdf', note: 'Protocole complet SIOPE — schémas thérapeutiques, doses RT, algorithmes de rechute. Accès libre.' },
+  1: { authors: 'van den Heuvel-Eibrink MM, Hol JA, Pritchard-Jones K, et al.', title: 'Position paper: Rationale for the treatment of Wilms tumour in the UMBRELLA SIOP–RTSG 2016 protocol', journal: 'Nat Rev Urol. 2017;14:743–752', doi: 'https://doi.org/10.1038/nrurol.2017.163', note: 'Protocole UMBRELLA 2016 — référence fondatrice' },
+  2: { authors: 'de Kraker J, Graf N, van Tinteren H, et al.', title: 'Reduction of postoperative chemotherapy in children with stage I intermediate-risk and anaplastic Wilms tumour (SIOP 93-01 trial)', journal: 'Lancet. 2004;364:1229–1235', doi: 'https://doi.org/10.1016/S0140-6736(04)17139-6', note: 'Essai SIOP 93-01 — EFS 90%, OS 95% stade II–III LR/IR' },
+  3: { authors: 'van den Heuvel-Eibrink MM, et al. (SIOP-RTSG)', title: 'Outcome of localised blastemal-type Wilms tumour patients treated according to intensified treatment in the SIOP WT 2001 protocol', journal: 'Eur J Cancer. 2015;51:498–506', doi: 'https://doi.org/10.1016/j.ejca.2014.11.012', note: 'Blastemal type EFS 80%, OS 88% (stades I–III) ; stade I EFS 96%, OS 100%' },
+  4: { authors: 'Pritchard-Jones K, Bergeron C, De Camargo B, et al.', title: 'Omission of doxorubicin from the treatment of stage II–III, intermediate-risk Wilms tumour (SIOP WT 2001)', journal: 'Lancet. 2015;386:1156–1164', doi: 'https://doi.org/10.1016/S0140-6736(14)62395-3', note: 'OS 5 ans 96% stades II–III IR avec ou sans doxorubicine' },
+  5: { authors: 'Warmann SW, Furtwängler R, Blumenstock G, et al.', title: 'Tumor biology influences the prognosis of nephroblastoma patients with primary pulmonary metastases: SIOP 93-01/GPOH and SIOP 2001/GPOH', journal: 'Ann Surg. 2011;254:155–162', doi: 'https://doi.org/10.1097/SLA.0b013e318221dd33', note: 'Stade IV : EFS 5 ans 79% (CR), 67% (RP), 17% (SD/PD)' },
+  6: { authors: 'Pasqualini C, Furtwängler R, van Tinteren H, et al.', title: 'Outcome of patients with stage IV high-risk Wilms tumour treated according to the SIOP2001 protocol', journal: 'Eur J Cancer. 2020;128:38–46', doi: 'https://doi.org/10.1016/j.ejca.2019.12.012', note: 'Stade IV HR: EFS 44% (BT), 28% (DA) ; OS 53% (BT), 29% (DA)' },
+  7: { authors: 'Brok J, et al. (SIOP-RTSG)', title: 'Advances in the Clinical Management of High-Risk Wilms Tumors', journal: 'Front Oncol. 2024;14', doi: 'https://doi.org/10.3389/fonc.2024.1331387', note: 'Rechute AA ~80% OS ; BB ~40–50% survie ; CC ~10%' },
+  8: { authors: 'Hol JA, et al. (SIOP-RTSG)', title: 'Outcome of patients with first relapse after intermediate- or high-risk Wilms tumor, SIOP WT 2001/UK-IMPORT', journal: 'Eur J Cancer. 2025', doi: 'https://doi.org/10.1016/j.ejca.2025.115178', note: 'Groupe BB: EFS 63%, OS 68% (5 ans)' },
+  9: { authors: 'Furtwängler R, et al. (SIOP-RTSG)', title: '5-year EFS/OS CCSK SIOP 93-01 and SIOP 2001: EFS 78%, OS 86%', journal: 'ESCP Renal Tumours Standard Clinical Practice. 2023', doi: 'https://siope.eu/media/documents/escp-treatment-of-renal-tumours.pdf', note: 'CCSK : EFS 5 ans 78%, OS 5 ans 86% ; stades I–IV' },
+  10: { authors: 'van den Heuvel-Eibrink MM, et al.', title: 'Characteristics and survival of 750 children with renal tumor in the first seven months of life', journal: 'Pediatr Blood Cancer. 2008;50:1130–1134', doi: 'https://doi.org/10.1002/pbc.21468', note: 'CMN : OS > 96% après résection complète' },
+  11: { authors: 'Mul J, van Grotel M, Seravalli E, et al.', title: 'Locoregional control using highly conformal flank target volumes and VMAT in pediatric renal tumors', journal: 'Radiother Oncol. 2021;159:249–254', doi: 'https://doi.org/10.1016/j.radonc.2021.04.005', note: 'Données RT flank VMAT : LCR 2 ans 94%, DFI 91%, OS 94% (n=36)' },
+  12: { authors: 'Vujanić GM, et al.', title: 'Outcomes of patients with Wilms tumour stage III due to positive resection margins only: SIOP-WT-2001', journal: 'Int J Cancer. 2023;152:2109–2121', doi: 'https://doi.org/10.1002/ijc.34371', note: 'Stade III marges+ : RFS 95.7%, EFS 85.1%, OS 90.3%' },
+};
+
+function renderRefs(ids) {
+  var list = document.getElementById('refs-list');
+  var section = document.getElementById('refs-section');
+  if (!ids || ids.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = ids.map(function(id) {
+    var r = REFS[id];
+    if (!r) return '';
+    return '<div class="ref-item">'
+      + '<span class="ref-num">[' + id + ']</span>'
+      + '<div class="ref-body">'
+      + '<div class="ref-authors">' + r.authors + '</div>'
+      + '<div class="ref-title-text">' + r.title + '</div>'
+      + '<div class="ref-journal">' + r.journal + '</div>'
+      + (r.doi ? '<div class="ref-doi"><a href="' + r.doi + '" target="_blank">' + r.doi + '</a></div>' : '')
+      + (r.note ? '<div class="ref-journal" style="margin-top:2px;font-style:italic">' + r.note + '</div>' : '')
+      + '</div></div>';
+  }).join('');
+}
+
+// ═══ ÉTAT WIZARD ═══
+var wState = {};
+var navStack = [];
+var currentStep = 'start';
+var MAX_STEPS = 9;
+
+// ═══ DONNÉES LOCALISÉES ═══
+var LOCALISED_DATA = {
+  LR: {
+    I:   { chemo: 'Aucune chimiothérapie post-opératoire', rt: null, efs: '> 97 %', os: '> 99 %', ref_efs: 2 },
+    II:  { chemo: 'AV × 18 sem (Vincristine + Actinomycine D)', rt: null, efs: '~95 %', os: '~98 %', ref_efs: 2 },
+    III: { chemo: 'AVD × 27 sem', rt: '10,8 Gy / 6 fr / 1,8 Gy/fr (flanc)', efs: '~93 %', os: '~97 %', ref_efs: 2 },
+  },
+  IR: {
+    I:   { chemo: 'AV × 18 sem (Vincristine + Actinomycine D)', rt: null, efs: '~90 %', os: '~95 %', ref_efs: 4 },
+    II:  { chemo: 'AVD × 27 sem', rt: null, efs: '~88 %', os: '~96 %', ref_efs: 4 },
+    III: { chemo: 'AVD × 27 sem', rt: '10,8 Gy / 6 fr / 1,8 Gy/fr (flanc)', efs: '~83 %', os: '~94 %', ref_efs: 4 },
+  },
+  HR_BT: {
+    I:   { chemo: 'HR-1 × 34 sem', rt: null, efs: '~96 %', os: '~100 %', ref_efs: 3 },
+    II:  { chemo: 'HR-1 × 34 sem', rt: '25,2 Gy / 14 fr / 1,8 Gy/fr (flanc)', efs: '~80 %', os: '~88 %', ref_efs: 3 },
+    III: { chemo: 'HR-1 × 34 sem', rt: '25,2 Gy / 14 fr / 1,8 Gy/fr (flanc)', efs: '80 %', os: '88 %', ref_efs: 3 },
+  },
+  HR_DA: {
+    I:   { chemo: 'AVD × 27 sem', rt: null, efs: '~93 %', os: '~95 %', ref_efs: 1 },
+    II:  { chemo: 'HR-1 × 34 sem', rt: '25,2 Gy / 14 fr / 1,8 Gy/fr (flanc)', efs: '~70 %', os: '~80 %', ref_efs: 1 },
+    III: { chemo: 'HR-1 × 34 sem', rt: '25,2 Gy / 14 fr / 1,8 Gy/fr ± WAI si rupture', efs: '~70 %', os: '~80 %', ref_efs: 1 },
+  },
+};
+
+var RISK_LABELS = {
+  LR:    { label: 'Faible Risque (LR)',            tag: 'tag-lr', cls: 'lr', icon: '🟢' },
+  IR:    { label: 'Risque Intermédiaire (IR)',       tag: 'tag-sr', cls: 'sr', icon: '🟡' },
+  HR_BT: { label: 'Haut Risque — Blastemal Type',   tag: 'tag-hr', cls: 'hr', icon: '🔴' },
+  HR_DA: { label: 'Haut Risque — Anaplasie Diffuse', tag: 'tag-hr', cls: 'hr', icon: '🔴' },
+};
+
+// ═══ ÉTAPES ═══
+var STEPS = {
+  start: {
+    label: 'Présentation', num: 1, total: MAX_STEPS,
+    q: 'Présentation clinique initiale',
+    sub: 'Identifier la configuration d\'entrée du patient',
+    opts: [
+      { val: 'unilateral',  label: 'Tumeur rénale unilatérale', desc: 'Masse rénale unique, localisée' },
+      { val: 'bilateral',   label: 'Tumeur bilatérale (Stade V)', desc: 'Atteinte rénale synchrone bilatérale' },
+      { val: 'stage4',      label: 'Métastases à distance (Stade IV)', desc: 'Pulmonaires, hépatiques ou autres' },
+      { val: 'relapse',     label: 'Rechute / Récidive', desc: 'Après traitement de 1ère ligne' },
+    ],
+    next: function(val) {
+      if (val === 'unilateral') return 'age';
+      if (val === 'bilateral')  return '_result_bilateral';
+      if (val === 'stage4')     return 'stage4_site';
+      if (val === 'relapse')    return 'relapse_prior';
+    }
+  },
+  age: {
+    label: 'Âge', num: 2, total: MAX_STEPS,
+    q: 'Âge du patient',
+    sub: 'Conditionne la stratégie de traitement initial',
+    opts: [
+      { val: 'infant',   label: '< 6 mois', desc: 'Protocole nourrisson adapté' },
+      { val: 'standard', label: '6 mois – 16 ans', desc: 'Âge standard SIOPE' },
+      { val: 'adult',    label: '> 16 ans / Adulte', desc: 'Prise en charge adulte SIOPE' },
+    ],
+    next: function(val) {
+      if (val === 'infant')   return '_result_infant';
+      if (val === 'adult')    return '_result_adult';
+      return 'imaging';
+    }
+  },
+  imaging: {
+    label: 'Imagerie', num: 3, total: MAX_STEPS,
+    q: 'Bilan d\'imagerie réalisé ?',
+    sub: 'IRM abdominale + TDM thoracique recommandés (§11.3). Orienter vers biopsie si doute diagnostique.',
+    opts: [
+      { val: 'typical',  label: 'IRM abdomen + TDM thorax — aspect typique de WT', desc: 'Démarrage CT néoadjuvante sans biopsie' },
+      { val: 'atypical', label: 'Aspect atypique / biopsie indiquée', desc: 'Tumeur non-Wilms possible' },
+    ],
+    next: function(val) {
+      if (val === 'atypical') return 'biopsy_result';
+      return 'preop_chemo';
+    }
+  },
+  biopsy_result: {
+    label: 'Histologie', num: 4, total: MAX_STEPS,
+    q: 'Type histologique après biopsie',
+    sub: 'Les tumeurs non-Wilms suivent des algorithmes spécifiques (§18)',
+    opts: [
+      { val: 'wt',   label: 'Tumeur de Wilms (Néphroblastome)', desc: 'Continuer algorithme WT' },
+      { val: 'ccsk', label: 'Sarcome à cellules claires (CCSK)', desc: 'Protocole spécifique UMBRELLA §18.1' },
+      { val: 'mrtk', label: 'Tumeur rhabdoïde maligne (MRTK)', desc: 'Protocole MRTK / EU-RHAB' },
+      { val: 'rcc',  label: 'Carcinome à cellules rénales (RCC)', desc: 'Chirurgie première §18.2' },
+    ],
+    next: function(val) {
+      if (val === 'ccsk') return '_result_ccsk';
+      if (val === 'mrtk') return '_result_mrtk';
+      if (val === 'rcc')  return '_result_rcc';
+      return 'preop_chemo';
+    }
+  },
+  preop_chemo: {
+    label: 'CT néoadj.', num: 4, total: MAX_STEPS,
+    q: 'Chimiothérapie néoadjuvante',
+    sub: '4 semaines AV standard pour stade I–III présumé. 6 semaines AVD si stade IV (§15.2, §15.3)',
+    opts: [
+      { val: 'av4', label: '4 semaines AV', desc: 'Actinomycine D + Vincristine · stade I–III présumé' },
+      { val: 'avd6', label: '6 semaines AVD', desc: 'AV + Doxorubicine · stade IV ou doute → redirection stade IV' },
+    ],
+    next: function(val) {
+      if (val === 'avd6') return 'stage4_site';
+      return 'surgery';
+    }
+  },
+  surgery: {
+    label: 'Chirurgie', num: 5, total: MAX_STEPS,
+    q: 'Type de chirurgie réalisée',
+    sub: 'Après chimiothérapie néoadjuvante. NSS si volume ≤ 300 mL ou rein fonctionnel unique (§16.1.2)',
+    opts: [
+      { val: 'total', label: 'Néphrectomie totale', desc: 'Exérèse complète' },
+      { val: 'nss',   label: 'Chirurgie conservatrice (NSS)', desc: 'Nephron-Sparing Surgery' },
+    ],
+    next: function() { return 'staging'; }
+  },
+  staging: {
+    label: 'Stade', num: 6, total: MAX_STEPS,
+    q: 'Stade chirurgical / pathologique',
+    sub: 'Selon critères SIOPE post-opératoires après chimiothérapie néoadjuvante (§15.5.1)',
+    opts: [
+      { val: 'I',   label: 'Stade I', desc: 'Tumeur limitée au rein, résection R0' },
+      { val: 'II',  label: 'Stade II', desc: 'Extension péri-rénale, marges saines' },
+      { val: 'III', label: 'Stade III', desc: 'Résidu / ganglions / rupture / marges+' },
+    ],
+    next: function() { return 'histo'; }
+  },
+  histo: {
+    label: 'Risque histo', num: 7, total: MAX_STEPS,
+    q: 'Classification histologique post-opératoire',
+    sub: 'Sur la pièce de néphrectomie, après CT néoadjuvante. Basée sur % blastème viable (§4.2)',
+    opts: [
+      { val: 'LR',    label: 'Risque faible (LR)', desc: 'WT complètement nécrosé (CN) · néphrome kystique partiellement différencié' },
+      { val: 'IR',    label: 'Risque intermédiaire (IR)', desc: 'Mélangé, stromal, épithélial, régressif · blastemal < 33% · anaplasie focale' },
+      { val: 'HR_BT', label: 'Risque élevé (HR) — Blastemal type', desc: 'Blastemal ≥ 33% de la tumeur viable' },
+      { val: 'HR_DA', label: 'Risque élevé (HR) — Anaplasie diffuse', desc: 'Diffuse anaplasia (DA) · souvent TP53 muté' },
+    ],
+    next: function() { return '_result_localised'; }
+  },
+  stage4_site: {
+    label: 'Site IV', num: 3, total: 5,
+    q: 'Localisation des métastases',
+    sub: 'Influence la décision de radiothérapie et l\'intensification post-opératoire (§15.3)',
+    opts: [
+      { val: 'pulm',  label: 'Pulmonaires uniquement', desc: 'Forme la plus fréquente du stade IV' },
+      { val: 'liver', label: 'Hépatiques (seules ou combinées)', desc: 'RT hépatique selon résidu' },
+      { val: 'other', label: 'Autres sites / multiples', desc: 'Cérébral, osseux, médiastinal…' },
+    ],
+    next: function(val) {
+      if (val === 'liver') return '_result_stage4_liver';
+      if (val === 'other') return '_result_stage4_other';
+      return 'stage4_response';
+    }
+  },
+  stage4_response: {
+    label: 'Réponse IV', num: 4, total: 5,
+    q: 'Réponse pulmonaire après 6 semaines AVD',
+    sub: 'Évaluée par TDM thoracique à S6, avant chirurgie. CR = disparition complète (§15.3.5)',
+    opts: [
+      { val: 'cr', label: 'RC complète (CR)', desc: 'Disparition de toutes les lésions pulmonaires' },
+      { val: 'pr', label: 'RP / SD / Progression', desc: 'Persistance ou progression des lésions' },
+    ],
+    next: function(val) {
+      if (val === 'pr') return '_result_stage4_pr';
+      return 'stage4_histo';
+    }
+  },
+  stage4_histo: {
+    label: 'Histologie IV', num: 5, total: 5,
+    q: 'Histologie de la tumeur rénale (pièce opératoire)',
+    sub: 'Conditionne la décision de RT pulmonaire même en cas de CR (§15.3.7)',
+    opts: [
+      { val: 'lrir', label: 'LR ou IR', desc: 'Faible ou intermédiaire risque' },
+      { val: 'hr',   label: 'HR — Blastemal type ou Anaplasie diffuse', desc: 'Haut risque histologique' },
+    ],
+    next: function(val) {
+      if (val === 'hr') return '_result_stage4_cr_hr';
+      return '_result_stage4_cr_ir';
+    }
+  },
+  relapse_prior: {
+    label: 'Rechute', num: 2, total: 3,
+    q: 'Traitement reçu en 1ère ligne',
+    sub: 'La classification AA/BB/CC est basée sur l\'intensité du traitement initial (§15.6.13)',
+    opts: [
+      { val: 'AA', label: 'AV seulement (sans doxorubicine)', desc: 'Groupe AA : risque standard de rechute' },
+      { val: 'BB', label: 'AVD ou régime HR-1 (≥ 3 drogues avec doxo)', desc: 'Groupe BB : rechute haut risque' },
+      { val: 'CC', label: 'Histologie HR d\'emblée (BT ou DA stade IV) ou 2ème rechute', desc: 'Groupe CC : très haut risque' },
+    ],
+    next: function(val) {
+      return '_result_relapse_' + val;
+    }
+  }
+};
+
+// ═══ RÉSULTATS ═══
+var RES = {
+  infant: {
+    cls: 'sp', icon: '👶',
+    title: 'Protocole nourrisson < 6 mois',
+    subtitle: 'Adaptations posologiques obligatoires · §14.5',
+    tags: [{ t: 'tag-sp', l: 'ÂGE < 6 MOIS' }, { t: 'tag-hr', l: 'ADAPTATION REQUISE' }],
+    sections: [{ label: 'Recommandations spécifiques', items: [
+      { i: '⚠️', h: '<strong>Chirurgie première</strong> si faisable après évaluation multidisciplinaire' },
+      { i: '💊', h: '<strong>Réduction posologique</strong> : 2/3 de la dose standard si &lt; 12 kg (§14.5.3)' },
+      { i: '🔬', h: '<strong>Actinomycine D</strong> : risque hépatotoxicité élevé — surveillance rapprochée' },
+      { i: '📡', h: '<strong>RT à éviter</strong> avant 12–18 mois si possible (§14.5.4)' },
+    ]}],
+    rt: null, rtText: 'PAS DE RT — À éviter avant 12–18 mois si possible ; discuter en RCP si indispensable',
+    os: '—', efs: '—', n: 'série SIOPE/GPOH', refs: [1], alert: 'Discussion RCP nationale impérative. Contacter le référent SIOPE/SFCE.',
+  },
+  adult: {
+    cls: 'sr', icon: '👤',
+    title: 'Tumeur de Wilms de l\'adulte (> 16 ans)',
+    subtitle: 'Protocole adulte SIOPE UMBRELLA · §15.7',
+    tags: [{ t: 'tag-info', l: 'ADULTE > 16 ANS' }],
+    sections: [{ label: 'Stratégie thérapeutique', items: [
+      { i: '💊', h: '<strong>Néoadjuvante</strong> : Vincristine + Actinomycine D × 4 semaines' },
+      { i: '🏥', h: '<strong>Chirurgie</strong> : Néphrectomie totale ; NSS à discuter en RCP' },
+      { i: '📋', h: '<strong>Post-opératoire</strong> : Selon stade et histologie — identique à l\'enfant' },
+      { i: '📡', h: '<strong>RT abdominale</strong> : Indications identiques au protocole pédiatrique' },
+    ]}],
+    rt: null, rtText: 'Selon stade et histologie — identique au protocole pédiatrique',
+    os: '—', efs: '—', n: 'protocole adulte SIOPE', refs: [1], alert: null,
+  },
+  bilateral: {
+    cls: 'sp', icon: '⚖️',
+    title: 'Stade V — Tumeur de Wilms bilatérale',
+    subtitle: 'Préservation néphronique maximale · §15.4',
+    tags: [{ t: 'tag-info', l: 'STADE V' }, { t: 'tag-sp', l: 'RCP OBLIGATOIRE' }],
+    sections: [{ label: 'Stratégie (§15.4.3)', items: [
+      { i: '💊', h: '<strong>CT néoadjuvante</strong> : AV × 4–6 sem → réévaluation IRM à S6' },
+      { i: '🔄', h: '<strong>Allongement possible</strong> jusqu\'à 12 sem si réponse insuffisante' },
+      { i: '✂️', h: '<strong>NSS bilatérale</strong> si possible — éviter la bilatéralectomie' },
+      { i: '📋', h: '<strong>Post-op</strong> : Selon stade et histologie du côté le plus défavorable' },
+      { i: '📡', h: '<strong>RT</strong> : Doses réduites si rein unique restant (§17.6)' },
+    ]}],
+    rt: null, rtText: 'Selon stade local — doses réduites si rein unique restant (§17.6). Discuter en RCP.',
+    os: '~80 %', efs: '—', n: 'cohorte SIOP stade V', refs: [1],
+    alert: 'Objectif : préserver ≥ 2/3 de parenchyme rénal total. Facteur pronostique OS : stade local III > stade I–II.',
+  },
+  ccsk: {
+    cls: 'hr', icon: '🔵',
+    title: 'Sarcome à cellules claires du rein (CCSK)',
+    subtitle: 'Protocole spécifique UMBRELLA · §18.1',
+    tags: [{ t: 'tag-hr', l: 'CCSK' }, { t: 'tag-info', l: 'NON-WILMS' }],
+    sections: [{ label: 'Traitement CCSK (§18.1.4)', items: [
+      { i: '💊', h: '<strong>CT néoadjuvante</strong> : AV × 6 semaines' },
+      { i: '💊', h: '<strong>CT post-op</strong> : UH-1 × 34 sem (Vincristine, Doxo, Cyclophos, Étoposide, Carboplatine)' },
+      { i: '📡', h: '<strong>RT abdominale</strong> : Recommandée pour <em>tous les stades</em> (y compris stade I)' },
+      { i: '🧠', h: '<strong>Suivi cérébral prolongé</strong> : Métastases cérébrales tardives possibles' },
+    ]}],
+    rt: { timing: 'J10–J21 postopératoire',
+      volumes: 'Flanc : GTV = volume tumoral préop ; CTV = GTV + 1 cm ; PTV = CTV + 5–10 mm',
+      doses: '<span class="rt-dose esc">25,2 Gy / 14 fr / 1,8 Gy/fr</span> (stades II–III) · <span class="rt-dose">10,8 Gy / 6 fr</span> stade I selon SIOPE' },
+    os: '86 %', efs: '78 %', n: 'SIOP 93-01/2001', refs: [1, 9],
+    alert: 'RT flank recommandée pour tous les stades, y compris stade I — différence majeure avec le WT.',
+  },
+  mrtk: {
+    cls: 'hr', icon: '🔴',
+    title: 'Tumeur rhabdoïde maligne du rein (MRTK)',
+    subtitle: 'Pronostic sévère · EU-RHAB / §18.3',
+    tags: [{ t: 'tag-hr', l: 'MRTK' }, { t: 'tag-hr', l: 'PRONOSTIC SÉVÈRE' }],
+    sections: [{ label: 'Traitement MRTK', items: [
+      { i: '🧬', h: '<strong>Test SMARCB1/INI1</strong> obligatoire (mutation germinale dans ~30% des cas)' },
+      { i: '💊', h: '<strong>CT intensive</strong> : ICE ± Doxo selon protocole EU-RHAB / essai disponible' },
+      { i: '🏥', h: '<strong>Chirurgie</strong> : Si résécable — après bilan complet' },
+      { i: '📡', h: '<strong>RT</strong> : Recommandée selon stade (impact survie démontré)' },
+      { i: '👨‍👩‍👧', h: '<strong>Conseil génétique familial</strong> obligatoire (SMARCB1 germinal)' },
+    ]}],
+    rt: { timing: 'Selon protocole EU-RHAB — précoce si résidu local',
+      volumes: 'Flanc : volume opératoire avec marges. CTV = lit tumoral + 1 cm ; PTV = CTV + 5 mm',
+      doses: 'Selon stade — variable ; <span class="rt-dose">19,8–25,2 Gy</span> flanc ; métastases selon site' },
+    os: '~50 % stade I · 19–41 % stades III–V', efs: '—', n: 'série SIOP', refs: [1],
+    alert: '⚠️ Inclusion dans essai clinique fortement recommandée. RCP internationale. Prédisposition génétique à rechercher systématiquement.',
+  },
+  rcc: {
+    cls: 'sr', icon: '🟠',
+    title: 'Carcinome à cellules rénales pédiatrique (RCC)',
+    subtitle: 'Chirurgie première · §18.2',
+    tags: [{ t: 'tag-sr', l: 'RCC' }, { t: 'tag-info', l: 'NON-WILMS' }],
+    sections: [{ label: 'Traitement RCC pédiatrique (§18.2)', items: [
+      { i: '🧬', h: '<strong>Génétique</strong> : Recherche translocation Xp11.2 (TFE3), t(6;11)' },
+      { i: '🏥', h: '<strong>Chirurgie d\'emblée</strong> : Préférée si résécable (pas de CT néoadjuvante standard)' },
+      { i: '💊', h: '<strong>CT adjuvante</strong> : Rôle limité. TKI si métastatique (discussion RCP)' },
+      { i: '📡', h: '<strong>RT</strong> : Pas d\'indication standard établie' },
+    ]}],
+    rt: null, rtText: 'PAS DE RT — Pas d\'indication standard établie pour le RCC pédiatrique',
+    os: '—', efs: '—', n: 'cohorte SIOPE', refs: [1],
+    alert: 'Pas de CT néoadjuvante standard pour le RCC. Enregistrement UMBRELLA recommandé. Discussion RCP multidisciplinaire.',
+  },
+  localised: { _dynamic: true },
+  stage4_cr_ir: {
+    cls: 'sr', icon: '🫁',
+    title: 'Stade IV — RC pulmonaire · LR/IR',
+    subtitle: 'Excellent pronostic · pas de RT pulmonaire si CR confirmée',
+    tags: [{ t: 'tag-info', l: 'STADE IV' }, { t: 'tag-lr', l: 'RC PULMONAIRE' }, { t: 'tag-sr', l: 'LR/IR' }],
+    sections: [{ label: 'Traitement post-chirurgical (§15.3.4)', items: [
+      { i: '💊', h: '<strong>CT post-op</strong> : AVD × 27 semaines' },
+      { i: '📡', h: '<strong>RT pulmonaire</strong> : <em>Non recommandée</em> si CR confirmée + histologie LR/IR' },
+      { i: '📡', h: '<strong>RT flank</strong> : Selon stade local (si stade III local : 10,8–14,4 Gy)' },
+    ]}],
+    rt: { timing: 'RT flank si stade III local : J10–J21 postopératoire. RT pulmonaire : non indiquée si CR + LR/IR',
+      volumes: 'RT flank : GTV = volume tumoral préop ; CTV = GTV + 1 cm ; PTV = CTV + 5–10 mm. Pas de WLI si CR + LR/IR.',
+      doses: '<span class="rt-dose">10,8 Gy / 6 fr / 1,8 Gy/fr</span> (flanc stade III LR/IR) · <span class="rt-dose">Pas de WLI</span> si CR + LR/IR' },
+    os: '91 %', efs: '79 %', n: 'SIOP/GPOH', refs: [1, 5],
+    alert: 'CR définie par TDM thoracique à S6 avec disparition complète. Critère radiologique strict.',
+  },
+  stage4_cr_hr: {
+    cls: 'hr', icon: '🫁',
+    title: 'Stade IV — RC pulmonaire · HR (BT ou DA)',
+    subtitle: 'RT pulmonaire recommandée malgré la RC · §15.3.7',
+    tags: [{ t: 'tag-info', l: 'STADE IV' }, { t: 'tag-lr', l: 'RC PULMONAIRE' }, { t: 'tag-hr', l: 'HR' }],
+    sections: [{ label: 'Traitement post-chirurgical (§15.3.5–15.3.7)', items: [
+      { i: '💊', h: '<strong>CT post-op</strong> : HR-1 × 34 semaines (Vincristine, Doxo, Cyclophos, Étoposide, Carboplatine)' },
+      { i: '📡', h: '<strong>RT pulmonaire entière (WLI)</strong> : Recommandée (histologie HR) — 12 Gy / 8 fx / 1,5 Gy/fr' },
+      { i: '📡', h: '<strong>RT flank</strong> : 25,2 Gy / 14 fx si stade III HR local' },
+    ]}],
+    rt: { timing: 'WLI : sem 13 après C4 ou selon calendrier HR-1. RT flank : J10–J21 postopératoire (si stade III local)',
+      volumes: 'WLI : CTV = plèvre entière sur CT simulation ; PTV = CTV + 5–10 mm (AP/PA ou IMRT ou protons). Flanc : GTV + 1 cm → CTV ; PTV = CTV + 5–10 mm',
+      doses: '<span class="rt-dose esc">WLI : 12 Gy / 8 fr / 1,5 Gy/fr</span> (&gt; 12 mois) · <span class="rt-dose">10,5 Gy</span> (&lt; 12 mois) · <span class="rt-dose highesc">Flanc HR : 25,2 Gy / 14 fr / 1,8 Gy/fr</span>' },
+    os: '53 % (BT) · 29 % (DA)', efs: '44 % (BT) · 28 % (DA)', n: 'SIOP 2001', refs: [1, 6],
+    alert: '⚠️ Pronostic sévère pour stade IV HR. RT pulmonaire recommandée même en cas de RC. Discussion RCP nationale.',
+  },
+  stage4_pr: {
+    cls: 'hr', icon: '🫁',
+    title: 'Stade IV — Réponse partielle / SD / Progression pulmonaire',
+    subtitle: 'Escalade thérapeutique nécessaire · §15.3.6',
+    tags: [{ t: 'tag-info', l: 'STADE IV' }, { t: 'tag-hr', l: 'RP / SD / PD' }],
+    sections: [{ label: 'Stratégie (§15.3.6)', items: [
+      { i: '💊', h: '<strong>Intensification CT</strong> : Étoposide + Carboplatine × 2 cycles avant chirurgie pulmonaire' },
+      { i: '✂️', h: '<strong>Chirurgie pulmonaire</strong> : Résection des nodules résiduels si faisable' },
+      { i: '📡', h: '<strong>RT pulmonaire entière (WLI)</strong> : Recommandée — 12 Gy / 8 fx / 1,5 Gy/fr' },
+      { i: '🧬', h: '<strong>1q gain / LOH 16q</strong> : Biomarqueurs pronostiques à évaluer — orienter essai clinique' },
+    ]}],
+    rt: { timing: 'WLI après chirurgie pulmonaire et consolidation CT — calendrier selon réponse',
+      volumes: 'WLI : CTV = plèvre entière sur CT simulation ; PTV = CTV + 5–10 mm. Boost tumoral à 41,4 Gy si persistance résiduelle.',
+      doses: '<span class="rt-dose esc">WLI : 12 Gy / 8 fr / 1,5 Gy/fr</span> · <span class="rt-dose highesc">Boost résidu : jusqu\'à 41,4 Gy / 23 fr</span>' },
+    os: '79 % (RP) · —% (SD/PD)', efs: '67 % (RP) · 17 % (SD/PD)', n: 'SIOP/GPOH', refs: [1, 5],
+    alert: 'Discussion RCP nationale recommandée. Envisager inclusion dans essai thérapeutique.',
+  },
+  stage4_liver: {
+    cls: 'sp', icon: '🫀',
+    title: 'Stade IV — Métastases hépatiques',
+    subtitle: 'RT hépatique selon résidu · §17.7.3',
+    tags: [{ t: 'tag-info', l: 'STADE IV' }, { t: 'tag-sp', l: 'METS HÉPATIQUES' }],
+    sections: [{ label: 'Prise en charge', items: [
+      { i: '💊', h: '<strong>CT néoadjuvante</strong> : AVD × 6 semaines' },
+      { i: '✂️', h: '<strong>Chirurgie hépatique</strong> : Résection R0 si possible (associée à la néphrectomie)' },
+      { i: '📡', h: '<strong>RT hépatique</strong> : Si résidu non résécable — 19,8 Gy / 11 fx / 1,8 Gy/fr' },
+      { i: '💊', h: '<strong>CT post-op</strong> : AVD ou HR-1 selon histologie rénale' },
+    ]}],
+    rt: { timing: 'RT hépatique après chirurgie et récupération hématologique — délai ≤ 21 jours post-op',
+      volumes: 'GTV = résidu macroscopique hépatique ; CTV = GTV + 1 cm ; PTV = CTV + 5–10 mm. Shielding rein controlatéral obligatoire.',
+      doses: '<span class="rt-dose esc">19,8 Gy / 11 fr / 1,8 Gy/fr</span> (résidu non résécable). Dose max rein restant : V12Gy &lt; 33%.' },
+    os: '—', efs: '77 % (stade IV LR/IR non-pulm)', n: 'SIOP 93-01', refs: [1, 5],
+    alert: 'Shielding rein controlatéral obligatoire. Dose max rein restant : V12Gy < 33%.',
+  },
+  stage4_other: {
+    cls: 'hr', icon: '🌐',
+    title: 'Stade IV — Métastases autres sites',
+    subtitle: 'Cérébral, osseux, médiastinal · §17.7.4',
+    tags: [{ t: 'tag-info', l: 'STADE IV' }, { t: 'tag-hr', l: 'SITES MULTIPLES' }],
+    sections: [{ label: 'Approche thérapeutique', items: [
+      { i: '💊', h: '<strong>CT intensifiée</strong> : AVD ± escalade selon réponse' },
+      { i: '📡', h: '<strong>RT cérébrale</strong> : 21,6 Gy entière + boost local (§17.14.5)' },
+      { i: '📡', h: '<strong>RT osseuse</strong> : 25,2 Gy si douleur ou risque fracture (§17.14.6)' },
+      { i: '🧬', h: '<strong>Bilan moléculaire complet</strong> : 1q gain, LOH 16q, TP53' },
+    ]}],
+    rt: { timing: 'Concurrent ou séquentiel selon sites et CT — discussion RCP',
+      volumes: 'Cérébral : volume entier + boost local. Osseux : volume osseux atteint + marges. Selon site de rechute.',
+      doses: '<span class="rt-dose esc">Cérébral : 21,6 Gy entier + boost</span> · <span class="rt-dose highesc">Osseux : 25,2 Gy / 14 fr</span>' },
+    os: '—', efs: '—', n: 'série SIOP', refs: [1],
+    alert: 'Avis RCP nationale obligatoire. Discussion avec centre SIOPE référent. Essai clinique à envisager.',
+  },
+  relapse_AA: {
+    cls: 'sr', icon: '🔄',
+    title: 'Rechute — Groupe AA (Risque standard)',
+    subtitle: 'Rechute après VA seul · §15.6.13',
+    tags: [{ t: 'tag-sp', l: 'RECHUTE' }, { t: 'tag-sr', l: 'GROUPE AA' }],
+    sections: [{ label: 'Traitement de sauvetage (§15.6.15)', items: [
+      { i: '💊', h: '<strong>Induction</strong> : Alternance Cyclophosphamide/Doxorubicine et Étoposide/Carboplatine × 4 cycles (régime HR-1)' },
+      { i: '✂️', h: '<strong>Chirurgie</strong> : Résection de la rechute si faisable après induction' },
+      { i: '📡', h: '<strong>RT</strong> : Site de rechute si non irradié antérieurement — dose selon site' },
+      { i: '💊', h: '<strong>Consolidation</strong> : Selon réponse à l\'induction' },
+    ]}],
+    rt: { timing: 'Après chirurgie de la rechute et récupération hématologique',
+      volumes: 'Volume de rechute + marges selon site anatomique. GTV = volume rechute ; CTV = GTV + 1–2 cm ; PTV = CTV + 5–10 mm',
+      doses: '<span class="rt-dose">10,8 Gy / 6 fr</span> flanc non irradié · <span class="rt-dose esc">25,2 Gy</span> si pas de RT antérieure (flanc HR) · selon site si autre localisation' },
+    os: '~80 %', efs: '—', n: 'SIOP 2001', refs: [1, 7],
+    alert: 'Meilleur pronostic de rechute. Résection chirurgicale complète associée à une meilleure survie.',
+  },
+  relapse_BB: {
+    cls: 'hr', icon: '🔄',
+    title: 'Rechute — Groupe BB (Haut risque)',
+    subtitle: 'Rechute après ≥ 3 drogues dont doxorubicine · §15.6.13',
+    tags: [{ t: 'tag-hr', l: 'RECHUTE' }, { t: 'tag-hr', l: 'GROUPE BB' }],
+    sections: [{ label: 'Traitement intensifié (§15.6.15)', items: [
+      { i: '💊', h: '<strong>Induction</strong> : 4 cycles Carboplatine/Étoposide alternant avec Cyclophosphamide ou Ifosfamide' },
+      { i: '💉', h: '<strong>Consolidation</strong> : Autogreffe avec conditionnement Melphalan' },
+      { i: '✂️', h: '<strong>Chirurgie maximale</strong> : Avant ou après induction selon réponse' },
+      { i: '📡', h: '<strong>RT</strong> : Sites de rechute ; RT pulmonaire 12 Gy / 8 fx si non irradié' },
+    ]}],
+    rt: { timing: 'RT après autogreffe et prise de greffe — coordination avec hémato',
+      volumes: 'WLI si rechute pulmonaire : plèvre entière ; PTV = CTV + 5–10 mm. Flanc si non antérieurement irradié.',
+      doses: '<span class="rt-dose esc">WLI : 12 Gy / 8 fr / 1,5 Gy/fr</span> · <span class="rt-dose">Flanc : 10,8–25,2 Gy selon antécédents RT</span>' },
+    os: '68 %', efs: '63 %', n: 'SIOP 2001 / UK-IMPORT', refs: [1, 7, 8],
+    alert: 'RCP nationale obligatoire. Autogreffe recommandée chez les patients répondeurs à l\'induction.',
+  },
+  relapse_CC: {
+    cls: 'hr', icon: '🔄',
+    title: 'Rechute — Groupe CC (Très haut risque)',
+    subtitle: 'HR stade IV d\'emblée ou 2ème rechute · §15.6.13',
+    tags: [{ t: 'tag-hr', l: 'RECHUTE' }, { t: 'tag-hr', l: 'GROUPE CC' }],
+    sections: [{ label: 'Options thérapeutiques (§15.6.15)', items: [
+      { i: '💊', h: '<strong>CT camptothécine</strong> : Vincristine/Irinotécan (VI) ou VIT (+ témozolomide) — naïfs à ces agents' },
+      { i: '🧬', h: '<strong>Bilan moléculaire approfondi</strong> : Organoides, PDX, programme médecine de précision' },
+      { i: '🔬', h: '<strong>Essai clinique de phase précoce</strong> : Fortement encouragé' },
+      { i: '💉', h: '<strong>Autogreffe</strong> : Si réponse minimale démontrée à l\'induction' },
+    ]}],
+    rt: { timing: 'Selon réponse et faisabilité — décision cas par cas en RCP',
+      volumes: 'Selon site de rechute — pas de volume standardisé',
+      doses: 'Selon site et antécédents — discuter proportionnalité et qualité de vie' },
+    os: '~10 %', efs: '—', n: 'SIOP-RTSG', refs: [1, 7],
+    alert: '⚠️ Pronostic très défavorable. Discussion de la proportionnalité des soins avec l\'équipe et la famille. Avis international recommandé.',
+  },
+};
+
+// ═══ RENDU ÉTAPE ═══
+function renderStep(sid) {
+  var s = STEPS[sid];
+  if (!s) return '<div class="step-card"><p>Étape inconnue : ' + sid + '</p></div>';
+  var pct = Math.round((navStack.length / MAX_STEPS) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = 'Étape ' + navStack.length + ' / ~' + MAX_STEPS;
+  document.getElementById('progress-step-name').textContent = s.label || '';
+  document.getElementById('refs-section').style.display = 'none';
+
+  var bcLabels = { start:'Présentation', age:'Âge', imaging:'Imagerie', biopsy_result:'Histologie', preop_chemo:'CT néoadj.', surgery:'Chirurgie', staging:'Stade', histo:'Risque histo', stage4_site:'Stade IV site', stage4_response:'Réponse IV', stage4_histo:'Histologie IV', relapse_prior:'Rechute' };
+  document.getElementById('breadcrumb').innerHTML = navStack
+    .map(function(e) { return e.step; })
+    .filter(function(s) { return bcLabels[s]; })
+    .map(function(s) { return '<div class="bc-item"><span>' + bcLabels[s] + '</span></div>'; })
+    .join('');
+
+  var optsHtml = s.opts.map(function(o) {
+    return '<button class="choice-btn" data-sid="' + sid + '" data-val="' + o.val + '">'
+      + '<span class="choice-label">' + o.label + '</span>'
+      + (o.desc ? '<span class="choice-sub">' + o.desc + '</span>' : '')
+      + '</button>';
+  }).join('');
+
+  document.getElementById('app').innerHTML =
+    '<div class="step-card">'
+    + '<div class="step-num">ÉTAPE — ' + s.label.toUpperCase() + '</div>'
+    + '<div class="step-question">' + s.q + '</div>'
+    + (s.sub ? '<div class="step-hint">' + s.sub + '</div>' : '')
+    + '<div class="choices ' + (s.opts.length <= 2 ? 'cols2' : 'cols1') + '">' + optsHtml + '</div>'
+    + '</div>'
+    + (navStack.length > 0 ? '<button class="btn-back" onclick="goBack()" style="margin-top:12px">← Retour</button>' : '');
+}
+
+// ═══ RENDU RÉSULTAT ═══
+function renderResult(key) {
+  if (key === 'localised') { renderLocalisedResult(); return; }
+  var r = RES[key];
+  if (!r) { document.getElementById('app').innerHTML = '<div class="step-card"><p>Résultat inconnu : ' + key + '</p></div>'; return; }
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-label').textContent = 'Résultat';
+  document.getElementById('progress-step-name').textContent = '';
+
+  var tags = (r.tags || []).map(function(t) { return '<span class="tag ' + t.t + '">' + t.l + '</span>'; }).join('');
+
+  var osNum = parseFloat(r.os);
+  var osCls = (osNum >= 90 ? 'outcome-good' : (osNum >= 70 ? 'outcome-mid' : (isNaN(osNum) ? '' : 'outcome-poor')));
+  var efsNum = parseFloat(r.efs);
+  var efsCls = (efsNum >= 80 ? 'outcome-good' : (efsNum >= 60 ? 'outcome-mid' : (isNaN(efsNum) ? '' : 'outcome-poor')));
+
+  var outcomesHtml = '';
+  if (r.os !== '—' || r.efs !== '—') {
+    outcomesHtml = '<div class="section-label">Données d\'efficacité</div>'
+      + '<div class="outcome-block">'
+      + (r.os !== '—' ? '<div class="outcome-row"><span class="outcome-label">OS 5 ans</span><span class="outcome-val ' + osCls + '">' + r.os + '</span></div>' : '')
+      + (r.efs !== '—' ? '<div class="outcome-row"><span class="outcome-label">EFS / survie</span><span class="outcome-val ' + efsCls + '">' + r.efs + '</span></div>' : '')
+      + '<div class="outcome-row"><span class="outcome-label">Cohorte</span><span class="outcome-val">' + r.n + '</span></div>'
+      + '</div>';
+  }
+
+  var sectionsHtml = (r.sections || []).map(function(s) {
+    var items = s.items.map(function(it) {
+      return '<div class="proto-line"><span class="proto-icon">' + it.i + '</span><span>' + it.h + '</span></div>';
+    }).join('');
+    return '<div class="section-label">' + s.label + '</div>' + items;
+  }).join('');
+
+  var rtHtml = '';
+  if (r.rt) {
+    rtHtml = '<div class="rt-block">'
+      + '<div class="rt-block-title">Radiothérapie — Timing · Volumes · Doses</div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Timing <span class="rt-tag">' + r.rt.timing + '</span></div></div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Volumes cibles</div><div class="rt-note">' + r.rt.volumes + '</div></div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Doses prescrites</div><div class="rt-note">' + r.rt.doses + '</div></div>'
+      + '</div>';
+  } else {
+    rtHtml = '<div class="no-rt-box">' + (r.rtText || 'Pas de RT indiquée pour ce groupe') + '</div>';
+  }
+
+  var alertHtml = r.alert ? '<div class="alert-box"><span>⚠️</span><span>' + r.alert + '</span></div>' : '';
+
+  document.getElementById('app').innerHTML =
+    '<button class="btn-back" onclick="goBack()" style="margin-bottom:12px">← Retour</button>'
+    + '<div class="result-card ' + r.cls + '">'
+    + '<div class="result-header"><div class="result-icon">' + r.icon + '</div>'
+    + '<div><div class="result-title">' + r.title + '</div><div class="result-subtitle">' + r.subtitle + '</div>'
+    + '<div style="margin-top:6px">' + tags + '</div></div></div>'
+    + outcomesHtml
+    + sectionsHtml
+    + (r.rt || r.rtText ? '<div class="section-label" style="margin-top:20px">Radiothérapie</div>' + rtHtml : '')
+    + alertHtml
+    + '<div class="result-actions">'
+    + '<button class="btn-restart" onclick="restart()">↺ Recommencer</button>'
+    + '<button class="btn-pdf" onclick="printResult()">⬇ Exporter PDF</button>'
+    + '</div></div>';
+
+  document.getElementById('refs-section').style.display = 'block';
+  renderRefs(r.refs || []);
+}
+
+// ═══ RÉSULTAT LOCALISÉ (dynamique stade × histologie) ═══
+function renderLocalisedResult() {
+  var risk = wState['histo'] || 'IR';
+  var stage = wState['staging'] || 'I';
+  var rl = RISK_LABELS[risk];
+  var d = (LOCALISED_DATA[risk] || {})[stage] || {};
+  var hasRT = d.rt && d.rt !== null;
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-label').textContent = 'Résultat';
+  document.getElementById('progress-step-name').textContent = '';
+
+  var rtBlock = '';
+  if (hasRT) {
+    var rtTiming = 'J10–J21 postopératoire (idéalement J10). Délai chirurgie–RT : ≤ 21 jours (§17.1.3)';
+    var rtVolumes = 'Flanc : GTV = volume tumoral préop sur IRM ; CTV = GTV + 1 cm (barrières anatomiques) ; PTV = CTV + 5–10 mm';
+    var rtDosesHtml = '<span class="rt-dose">' + d.rt + '</span>';
+    if (d.rt && d.rt.indexOf('25') !== -1) rtDosesHtml = '<span class="rt-dose highesc">' + d.rt + '</span>';
+    var ganglHtml = '<div class="rt-section"><div class="rt-section-hdr">RT ganglionnaire <span class="rt-tag yellow">Si N+</span></div>'
+      + '<div class="rt-note">LN réséquées : 10,8 Gy · LN non réséquées : 10,8 Gy + boost à 19,8 Gy (§17.5.2)</div></div>';
+    var waiHtml = (stage === 'III') ? '<div class="rt-section"><div class="rt-section-hdr">WAI — si rupture ou implants péritonéaux <span class="rt-tag yellow">Stade III rupture</span></div>'
+      + '<div class="rt-note"><span class="rt-dose esc">10,5 Gy / 7 fr / 1,5 Gy/fr</span> · CTV = cavité péritonéale entière (diaphragme → plancher pelvien) · éviter dactinomycine/doxo à pleine dose concurrent</div></div>' : '';
+
+    rtBlock = '<div class="section-label" style="margin-top:20px">Radiothérapie</div>'
+      + '<div class="rt-block">'
+      + '<div class="rt-block-title">Radiothérapie — Timing · Volumes · Doses</div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Timing <span class="rt-tag">' + rtTiming + '</span></div></div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Volumes cibles</div>'
+      + '<div class="rt-2col">'
+      + '<div class="rt-box"><div class="rt-box-label">GTV</div><div class="rt-box-val">Volume tumoral préopératoire sur imagerie initiale</div></div>'
+      + '<div class="rt-box"><div class="rt-box-label">CTV</div><div class="rt-box-val">GTV + 1 cm (barrières anatomiques respectées)</div></div>'
+      + '<div class="rt-box"><div class="rt-box-label">PTV</div><div class="rt-box-val">CTV + 5–10 mm selon IGRT locale</div></div>'
+      + '<div class="rt-box"><div class="rt-box-label">Technique</div><div class="rt-box-val">3D-CRT / VMAT / Protons selon centre <sup>[11]</sup></div></div>'
+      + '</div></div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Doses prescrites</div>'
+      + '<div class="rt-box"><div class="rt-box-label">Flanc — Stade III</div><div class="rt-box-val">' + rtDosesHtml + '</div></div></div>'
+      + ganglHtml
+      + waiHtml
+      + '</div>';
+  } else {
+    rtBlock = '<div class="section-label" style="margin-top:20px">Radiothérapie</div>'
+      + '<div class="no-rt-box">PAS DE RT — Stade ' + stage + ' ' + rl.label + ' : pas d\'indication de RT locale (§17.1)</div>';
+  }
+
+  var osNum = parseFloat(d.os);
+  var osCls = osNum >= 90 ? 'outcome-good' : 'outcome-mid';
+  var efsNum = parseFloat(d.efs);
+  var efsCls = efsNum >= 85 ? 'outcome-good' : (efsNum >= 70 ? 'outcome-mid' : 'outcome-poor');
+
+  var refs = [1, 2, 4, 11];
+  if (risk === 'HR_BT') refs.push(3);
+
+  document.getElementById('app').innerHTML =
+    '<button class="btn-back" onclick="goBack()" style="margin-bottom:12px">← Retour</button>'
+    + '<div class="result-card ' + rl.cls + '">'
+    + '<div class="result-header"><div class="result-icon">' + rl.icon + '</div>'
+    + '<div><div class="result-title">Tumeur de Wilms localisée — Traitement post-opératoire</div>'
+    + '<div class="result-subtitle">Stade ' + stage + ' · ' + rl.label + ' · Recommandations UMBRELLA 2016</div>'
+    + '<div style="margin-top:6px"><span class="tag ' + rl.tag + '">' + rl.label + '</span><span class="tag tag-info">STADE ' + stage + '</span></div></div></div>'
+
+    + '<div class="summary-panel">'
+    + '<div class="sp-title">Profil retenu</div>'
+    + '<div class="sp-row"><span class="sp-key">Stade chirurgical</span><span class="sp-val">Stade ' + stage + '</span></div>'
+    + '<div class="sp-row"><span class="sp-key">Histologie</span><span class="sp-val">' + rl.label + '</span></div>'
+    + '<div class="sp-row"><span class="sp-key">Protocole de référence</span><span class="sp-val">SIOPE UMBRELLA 2016</span></div>'
+    + '</div>'
+
+    + '<div class="section-label">Données d\'efficacité <sup>[' + (d.ref_efs || 1) + ']</sup></div>'
+    + '<div class="outcome-block">'
+    + '<div class="outcome-row"><span class="outcome-label">EFS 4–5 ans</span><span class="outcome-val ' + efsCls + '">' + (d.efs || '—') + '</span></div>'
+    + '<div class="outcome-row"><span class="outcome-label">OS 5 ans</span><span class="outcome-val ' + osCls + '">' + (d.os || '—') + '</span></div>'
+    + '</div>'
+
+    + '<div class="section-label">Chimiothérapie post-opératoire</div>'
+    + '<div class="proto-line"><span class="proto-icon">💊</span><span><strong>' + (d.chemo || '—') + '</strong></span></div>'
+
+    + '<div class="section-label">Doses de référence (§14.2.1)</div>'
+    + '<table class="chemo-table">'
+    + '<tr><th>Drogue</th><th>Dose standard</th><th>Rythme</th></tr>'
+    + '<tr><td>Vincristine (V)</td><td>1,5 mg/m² (max 2 mg)</td><td>IV bolus hebdomadaire</td></tr>'
+    + '<tr><td>Actinomycine D (A)</td><td>45 µg/kg (max 2 mg)</td><td>IV toutes les 3 semaines</td></tr>'
+    + ((risk === 'IR' || risk === 'HR_BT' || risk === 'HR_DA') && stage !== 'I'
+      ? '<tr><td>Doxorubicine (D)</td><td>50 mg/m² (cum. max 250 mg/m²)</td><td>IV toutes les 6 semaines</td></tr>' : '')
+    + ((risk === 'HR_BT' || risk === 'HR_DA')
+      ? '<tr><td>Carboplatine</td><td>AUC 6 (max 600 mg)</td><td>IV × 5 jours</td></tr>'
+        + '<tr><td>Étoposide</td><td>150 mg/m²/j × 3j</td><td>IV</td></tr>' : '')
+    + '</table>'
+
+    + rtBlock
+
+    + '<div class="alert-box"><span>⚠️</span><span>'
+    + '<strong>OARs à protéger :</strong> Rein controlatéral (V12Gy &lt; 33%), foie, colonne vertébrale (symétrie bilatérale), gonades, cœur.'
+    + '<br>Suivi cardiaque si doxorubicine + RT · Bilan 1q gain / LOH 16q sur pièce opératoire.'
+    + '</span></div>'
+
+    + '<div class="result-actions">'
+    + '<button class="btn-restart" onclick="restart()">↺ Recommencer</button>'
+    + '<button class="btn-pdf" onclick="printResult()">⬇ Exporter PDF</button>'
+    + '</div></div>';
+
+  document.getElementById('refs-section').style.display = 'block';
+  renderRefs([...new Set(refs)]);
+}
+
+// ═══ MOTEUR NAVIGATION ═══
+function navigate(sid, val) {
+  navStack.push({ step: sid, state: JSON.parse(JSON.stringify(wState)) });
+  wState[sid] = val;
+  var nxt = STEPS[sid].next(val);
+  if (nxt.startsWith('_result_')) {
+    renderResult(nxt.slice(8));
+  } else {
+    currentStep = nxt;
+    renderStep(nxt);
+  }
+}
+
+function goBack() {
+  if (!navStack.length) return;
+  var prev = navStack.pop();
+  wState = prev.state;
+  currentStep = prev.step;
+  renderStep(prev.step);
+}
+
+function restart() {
+  wState = {}; navStack = []; currentStep = 'start';
+  document.getElementById('refs-section').style.display = 'none';
+  renderStep('start');
+}
+
+function printResult() {
+  document.getElementById('progressWrap').style.display = 'none';
+  document.querySelectorAll('.btn-back').forEach(function(b) { b.style.display = 'none'; });
+  window.print();
+  document.getElementById('progressWrap').style.display = 'block';
+  document.querySelectorAll('.btn-back').forEach(function(b) { b.style.display = ''; });
+}
+
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.choice-btn');
+  if (!btn || !btn.dataset.sid) return;
+  navigate(btn.dataset.sid, btn.dataset.val);
+});
+
+// ═══ LOGIGRAMME D3 ═══
+var TT_DATA = {
+  root:      { title: 'POINT D\'ENTRÉE', q: 'Tumeur rénale pédiatrique', chemo: 'Imagerie : IRM abdo + TDM thorax', rt: '—', timing: '—', efs: 'Évaluation initiale', ec: 'efs-mid' },
+  unilat:    { title: 'ÉTAPE 2–3 — UNILATÉRALE', q: 'Tumeur unilatérale · 6 mois–16 ans', chemo: 'AV × 4 sem néoadjuvant (Vincristine 1,5 mg/m² + Act D 45 µg/kg)', rt: 'Après chirurgie selon stade/histo', timing: 'J0–J28 néoadjuvant', efs: 'Selon stade × histo — voir résultats', ec: 'efs-mid' },
+  surg_histo:{ title: 'ÉTAPE 5–7 — CHIRURGIE + HISTOLOGIE', q: 'Stade chirurgical × risque histologique', chemo: 'LR / IR / HR-BT / HR-DA → bras spécifique', rt: 'Selon stade III : flanc 10,8–25,2 Gy', timing: 'J10–J21 postop si RT indiquée', efs: 'Stade I LR : EFS > 97 %', ec: 'efs-good' },
+  stI_LR:    { title: 'RÉSULTAT — Stade I LR', q: 'Tumeur complètement nécrosée — aucune chimio post-op', chemo: 'Aucune chimiothérapie post-opératoire', rt: 'Aucune RT', timing: 'N/A', efs: 'EFS > 97 % · OS > 99 %', ec: 'efs-good' },
+  stI_IR:    { title: 'RÉSULTAT — Stade I IR', q: 'Histologie intermédiaire', chemo: 'AV × 18 sem', rt: 'Aucune RT', timing: 'N/A', efs: 'EFS ~90 % · OS ~95 %', ec: 'efs-good' },
+  stII_LR:   { title: 'RÉSULTAT — Stade II LR', q: 'Extension péri-rénale / LR', chemo: 'AV × 18 sem', rt: 'Aucune RT', timing: 'N/A', efs: 'EFS ~95 % · OS ~98 %', ec: 'efs-good' },
+  stII_IR:   { title: 'RÉSULTAT — Stade II IR', q: 'Extension péri-rénale / IR', chemo: 'AVD × 27 sem', rt: 'Aucune RT', timing: 'N/A', efs: 'EFS ~88 % · OS ~96 %', ec: 'efs-good' },
+  stIII_LR:  { title: 'RÉSULTAT — Stade III LR', q: 'Résidu / ganglions / rupture — LR', chemo: 'AVD × 27 sem', rt: 'Flanc : 10,8 Gy / 6 fr / 1,8 Gy/fr', timing: 'J10–J21 postop', volumes: 'GTV préop → CTV + 1 cm → PTV + 5–10 mm', efs: 'EFS ~93 % · OS ~97 %', ec: 'efs-good' },
+  stIII_IR:  { title: 'RÉSULTAT — Stade III IR', q: 'Résidu / ganglions / rupture — IR', chemo: 'AVD × 27 sem', rt: 'Flanc : 10,8 Gy / 6 fr / 1,8 Gy/fr', timing: 'J10–J21 postop', volumes: 'GTV préop → CTV + 1 cm → PTV + 5–10 mm', efs: 'EFS ~83 % · OS ~94 %', ec: 'efs-good' },
+  stIII_HR:  { title: 'RÉSULTAT — Stade II–III HR', q: 'Blastemal type ou Anaplasie diffuse', chemo: 'HR-1 × 34 sem (Vincristine, Doxo, Cyclophos, Éto, Carbo)', rt: 'Flanc : 25,2 Gy / 14 fr / 1,8 Gy/fr', timing: 'J10–J21 postop · coordination CT-RT', volumes: 'GTV préop → CTV + 1 cm → PTV + 5–10 mm', efs: 'EFS ~80 % stade II–III BT · OS ~88 %', ec: 'efs-mid' },
+  iv_pulm_cr_lr:{ title: 'RÉSULTAT — Stade IV RC pulm · LR/IR', q: 'CR pulmonaire confirmée — histologie favorable', chemo: 'AVD × 27 sem', rt: 'Pas de WLI · RT flanc si stade III local : 10,8 Gy', timing: 'RT flanc si indiqué : J10–J21', efs: 'EFS 79 % · OS 91 %', ec: 'efs-good' },
+  iv_pulm_cr_hr:{ title: 'RÉSULTAT — Stade IV RC pulm · HR', q: 'CR pulmonaire · histologie HR (BT ou DA)', chemo: 'HR-1 × 34 sem', rt: 'WLI 12 Gy / 8 fr + flanc HR 25,2 Gy / 14 fr', timing: 'WLI sem 13 après C4 · flanc J10–J21', volumes: 'WLI : plèvre entière · Flanc : GTV + 1 cm', efs: 'EFS 44 % (BT) · 28 % (DA) · OS 53 %', ec: 'efs-mid' },
+  iv_pulm_pr:   { title: 'RÉSULTAT — Stade IV RP/SD/PD pulm', q: 'Réponse partielle ou progression pulmonaire', chemo: 'Escalade : Étoposide + Carboplatine × 2 cycles', rt: 'WLI 12 Gy / 8 fr — toujours recommandée', timing: 'Après chirurgie pulmonaire et consolidation', volumes: 'WLI : plèvre entière · Boost résidu : 41,4 Gy', efs: 'EFS 67 % (RP) · 17 % (SD/PD)', ec: 'efs-mid' },
+  iv_liver:  { title: 'RÉSULTAT — Stade IV mets hépatiques', q: 'Métastases hépatiques — résidu non résécable', chemo: 'AVD × 6 sem néoadj · AVD ou HR-1 post-op', rt: 'RT hépatique : 19,8 Gy / 11 fr si résidu', timing: 'Après chirurgie hépatique · délai ≤ 21 j', volumes: 'GTV résidu + 1 cm → CTV → PTV', efs: 'EFS 77 % (stade IV LR/IR non-pulm)', ec: 'efs-good' },
+  iv_other:  { title: 'RÉSULTAT — Stade IV autres sites', q: 'Cérébral, osseux, médiastinal', chemo: 'AVD intensifiée ± escalade', rt: 'Cérébral 21,6 Gy entier + boost · Osseux 25,2 Gy', timing: 'Selon sites — discussion RCP', efs: 'Pronostic selon sites — RCP nationale', ec: 'efs-mid' },
+  bilateral: { title: 'RÉSULTAT — STADE V BILATÉRAL', q: 'NSS bilatérale — préservation néphronique', chemo: 'AV × 4–6 sem + rééval IRM → NSS', rt: 'Selon stade local — doses réduites (§17.6)', timing: 'Après chirurgie bilatérale si indiqué', volumes: 'Flanc bilatéral avec protection maximale rein', efs: 'OS ~80 % (long terme)', ec: 'efs-mid' },
+  infant:    { title: 'RÉSULTAT — NOURRISSON < 6 MOIS', q: 'Adaptation posologique obligatoire', chemo: '2/3 dose standard si < 12 kg — hépatotox. ActD', rt: 'À éviter avant 12–18 mois si possible', timing: 'RT en dernier recours uniquement', efs: 'Discussion RCP impérative', ec: 'efs-mid' },
+  relapse_AA:{ title: 'RECHUTE AA — Risque standard', q: 'Rechute après AV seul', chemo: 'HR-1 × 4 cycles induction · consolidation', rt: 'Site rechute non irradié : 10,8–25,2 Gy', timing: 'Après chirurgie rechute', efs: 'OS ~80 %', ec: 'efs-good' },
+  relapse_BB:{ title: 'RECHUTE BB — Haut risque', q: 'Rechute après ≥ 3 drogues dont doxo', chemo: 'Carbo/Éto × 4C → Autogreffe Melphalan', rt: 'WLI 12 Gy + sites rechute', timing: 'Après prise de greffe', efs: 'EFS 63 % · OS 68 %', ec: 'efs-mid' },
+  relapse_CC:{ title: 'RECHUTE CC — Très haut risque', q: 'HR stade IV d\'emblée ou 2ème rechute', chemo: 'Vincristine/Irinotécan (VI/VIT) — médecine précision', rt: 'Selon site — proportionnalité à discuter', timing: 'Cas par cas', efs: 'Survie ~10 % · Essai clinique', ec: 'efs-bad' },
+};
+
+function buildFlow() {
+  var fp = document.getElementById('panel-flow');
+  var W = fp.clientWidth;
+  var H = fp.clientHeight;
+
+  // Styles des nœuds D3 — hardcodés (pas de var CSS)
+  var NS = {
+    d:   { fill: '#dce8f5', stroke: '#1a5fa8', tc: '#0a1020' },
+    form:{ fill: '#ece0f5', stroke: '#6b3fa0', tc: '#0a1020' },
+    lr:  { fill: '#d5edd8', stroke: '#2d7a3a', tc: '#0a1a0a' },
+    sr:  { fill: '#d5e4f5', stroke: '#1a5fa8', tc: '#0a1020' },
+    hr:  { fill: '#f5d8d5', stroke: '#c0392b', tc: '#200505' },
+    sp:  { fill: '#f5ead5', stroke: '#a0720a', tc: '#201000' },
+  };
+
+  var nodes = [
+    { id:'root',           x:0,    y:0,    type:'d',    label:'Tumeur rénale\npédiatrique',         ttId:'root' },
+    { id:'unilat',         x:-280, y:180,  type:'d',    label:'Unilatérale\n6 mois–16 ans',        ttId:'unilat' },
+    { id:'bilateral',      x:0,    y:180,  type:'sp',   label:'Stade V\nBilatéral',                ttId:'bilateral' },
+    { id:'iv_root',        x:280,  y:180,  type:'d',    label:'Stade IV\nMétastases',              ttId:'iv_other' },
+    { id:'relapse',        x:560,  y:180,  type:'d',    label:'Rechute /\nRécidive',               ttId:'relapse_AA' },
+    { id:'surg_histo',     x:-280, y:380,  type:'form', label:'Chirurgie +\nHistologie',           ttId:'surg_histo' },
+    { id:'stI_LR',         x:-560, y:560,  type:'lr',   label:'Stade I\nLR — Aucune CT',          ttId:'stI_LR' },
+    { id:'stI_IR',         x:-420, y:560,  type:'sr',   label:'Stade I\nIR — AV 18 sem',          ttId:'stI_IR' },
+    { id:'stII_LR',        x:-280, y:560,  type:'lr',   label:'Stade II\nLR — AV 18 sem',         ttId:'stII_LR' },
+    { id:'stII_IR',        x:-140, y:560,  type:'sr',   label:'Stade II\nIR — AVD 27 sem',        ttId:'stII_IR' },
+    { id:'stIII_LR',       x:-560, y:740,  type:'lr',   label:'Stade III LR\nAVD + RT 10,8 Gy',  ttId:'stIII_LR' },
+    { id:'stIII_IR',       x:-400, y:740,  type:'sr',   label:'Stade III IR\nAVD + RT 10,8 Gy',  ttId:'stIII_IR' },
+    { id:'stIII_HR',       x:-220, y:740,  type:'hr',   label:'Stade II–III HR\nHR-1 + RT 25,2 Gy', ttId:'stIII_HR' },
+    { id:'iv_pulm_cr_lr',  x:140,  y:380,  type:'sr',   label:'Stade IV\nRC · LR/IR',             ttId:'iv_pulm_cr_lr' },
+    { id:'iv_pulm_cr_hr',  x:280,  y:380,  type:'hr',   label:'Stade IV\nRC · HR + WLI',          ttId:'iv_pulm_cr_hr' },
+    { id:'iv_pulm_pr',     x:420,  y:380,  type:'hr',   label:'Stade IV\nRP/SD/PD + WLI',         ttId:'iv_pulm_pr' },
+    { id:'iv_liver',       x:560,  y:380,  type:'sp',   label:'Stade IV\nMets hépatiques',         ttId:'iv_liver' },
+    { id:'relapse_AA',     x:420,  y:560,  type:'sr',   label:'Rechute AA\n~80% OS',               ttId:'relapse_AA' },
+    { id:'relapse_BB',     x:560,  y:560,  type:'hr',   label:'Rechute BB\n68% OS',                ttId:'relapse_BB' },
+    { id:'relapse_CC',     x:700,  y:560,  type:'hr',   label:'Rechute CC\n~10% survie',           ttId:'relapse_CC' },
+    { id:'infant',         x:-700, y:180,  type:'sp',   label:'< 6 mois\nNourrisson',              ttId:'infant' },
+  ];
+
+  var edges = [
+    { s:'root', t:'unilat',        label:'Unilatérale\nâge standard' },
+    { s:'root', t:'bilateral',     label:'Stade V\nbilatéral' },
+    { s:'root', t:'iv_root',       label:'Stade IV\nmétastases' },
+    { s:'root', t:'relapse',       label:'Rechute' },
+    { s:'root', t:'infant',        label:'< 6 mois' },
+    { s:'unilat', t:'surg_histo',  label:'CT 4 sem AV\n→ Néphrectomie' },
+    { s:'surg_histo', t:'stI_LR',  label:'Stade I · LR' },
+    { s:'surg_histo', t:'stI_IR',  label:'Stade I · IR' },
+    { s:'surg_histo', t:'stII_LR', label:'Stade II · LR' },
+    { s:'surg_histo', t:'stII_IR', label:'Stade II · IR' },
+    { s:'surg_histo', t:'stIII_LR', label:'Stade III · LR' },
+    { s:'surg_histo', t:'stIII_IR', label:'Stade III · IR' },
+    { s:'surg_histo', t:'stIII_HR', label:'Stade II–III · HR' },
+    { s:'iv_root', t:'iv_pulm_cr_lr', label:'RC pulm · LR/IR' },
+    { s:'iv_root', t:'iv_pulm_cr_hr', label:'RC pulm · HR' },
+    { s:'iv_root', t:'iv_pulm_pr',    label:'RP / SD / PD' },
+    { s:'iv_root', t:'iv_liver',      label:'Mets hépatiques' },
+    { s:'relapse', t:'relapse_AA', label:'Groupe AA\n(VA seul)' },
+    { s:'relapse', t:'relapse_BB', label:'Groupe BB\n(AVD / HR-1)' },
+    { s:'relapse', t:'relapse_CC', label:'Groupe CC\n(HR d\'emblée)' },
+  ];
+
+  var nMap = {};
+  nodes.forEach(function(n) { nMap[n.id] = n; });
+
+  var svg = d3.select('#chart').append('svg')
+    .attr('width', '100%').attr('height', '100%');
+
+  svg.append('defs').append('marker')
+    .attr('id', 'arr').attr('viewBox', '0 -4 8 8').attr('refX', 8).attr('refY', 0)
+    .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', '#2a3441');
+
+  var g = svg.append('g');
+  var zoom = d3.zoom().scaleExtent([0.08, 3])
+    .on('zoom', function(event) { g.attr('transform', event.transform); });
+  svg.call(zoom);
+
+  var NW = 140, NH = 50;
+
+  // Arêtes
+  edges.forEach(function(e) {
+    var sn = nMap[e.s], tn = nMap[e.t];
+    if (!sn || !tn) return;
+    var sx = sn.x, sy = sn.y + NH/2;
+    var tx = tn.x, ty = tn.y - NH/2;
+    var mx = (sx + tx) / 2;
+    var my = (sy + ty) / 2;
+    g.append('path')
+      .attr('d', 'M' + sx + ',' + sy + ' C' + sx + ',' + (sy+60) + ' ' + tx + ',' + (ty-60) + ' ' + tx + ',' + ty)
+      .attr('fill', 'none').attr('stroke', '#2a3441').attr('stroke-width', 1.5)
+      .attr('marker-end', 'url(#arr)');
+    if (e.label) {
+      var lines = e.label.split('\n');
+      var lt = g.append('text').attr('x', mx).attr('y', my)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '8').attr('font-family', 'DM Mono, monospace').attr('fill', '#6e7681');
+      lines.forEach(function(ln, i) {
+        lt.append('tspan').attr('x', mx).attr('dy', i === 0 ? 0 : 11).text(ln);
+      });
+    }
+  });
+
+  // Nœuds
+  var nodeG = g.selectAll('.node').data(nodes).enter().append('g')
+    .attr('class', 'node')
+    .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+    .style('cursor', 'pointer');
+
+  // Ombre
+  nodeG.append('rect')
+    .attr('x', -NW/2+2).attr('y', -NH/2+2).attr('width', NW).attr('height', NH)
+    .attr('rx', 8).attr('fill', 'rgba(0,0,0,0.1)');
+
+  // Corps
+  nodeG.append('rect')
+    .attr('x', -NW/2).attr('y', -NH/2).attr('width', NW).attr('height', NH)
+    .attr('rx', 8)
+    .attr('fill', function(d) { return (NS[d.type] || NS.d).fill; })
+    .attr('stroke', function(d) { return (NS[d.type] || NS.d).stroke; })
+    .attr('stroke-width', 1.8);
+
+  // Barre couleur haut
+  nodeG.append('rect')
+    .attr('x', -NW/2).attr('y', -NH/2).attr('width', NW).attr('height', 3).attr('rx', 8)
+    .attr('fill', function(d) { return (NS[d.type] || NS.d).stroke; });
+
+  // Texte
+  nodeG.each(function(d) {
+    var el = d3.select(this);
+    var lines = d.label.split('\n');
+    var totalH = lines.length * 13;
+    var startY = -totalH / 2 + 7;
+    lines.forEach(function(line, i) {
+      el.append('text')
+        .attr('x', 0).attr('y', startY + i * 13)
+        .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
+        .attr('font-family', 'DM Mono, monospace').attr('font-size', 9).attr('font-weight', '500')
+        .attr('fill', function() { return (NS[d.type] || NS.d).tc; })
+        .text(line);
+    });
+  });
+
+  // Tooltip
+  var ttEl = document.getElementById('tt-body');
+
+  nodeG.on('mouseenter', function(event, d) {
+    var dt = TT_DATA[d.ttId];
+    if (!dt) return;
+    var html = '<div class="tt-title">' + dt.title + '</div>'
+      + '<div class="tt-q">' + dt.q + '</div>'
+      + '<div class="tt-section"><div class="tt-section-lbl">Chimiothérapie</div><div class="tt-val">' + dt.chemo + '</div></div>'
+      + '<div class="tt-section"><div class="tt-section-lbl">Radiothérapie</div><div class="tt-val">' + dt.rt + '</div></div>'
+      + '<div class="tt-section"><div class="tt-section-lbl">Timing RT</div><div class="tt-val">' + dt.timing + '</div></div>'
+      + (dt.volumes ? '<div class="tt-section"><div class="tt-section-lbl">Volumes</div><div class="tt-val">' + dt.volumes + '</div></div>' : '')
+      + '<div class="tt-outcome-line"><span class="' + (dt.ec || 'efs-mid') + '">' + dt.efs + '</span></div>';
+    ttEl.innerHTML = html;
+    ttEl.style.display = 'block';
+    d3.select(this).select('rect:nth-child(2)').attr('stroke-width', 3);
+  }).on('mousemove', function(event) {
+    var tx = event.clientX, ty = event.clientY;
+    var tw = ttEl.offsetWidth, th = ttEl.offsetHeight;
+    ttEl.style.left = (tx + 16 + tw > window.innerWidth ? tx - tw - 16 : tx + 16) + 'px';
+    ttEl.style.top  = (ty + 16 + th > window.innerHeight ? ty - th - 14 : ty + 16) + 'px';
+  }).on('mouseleave', function() {
+    ttEl.style.display = 'none';
+    d3.select(this).select('rect:nth-child(2)').attr('stroke-width', 1.8);
+  });
+
+  // Auto-fit
+  var xs = nodes.map(function(n) { return n.x; });
+  var ys = nodes.map(function(n) { return n.y; });
+  var minX = Math.min.apply(null, xs) - NW, maxX = Math.max.apply(null, xs) + NW;
+  var minY = Math.min.apply(null, ys) - NH, maxY = Math.max.apply(null, ys) + NH;
+  var scale = Math.min(W / (maxX - minX), H / (maxY - minY), 1) * 0.85;
+  var initTx = W / 2 - (minX + maxX) / 2 * scale;
+  var initTy = H / 2 - (minY + maxY) / 2 * scale;
+  var initT = d3.zoomIdentity.translate(initTx, initTy).scale(scale);
+  svg.call(zoom.transform, initT);
+
+  document.getElementById('btnReset').onclick = function() {
+    svg.transition().duration(600).call(zoom.transform, initT);
+  };
+
+  window.addEventListener('resize', function() {
+    var fp2 = document.getElementById('panel-flow');
+    var newW = fp2.clientWidth;
+    var newH = fp2.clientHeight;
+    svg.attr('width', newW).attr('height', newH);
+  });
+}
+
+// ═══ INIT ═══
+initTheme();
+renderStep('start');
+fixLayout();
+</script>
+</body>
+</html>
