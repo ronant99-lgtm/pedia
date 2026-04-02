@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>COG NCCN · Nephroblastome — Stratification & Logigramme</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── THÈME SOMBRE (défaut) ── */
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;
+  --border:#2a3441;--border2:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --green:#3fb950;--blue:#388bfd;--red:#f85149;--yellow:#d29922;
+  --purple:#a371f7;--orange:#f0883e;--cyan:#39c5cf;
+  --accent:#f0883e;--radius:10px;
+}
+/* ── THÈME CLAIR ── */
+body.light{
+  --bg:#f5f0e8;--surface:#ffffff;--surface2:#ede8dc;--surface3:#e6e0d2;
+  --border:#c8bfaa;--border2:#d4ccba;
+  --text:#1a1208;--text2:#5a4f3a;--text3:#9a8f7a;
+  --green:#2d7a3a;--blue:#1a5fa8;--red:#c0392b;--yellow:#a0720a;
+  --purple:#6b3fa0;--orange:#c45a10;--cyan:#1a7a8a;
+  --accent:#c45a10;
+}
+body.light header{background:rgba(245,240,232,0.97);backdrop-filter:blur(10px);}
+body.light .tab-nav{background:var(--surface2);}
+body.light .tab-btn:hover{background:rgba(0,0,0,.04);}
+body.light .opt-btn:hover{background:rgba(196,90,16,.06);border-color:var(--accent);}
+body.light .opt-btn:hover::before{transform:scaleY(1);}
+body.light .tt-body{background:rgba(245,240,232,.98);border-color:rgba(26,95,168,.25);}
+body.light .btn-reset-zoom{background:var(--surface);}
+
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;transition:background .25s,color .25s;}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:200;background:rgba(13,17,23,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;}
+.hdr-logo{width:32px;height:32px;border:1.5px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);font-weight:500;flex-shrink:0;}
+.hdr-texts{flex:1;min-width:0;}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px;}
+.hdr-badge{font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;border-radius:20px;background:rgba(240,136,62,.1);border:1px solid rgba(240,136,62,.3);color:var(--accent);margin-left:auto;flex-shrink:0;white-space:nowrap;}
+.btn-theme{width:30px;height:30px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:14px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;margin-left:8px;flex-shrink:0;}
+.btn-theme:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── TAB NAV ── */
+.tab-nav{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;z-index:150;}
+.tab-btn{flex:1;padding:11px 16px;border:none;background:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ── PANELS ── */
+.panel{display:none;}
+.panel.active{display:block;}
+#panel-flow{overflow:hidden;position:relative;}
+
+/* ── WIZARD LAYOUT ── */
+.container{max-width:860px;margin:0 auto;padding:32px 20px 80px;}
+.progress-wrap{margin-bottom:28px;}
+.progress-header{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;}
+.progress-bar-bg{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;}
+
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:14px;position:relative;animation:fadeSlide .3s ease;overflow:hidden;}
+.step-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+.q-title{font-family:'DM Serif Display',serif;font-size:19px;margin-bottom:6px;line-height:1.4;}
+.q-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.55;}
+.options{display:flex;flex-direction:column;gap:9px;}
+.opt-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:13px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;text-align:left;transition:all .2s;position:relative;overflow:hidden;}
+.opt-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);transform:scaleY(0);transition:transform .2s;}
+.opt-btn:hover{border-color:var(--accent);background:rgba(240,136,62,.06);}
+.opt-btn:hover::before{transform:scaleY(1);}
+.opt-btn strong{display:block;margin-bottom:3px;font-weight:600;}
+.opt-desc{font-size:11px;color:var(--text3);margin-top:3px;}
+.btn-back{background:none;border:1px solid var(--border2);color:var(--text2);padding:7px 13px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;margin-bottom:16px;transition:all .2s;}
+.btn-back:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── RESULT ── */
+.result-card{border-radius:var(--radius);padding:24px;animation:fadeSlide .3s ease;}
+.result-card.vlr{border:1px solid var(--green);border-top:3px solid var(--green);background:rgba(63,185,80,.04);}
+.result-card.lr{border:1px solid var(--green);border-top:3px solid var(--green);background:rgba(63,185,80,.04);}
+.result-card.sr{border:1px solid var(--blue);border-top:3px solid var(--blue);background:rgba(56,139,253,.04);}
+.result-card.hr{border:1px solid var(--red);border-top:3px solid var(--red);background:rgba(248,81,73,.05);}
+.result-card.bilat{border:1px solid var(--purple);border-top:3px solid var(--purple);background:rgba(163,113,247,.04);}
+.result-card.anapla{border:1px solid var(--red);border-top:3px solid var(--red);background:rgba(248,81,73,.05);}
+.result-card.predispo{border:1px solid var(--yellow);border-top:3px solid var(--yellow);background:rgba(210,153,34,.04);}
+
+.result-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px;}
+.result-title{font-family:'DM Serif Display',serif;font-size:20px;line-height:1.3;}
+.risk-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;flex-shrink:0;}
+.risk-badge.vlr,.risk-badge.lr{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);}
+.risk-badge.sr{background:rgba(56,139,253,.15);color:var(--blue);border:1px solid rgba(56,139,253,.3);}
+.risk-badge.hr,.risk-badge.anapla{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3);}
+.risk-badge.bilat{background:rgba(163,113,247,.15);color:var(--purple);border:1px solid rgba(163,113,247,.3);}
+.risk-badge.predispo{background:rgba(210,153,34,.15);color:var(--yellow);border:1px solid rgba(210,153,34,.3);}
+
+.r-row{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+.r-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;}
+.r-val{font-size:13px;color:var(--text);line-height:1.65;}
+.r-val strong{font-weight:600;}
+
+/* ── RT BLOCK ── */
+.rt-block{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:8px;padding:16px;margin-bottom:10px;}
+.rt-block-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--blue);text-transform:uppercase;margin-bottom:12px;}
+.rt-section{margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid var(--border);}
+.rt-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.rt-section-hdr{font-size:12px;font-weight:500;color:var(--text);margin-bottom:7px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.rt-tag{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(56,139,253,.12);color:var(--blue);flex-shrink:0;}
+body.light .rt-tag{color:var(--blue);}
+.rt-tag.no-rt{background:rgba(110,118,129,.12);color:var(--text3);}
+.rt-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:560px){.rt-2col{grid-template-columns:1fr;}}
+.rt-box{background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:9px 11px;margin-bottom:6px;}
+.rt-box-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.rt-box-val{font-size:12px;color:var(--text);line-height:1.5;}
+.rt-dose{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--blue);}
+.rt-note{font-size:11px;color:var(--text2);margin-top:5px;line-height:1.5;}
+.no-rt-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--text3);border-radius:8px;padding:12px 16px;margin-bottom:10px;font-size:13px;color:var(--text3);}
+
+/* ── OUTCOMES ── */
+.outcomes-block{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+.outcome-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.outcome-row:last-child{border-bottom:none;}
+.outcome-label{color:var(--text2);}
+.outcome-val{font-family:'DM Mono',monospace;font-size:11px;}
+.ov-good{color:var(--green);}.ov-mid{color:var(--yellow);}.ov-bad{color:var(--red);}
+
+.result-actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;}
+.btn-restart{background:none;border:1px solid var(--border2);color:var(--text2);padding:9px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s;}
+.btn-restart:hover{border-color:var(--accent);color:var(--accent);}
+.btn-pdf{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);padding:9px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s;}
+.btn-pdf:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── REFS ── */
+.refs-section{margin-top:44px;border-top:1px solid var(--border);padding-top:22px;}
+.refs-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+.ref-item{display:flex;gap:10px;margin-bottom:14px;font-size:12px;}
+.ref-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;padding-top:2px;}
+.ref-body{flex:1;}
+.ref-authors{font-weight:500;}
+.ref-title-text{color:var(--text);margin-top:2px;}
+.ref-journal{color:var(--text2);font-size:11px;margin-top:1px;}
+.ref-doi a{color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;text-decoration:none;}
+.ref-doi a:hover{text-decoration:underline;}
+
+/* ── D3 FLOWCHART ── */
+#chart{width:100%;height:100%;cursor:grab;}
+#chart:active{cursor:grabbing;}
+.btn-reset-zoom{position:absolute;top:14px;right:14px;background:var(--surface);border:1px solid var(--border2);color:var(--text2);padding:7px 14px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;z-index:10;transition:all .2s;}
+.btn-reset-zoom:hover{border-color:var(--accent);color:var(--accent);}
+.flow-legend{position:absolute;bottom:14px;left:14px;display:flex;flex-wrap:wrap;gap:8px;z-index:10;pointer-events:none;}
+.leg-it{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);}
+.leg-dot{width:9px;height:9px;border-radius:50%;}
+
+/* ── TOOLTIP D3 ── */
+.tt-body{position:fixed;pointer-events:none;z-index:300;background:rgba(13,17,23,.97);border-radius:10px;padding:14px 16px;width:300px;box-shadow:0 6px 28px rgba(0,0,0,.35);border:1px solid rgba(240,136,62,.2);display:none;}
+.tt-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:7px;letter-spacing:1.5px;text-transform:uppercase;}
+.tt-q{font-size:13px;font-weight:500;color:#e6edf3;margin-bottom:10px;line-height:1.4;}
+.tt-section{margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid #2a3441;}
+.tt-section:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.tt-section-lbl{font-family:'DM Mono',monospace;font-size:9px;color:#6e7681;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.tt-val{font-size:11px;color:#8b949e;line-height:1.5;}
+.tt-outcome-line{margin-top:8px;font-family:'DM Mono',monospace;font-size:11px;}
+.efs-good{color:#3fb950;}.efs-mid{color:#d29922;}.efs-bad{color:#f85149;}
+
+/* ── PRINT ── */
+.print-footer{display:none;}
+@media print{
+  body,body.light{background:#fff!important;color:#000!important;}
+  header,body.light header{position:static!important;background:#fff!important;border-bottom:1px solid #ccc!important;}
+  .tab-nav,.btn-pdf,.btn-restart,.progress-wrap,.btn-back,#panel-flow,.btn-theme{display:none!important;}
+  .panel{display:block!important;}
+  .result-card{border:1.5px solid #333!important;background:#fff!important;break-inside:avoid;}
+  .print-footer{display:block;font-size:8pt;color:#999;margin-top:22px;border-top:1px solid #ddd;padding-top:8px;}
+  :root,body.light{--text:#000;--text2:#444;--text3:#888;--surface:#fff;--surface2:#f5f5f5;--border:#ddd;--border2:#eee;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">NT</div>
+  <div class="hdr-texts">
+    <div class="hdr-title">Nephroblastome — Stratification & Logigramme</div>
+    <div class="hdr-sub">NCCN v2.2025 · COG Staging · AREN0532 · AREN0533 · AREN0534 · AREN0321</div>
+  </div>
+  <span class="hdr-badge">COG · NCCN 2025</span>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Passer en mode clair">◑</button>
+</header>
+
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" id="tab-wizard" onclick="switchTab('wizard')">⬡ Stratification pas-à-pas</button>
+  <button class="tab-btn" id="tab-flow" onclick="switchTab('flow')">⬡ Logigramme interactif</button>
+</div>
+
+<!-- ═══ PANEL WIZARD ═══ -->
+<div class="panel active" id="panel-wizard">
+  <div class="container">
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-header">
+        <span id="stepLabel">Étape 1 / 6</span>
+        <span id="stepName">Latéralité</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-fill" id="progressFill" style="width:16%"></div></div>
+    </div>
+    <div id="app"></div>
+    <div class="refs-section" id="refsSection" style="display:none">
+      <div class="refs-title">Références</div>
+      <div class="ref-item"><span class="ref-num">1</span><div class="ref-body">
+        <div class="ref-authors">Dix DB, Fernandez CV, Chi YY, et al.</div>
+        <div class="ref-title-text">Augmentation of therapy for combined loss of heterozygosity 1p and 16q in favorable histology Wilms tumor (AREN0532/0533)</div>
+        <div class="ref-journal">J Clin Oncol, 2019;37(31):2769–2777</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.19.00596" target="_blank">doi:10.1200/JCO.19.00596</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">2</span><div class="ref-body">
+        <div class="ref-authors">Dix DB, Seibel NL, Chi YY, et al.</div>
+        <div class="ref-title-text">Treatment of stage IV favorable histology Wilms tumor with lung metastases (AREN0533)</div>
+        <div class="ref-journal">J Clin Oncol, 2018;36(16):1564–1570</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.2017.77.1931" target="_blank">doi:10.1200/JCO.2017.77.1931</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">3</span><div class="ref-body">
+        <div class="ref-authors">Fernandez CV, Perlman EJ, Mullen EA, et al.</div>
+        <div class="ref-title-text">Clinical outcome and biological predictors of relapse after nephrectomy only for very low-risk Wilms tumor (AREN0532)</div>
+        <div class="ref-journal">Ann Surg, 2017;265(5):835–840</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1097/SLA.0000000000001716" target="_blank">doi:10.1097/SLA.0000000000001716</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">4</span><div class="ref-body">
+        <div class="ref-authors">Ehrlich PF, Chi YY, Chintagumpala MM, et al.</div>
+        <div class="ref-title-text">Results of the first prospective multi-institutional treatment study in children with bilateral Wilms tumor (AREN0534)</div>
+        <div class="ref-journal">Ann Surg, 2017;266(3):470–478</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1097/SLA.0000000000002356" target="_blank">doi:10.1097/SLA.0000000000002356</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">5</span><div class="ref-body">
+        <div class="ref-authors">Daw NC, Chi YY, Kalapurakal JA, et al.</div>
+        <div class="ref-title-text">Activity of vincristine and irinotecan in diffuse anaplastic Wilms tumor (AREN0321)</div>
+        <div class="ref-journal">J Clin Oncol, 2020;38(14):1558–1568</div>
+        <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.19.01912" target="_blank">doi:10.1200/JCO.19.01912</a></div>
+      </div></div>
+      <div class="ref-item"><span class="ref-num">6</span><div class="ref-body">
+        <div class="ref-authors">NCCN Guidelines v2.2025</div>
+        <div class="ref-title-text">Wilms Tumor (Nephroblastoma) — National Comprehensive Cancer Network</div>
+        <div class="ref-journal">Version 2.2025, June 11, 2025</div>
+        <div class="ref-doi"><a href="https://www.nccn.org/guidelines/guidelines-detail?category=1&id=1470" target="_blank">nccn.org/guidelines</a></div>
+      </div></div>
+    </div>
+    <div class="print-footer">Outil d'aide à la décision — Ne se substitue pas au jugement clinique ni aux recommandations en vigueur.<br>NCCN Guidelines v2.2025 · COG Staging</div>
+  </div>
+</div>
+
+<!-- ═══ PANEL FLOWCHART ═══ -->
+<div class="panel" id="panel-flow">
+  <button class="btn-reset-zoom" id="btnReset">⊙ Recentrer</button>
+  <div class="flow-legend">
+    <div class="leg-it"><div class="leg-dot" style="background:#388bfd"></div>Décision</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#3fb950"></div>Bas risque / VLR</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#388bfd;opacity:.5"></div>Risque standard</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#f85149"></div>Haut risque / Anaplasie</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#a371f7"></div>Bilatéral</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#d29922"></div>Prédisposition</div>
+  </div>
+  <svg id="chart"></svg>
+  <div class="tt-body" id="tooltip"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DONNÉES RÉSULTATS WIZARD
+// ═══════════════════════════════════════════════════
+var RES = {
+
+  fhwt_vlr: {
+    cls:'vlr', badge:'VLR', badgeCls:'vlr',
+    title:'FHWT — Très Bas Risque (VLR)',
+    chemo:'<strong>Observation seule</strong> si aucun biomarqueur défavorable (pas de LOH 11p15/LOI, pas de LOH 1p+16q combiné, pas de gain 1q).<br>Ou <strong>Régime EE4A</strong> (vincristine + dactinomycine × 18 sem.) si biomarqueur défavorable présent.',
+    rt:null, rtText:'PAS DE RT — Stade I, groupe très bas risque (aucune indication)',
+    os:'~98–100 %', efs:'~89–97 %', n:'n=116–188', refs:'[3]',
+    note:'Observation acceptable sans LOH défavorable. Si LOH 11p15 ou gain 1q → EE4A. Déintensification à ne pas proposer si gain 1q (données émergentes défavorables).'
+  },
+
+  fhwt_lr: {
+    cls:'lr', badge:'LR', badgeCls:'lr',
+    title:'FHWT — Bas Risque (LR), Stades I–II',
+    chemo:'<strong>Régime EE4A</strong> (vincristine + dactinomycine × 18 sem.) si pas de LOH combiné 1p+16q.<br><strong>Switch vers DD4A préféré</strong> (+ doxorubicine × 24 sem.) si LOH combiné 1p+16q détecté.',
+    rt:null, rtText:'PAS DE RT — Stades I–II sans critère local stade III',
+    os:'~99 %', efs:'~87–91 %', n:'large', refs:'[1,3]',
+    note:'LOH combiné 1p+16q stades I–II : EFS 87,3 % DD4A vs 68,8 % EE4A [AREN0532]. Gain 1q seul sans LOH combiné : données insuffisantes pour modifier le traitement en LR.'
+  },
+
+  fhwt_sr: {
+    cls:'sr', badge:'SR', badgeCls:'sr',
+    title:'FHWT — Risque Standard (SR), Stade III',
+    chemo:'<strong>Régime DD4A</strong> (vincristine + dactinomycine + doxorubicine × 24 sem.).<br>Si LOH combiné 1p+16q → <strong>switch Régime M préféré</strong> à semaine 7 (+ cyclophosphamide + étoposide).',
+    rt:{
+      timing:'Débuter J10 postopératoire (au plus tard J14)',
+      volumes:'Flanc : GTV préopératoire + 1 cm CTV + 5–10 mm PTV. WAI si rupture préop, implants péritonéaux ou spill diffus peropératoire.',
+      doses:'Flanc stade III : <strong>10,8 Gy / 1,8 Gy/fr</strong>. WAI : <strong>10,5 Gy / 1,5 Gy/fr</strong>. Résidu : boost +10,8 Gy conformal.'
+    },
+    os:'~95–98 %', efs:'~83–90 %', n:'large', refs:'[1]',
+    note:'RT obligatoire si stade III local (indépendamment des métastases). WAI à la place du flanc si rupture préopératoire, implants péritonéaux ou spill diffus. Coordonner timing RT et chimio (éviter dactinomycine/doxorubicine à pleine dose pendant WAI).'
+  },
+
+  fhwt_hr: {
+    cls:'hr', badge:'HR', badgeCls:'hr',
+    title:'FHWT — Haut Risque (HR), Stade IV',
+    chemo:'<strong>Régime DD4A d\'emblée</strong>. Réévaluation imagerie pulmonaire à S6 (avant anesthésie).<br>— LOH 1p+16q ou SIR pulmonaire S6 → <strong>switch Régime M</strong> (préféré) à S7.<br>— Gain 1q + RC pulmonaire S6 → <strong>DD4A + WLI obligatoire</strong> (EFS 57 % sans WLI).<br>— Pas de LOH, pas de gain 1q, RC pulmonaire S6 → DD4A, WLI non nécessaire.<br>— Méta extra-pulm + LOH → Régime M ; sans LOH → DD4A.',
+    rt:{
+      timing:'RT primaire J10–J14. WLI selon réponse pulmonaire S6 et biomarqueurs',
+      volumes:'Flanc/WAI : GTV préop + 1 cm CTV + 5–10 mm PTV. WLI : plèvre entière CTV + 5–10 mm PTV (AP/PA ou IMRT ou protons). Méta : selon site.',
+      doses:'Flanc : <strong>10,8 Gy / 1,8 Gy/fr</strong>. WAI : <strong>10,5 Gy / 1,5 Gy/fr</strong>. WLI >12 mois : <strong>12 Gy / 1,5 Gy/fr</strong>. WLI <12 mois : 10,5 Gy. Méta osseuses / autres : 50,4 Gy. Méta ganglionnaires réséquées : 10,8 Gy ; non réséquées : boost à 19,8 Gy.'
+    },
+    os:'~89–95 %', efs:'~76–88 %', n:'large', refs:'[2]',
+    note:'RC pulmonaire + pas de LOH + pas de gain 1q → EFS ~90 %, WLI non nécessaire. Gain 1q + RC → WLI impératif (EFS 57 % sans). Méta extra-pulm sans LOH : Régime M non démontré supérieur à DD4A (EFS 76 % vs 65 %, p=0,26) [AREN0533].'
+  },
+
+  fhwt_neoadj: {
+    cls:'sr', badge:'SR/HR', badgeCls:'sr',
+    title:'FHWT — Non résécable (sans prédisposition)',
+    chemo:'<strong>Biopsie fortement recommandée</strong> (upstage automatique stade III local).<br><strong>DD4A néoadjuvant</strong> — rééval. imagerie à S6 ± S12.<br>— Résécable S6 → néphectomie + curage ; adjuvant selon histo + biomarqueurs.<br>— Non résécable S6 → continuer DD4A ; chirurgie impérative ≤ S12.<br>— Progression → néphectomie ou rebiopsie (anaplasie ?).',
+    rt:{
+      timing:'RT postopératoire J10–J14. WLI selon réponse pulmonaire S6',
+      volumes:'Flanc (stade III systématique car biopsie) ou WAI. GTV préop + 1 cm CTV + 5–10 mm PTV.',
+      doses:'Flanc : <strong>10,8 Gy / 1,8 Gy/fr</strong>. WAI : <strong>10,5 Gy / 1,5 Gy/fr</strong>. WLI >12 mois : 12 Gy.'
+    },
+    os:'~90–95 %', efs:'~80–88 %', n:'large', refs:'[1,6]',
+    note:'Biopsie = upstage stade III pour chimio — mais pas pour RT si biopsie seule. Chirurgie ≤ S12 (pas de bénéfice à prolonger). Gain 1q + RC pulm S6 → WLI impératif même en réponse complète.'
+  },
+
+  predispo: {
+    cls:'predispo', badge:'Prédisp.', badgeCls:'predispo',
+    title:'FHWT — Tumeur unilatérale avec condition prédisposante',
+    chemo:'<strong>EE4A néoadjuvant × 6 sem.</strong> (VAD si biopsie préalable effectuée).<br>— RC S6 → continuer EE4A sans chirurgie ; rééval. S12.<br>— Résécable NSS à S6 → néphectomie partielle prioritaire (ou totale) + curage.<br>Adjuvant selon histo post-op : EE4A (stade I–II non blastemal) · DD4A (stade III non blastemal / stade I blastemal) · Régime I (stade II–III blastemal prédom.).',
+    rt:{
+      timing:'RT si stade III local post-op (J10–J14). Biopsie seule → chimio stade III, PAS RT stade III.',
+      volumes:'Flanc (stade III) ou WAI. GTV préop + 1 cm CTV + 5–10 mm PTV.',
+      doses:'Flanc : <strong>10,8 Gy / 1,8 Gy/fr</strong>. WAI : <strong>10,5 Gy / 1,5 Gy/fr</strong>.'
+    },
+    os:'100 %', efs:'94 %', n:'n=34 (AREN0534)', refs:'[4]',
+    note:'NSS à prioriser systématiquement. Néphectomie totale si NSS non faisable à S6 avec réponse < partielle, ou si NSS impossible à S12. Ne pas prolonger la chimio au-delà de S12. Biomarqueurs moléculaires non utilisés dans AREN0534 — excellents résultats malgré tout.'
+  },
+
+  bilateral: {
+    cls:'bilat', badge:'Bilatéral', badgeCls:'bilat',
+    title:'Nephroblastome Bilatéral (Stade V COG)',
+    chemo:'<strong>VAD néoadjuvant</strong> (6–12 sem., rééval. S6).<br>— Résécable NSS bilatérale à S6 → chirurgie.<br>— Réponse partielle → continuer VAD ; chirurgie ≤ S12.<br>— < Réponse partielle S6 → biopsies bilatérales ouvertes → adapter chimio (Régime I si blastemal ; Revised UH-2 si anaplasie).<br>Adjuvant : EE4A (stade I non blastemal ou nécrose complète) · DD4A (stade II–III non blastemal / stade I blastemal) · Régime I (stade II–III blastemal prédom.).',
+    rt:{
+      timing:'RT si stade III local post-op (J10–J14). Biopsie seule → pas de RT stade III.',
+      volumes:'Flanc(s) stade III ou WAI selon extension. WLI si méta pulmonaires.',
+      doses:'Flanc : <strong>10,8 Gy / 1,8 Gy/fr</strong>. WAI : <strong>10,5 Gy / 1,5 Gy/fr</strong>. WLI méta >12 mois : 12 Gy. Méta autres sites : selon localisation.'
+    },
+    os:'97,7 %', efs:'83 % (non blastemal)', n:'n=189 (AREN0534)', refs:'[4]',
+    note:'Préservation rénale prioritaire (NSS). Incidence insuffisance rénale terminale : 12 % bilatéral vs 0,6 % unilatéral. Chirurgie ≤ S12 impérative. En cas de récidive : NSS répétée si possible. Néphectomie totale si NSS impossible à S12.'
+  },
+
+  fawt: {
+    cls:'anapla', badge:'FAWT', badgeCls:'anapla',
+    title:'Anaplasie Focale (FAWT) — Post-néphectomie',
+    chemo:'<strong>Stades I–III : Régime DD4A</strong> (vincristine + dactinomycine + doxorubicine × 24 sem.).<br>Note : intensification discutée en stade III (résultats AREN0321 inférieurs aux attendus).<br><strong>Stade IV : Régime UH-1 révisé</strong> (vincristine + doxorubicine + cyclophosphamide + carboplatine + étoposide).',
+    rt:{
+      timing:'J10–J14 postopératoire. WLI si méta pulm stade IV.',
+      volumes:'Flanc (stades I–III) ou WAI selon spill/rupture. WLI + autres sites si stade IV. GTV préop + 1 cm CTV + 5–10 mm PTV.',
+      doses:'Flanc stades I–II : <strong>10,8 Gy / 1,8 Gy/fr</strong>. Flanc stade III : <strong>10,8 Gy / 1,8 Gy/fr</strong>. WAI : <strong>10,5 Gy / 1,5 Gy/fr</strong>. WLI >12 mois : 12 Gy. Résidu : +10,8 Gy conformal.'
+    },
+    os:'100 %', efs:'100 % (stade I)', n:'n=18 stade I (AREN0321)', refs:'[5]',
+    note:'Stade I FAWT : excellent pronostic avec DD4A + RT flanc (EFS/OS 100 % AREN0321). Stades II–IV : DD4A comparables à NWTS-5. Stade IV : UH-1 révisé recommandé (données récentes). Possible intensification stade III (résultats inférieurs aux attendus dans AREN0321).'
+  },
+
+  dawt: {
+    cls:'anapla', badge:'DAWT', badgeCls:'anapla',
+    title:'Anaplasie Diffuse (DAWT) — Post-néphectomie',
+    chemo:'<strong>Stade I : Régime DD4A</strong> (vincristine + dactinomycine + doxorubicine × 24 sem.).<br><strong>Stades II–IV : Régime UH-2 révisé</strong> (vincristine + doxorubicine + cyclophosphamide + carboplatine + étoposide + irinotécan).<br>Essai AREN1921 en cours : Régime UH-3.',
+    rt:{
+      timing:'Stade I : RT flanc J10–J14. Stades II–IV : RT flanc/WAI + WLI si méta pulm.',
+      volumes:'Flanc (stades I–II) ou WAI si rupture/implants (stade III). WLI si méta pulm. GTV préop + 1 cm CTV + 5–10 mm PTV.',
+      doses:'Flanc stades I–II : <strong>10,8 Gy / 1,8 Gy/fr</strong>. Flanc stade III DAWT : <strong>19,8 Gy</strong> (dose élevée — réduit rechutes locales 6,4 % vs 14,8 % NWTS-5). WAI : <strong>10,5 Gy</strong>. WLI >12 mois : 12 Gy. Résidu : +10,8 Gy conformal.'
+    },
+    os:'~73 %', efs:'~67 %', n:'n=66 stades II–IV (AREN0321)', refs:'[5]',
+    note:'Pronostic le plus défavorable. Dose élevée au flanc (19,8 Gy) pour le stade III DAWT réduit les rechutes locales (non significatif statistiquement). UH-2 révisé : pas de décès toxique (vs plusieurs avec UH-1 original). Essai AREN1921 actif pour DAWT et FHWT haut risque rechute.'
+  }
+};
+
+// ═══════════════════════════════════════════════════
+// STEPS WIZARD
+// ═══════════════════════════════════════════════════
+var STEPS = {
+  lateralite: {
+    label:'Latéralité', num:1, total:6,
+    q:'Atteinte rénale — unilatérale ou bilatérale ?',
+    sub:'L\'atteinte bilatérale (stade V COG) impose un protocole néoadjuvant systématique (VAD) avec objectif de préservation rénale (NSS), quelle que soit la condition prédisposante.',
+    opts:[
+      {val:'uni', label:'Tumeur unilatérale', desc:'Un seul rein atteint'},
+      {val:'bi',  label:'Tumeur bilatérale (Stade V)', desc:'Les deux reins — protocole néoadjuvant VAD + NSS (WILMS-8/9)'}
+    ],
+    next: function(v) { return v === 'bi' ? '_result_bilateral' : 'histologie'; }
+  },
+  histologie: {
+    label:'Histologie', num:2, total:6,
+    q:'Type histologique de la tumeur ?',
+    sub:'Déterminé après néphectomie ou biopsie. L\'anaplasie diffuse notée sur biopsie est toujours considérée comme diffuse. L\'anaplasie focale nécessite la pièce de néphectomie complète pour être classifiée.',
+    opts:[
+      {val:'fhwt',       label:'Histologie favorable (FHWT)',  desc:'Absence d\'anaplasie focale ou diffuse'},
+      {val:'fawt',       label:'Anaplasie focale (FAWT)',       desc:'1–2 foyers ≤15 mm, confinés au parenchyme rénal, hors espaces vasculaires'},
+      {val:'dawt',       label:'Anaplasie diffuse (DAWT)',      desc:'Multifocale, au-delà de la capsule, sur biopsie, ou avec instabilité nucléaire marquée'}
+    ],
+    next: function(v) {
+      if (v === 'fawt') return '_result_fawt';
+      if (v === 'dawt') return '_result_dawt';
+      return 'predisposition_step';
+    }
+  },
+  predisposition_step: {
+    label:'Condition prédisposante', num:3, total:6,
+    q:'Condition prédisposante génétique identifiée ?',
+    sub:'Syndromes associés : Denys-Drash, WAGR, Beckwith-Wiedemann, Frasier, Perlman, Sotos, Li-Fraumeni, trisomie 18, Simpson-Golabi-Behmel, Bloom. Également : restes néphrogéniques contralatéraux chez l\'enfant < 12 mois.',
+    opts:[
+      {val:'non', label:'Aucune condition prédisposante', desc:'WT sporadique'},
+      {val:'oui', label:'Condition prédisposante identifiée', desc:'Syndrome génétique ou restes néphrogéniques contralatéraux <12 mois'}
+    ],
+    next: function(v) { return v === 'oui' ? '_result_predispo' : 'resecabilite'; }
+  },
+  resecabilite: {
+    label:'Résécabilité', num:4, total:6,
+    q:'Statut de résécabilité de la tumeur ?',
+    sub:'Contre-indications à la résection d\'emblée : thrombus cave au-dessus des veines hépatiques, rein solitaire, risque de rupture ou de mortalité peropératoire élevé, atteinte bilatérale, masses trop volumineuses.',
+    opts:[
+      {val:'resec',    label:'Résécable d\'emblée', desc:'Néphectomie radicale + curage ≥5 ganglions recommandés en 1ère intention'},
+      {val:'nonresec', label:'Initialement non résécable', desc:'Biopsie fortement recommandée → DD4A néoadjuvant'}
+    ],
+    next: function(v) { return v === 'nonresec' ? '_result_fhwt_neoadj' : 'stade'; }
+  },
+  stade: {
+    label:'Stade COG post-chirurgical', num:5, total:6,
+    q:'Stade COG après néphectomie ?',
+    sub:'Stade III local : ganglions positifs, marges+, rupture pré- ou peropératoire, implants péritonéaux, résidu macroscopique, biopsie préalable. L\'atteinte métastatique (poumon, foie, os...) = Stade IV, indépendamment du stade local.',
+    opts:[
+      {val:'I',  label:'Stade I',                  desc:'Tumeur limitée au rein, résection complète, capsule intacte, pas de biopsie'},
+      {val:'II', label:'Stade II',                  desc:'Extension au-delà du rein, résection complète'},
+      {val:'III',label:'Stade III (local)',          desc:'Résidu abdominal — ganglions, marges+, rupture, biopsie préalable'},
+      {val:'IV', label:'Stade IV (métastatique)',   desc:'Métastases pulmonaires, hépatiques, osseuses ou extra-abdominales'}
+    ],
+    next: function() { return 'biomarqueurs'; }
+  },
+  biomarqueurs: {
+    label:'Biomarqueurs moléculaires', num:6, total:6,
+    q:'Résultats des biomarqueurs moléculaires (FHWT) ?',
+    sub:'Analyse sur tissu tumoral. Résultats disponibles en ~2 semaines. LOH combiné 1p+16q : principal facteur défavorable — augmentation thérapeutique si stade ≥ II. Gain 1q : défavorable — WLI impératif si stade IV et RC pulm S6.',
+    opts:[
+      {val:'fav',      label:'Pas de biomarqueur défavorable', desc:'Ni LOH 1p+16q combiné, ni gain 1q, ni LOH/LOI 11p15'},
+      {val:'loh1p16q', label:'LOH combiné 1p+16q',             desc:'Facteur défavorable principal — augmentation thérapeutique'},
+      {val:'gain1q',   label:'Gain 1q (sans LOH 1p+16q)',      desc:'Pertinent surtout au stade IV pour WLI même en RC pulmonaire'},
+      {val:'loh11p15', label:'LOH/LOI 11p15',                  desc:'Défavorable en risque très bas — contre-indique l\'observation seule'}
+    ],
+    next: function() { return '__compute'; }
+  }
+};
+
+function computeResult(st) {
+  var stade = st.stade, bio = st.biomarqueurs;
+  if (stade === 'IV') return 'fhwt_hr';
+  if (stade === 'III') return 'fhwt_sr';
+  if (stade === 'II') {
+    if (bio === 'loh1p16q') return 'fhwt_sr';
+    return 'fhwt_lr';
+  }
+  // Stade I
+  if (bio === 'fav') return 'fhwt_vlr';
+  if (bio === 'loh11p15' || bio === 'gain1q') return 'fhwt_lr';
+  if (bio === 'loh1p16q') return 'fhwt_lr';
+  return 'fhwt_vlr';
+}
+
+// ═══════════════════════════════════════════════════
+// MOTEUR WIZARD
+// ═══════════════════════════════════════════════════
+var wState = {}, navStack = [], currentStep = 'lateralite';
+
+function navigate(sid, val) {
+  navStack.push({ step: currentStep, state: JSON.parse(JSON.stringify(wState)) });
+  wState[sid] = val;
+  var step = STEPS[sid];
+  var nxt = step.next(val);
+  if (nxt === '__compute') {
+    currentStep = 'result';
+    renderResult(computeResult(wState));
+  } else if (nxt.startsWith('_result_')) {
+    currentStep = 'result';
+    renderResult(nxt.slice(8));
+  } else {
+    currentStep = nxt;
+    renderStep(nxt);
+  }
+}
+
+function renderStep(sid) {
+  var s = STEPS[sid];
+  var pct = Math.round(s.num / s.total * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepLabel').textContent = 'Étape ' + s.num + ' / ' + s.total;
+  document.getElementById('stepName').textContent = s.label;
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('refsSection').style.display = 'none';
+
+  var back = navStack.length ? '<button class="btn-back" onclick="goBack()">← Retour</button>' : '';
+  var opts = s.opts.map(function(o) {
+    return '<button class="opt-btn" onclick="navigate(\'' + sid + '\',\'' + o.val + '\')">'
+      + '<strong>' + o.label + '</strong>'
+      + (o.desc ? '<div class="opt-desc">' + o.desc + '</div>' : '')
+      + '</button>';
+  }).join('');
+
+  document.getElementById('app').innerHTML = back
+    + '<div class="step-card">'
+    + '<div class="section-label">Question ' + s.num + '</div>'
+    + '<div class="q-title">' + s.q + '</div>'
+    + '<div class="q-sub">' + s.sub + '</div>'
+    + '<div class="options">' + opts + '</div>'
+    + '</div>';
+}
+
+function renderResult(key) {
+  var r = RES[key];
+  if (!r) { document.getElementById('app').innerHTML = '<p>Résultat inconnu : ' + key + '</p>'; return; }
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('stepLabel').textContent = 'Résultat';
+  document.getElementById('stepName').textContent = r.title;
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('refsSection').style.display = 'block';
+
+  // Build RT block
+  var rtHtml = '';
+  if (r.rt) {
+    rtHtml = '<div class="rt-block">'
+      + '<div class="rt-block-title">Radiothérapie — Timing · Volumes · Doses</div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Timing <span class="rt-tag">' + r.rt.timing + '</span></div></div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Volumes cibles</div><div class="rt-note">' + r.rt.volumes + '</div></div>'
+      + '<div class="rt-section"><div class="rt-section-hdr">Doses</div><div class="rt-note">' + r.rt.doses + '</div></div>'
+      + '</div>';
+  } else {
+    rtHtml = '<div class="no-rt-box">' + (r.rtText || 'Pas de RT indiquée') + '</div>';
+  }
+
+  // OS/EFS color
+  var osNum = parseFloat(r.os);
+  var osCls = osNum >= 95 ? 'ov-good' : (osNum >= 80 ? 'ov-mid' : 'ov-bad');
+  var efsNum = parseFloat(r.efs);
+  var efsCls = efsNum >= 90 ? 'ov-good' : (efsNum >= 70 ? 'ov-mid' : 'ov-bad');
+
+  var html = '<button class="btn-back" onclick="goBack()">← Retour</button>'
+    + '<div class="result-card ' + r.cls + '">'
+    + '<div class="result-header">'
+    + '<div class="result-title">' + r.title + '</div>'
+    + '<span class="risk-badge ' + r.badgeCls + '">' + r.badge + '</span>'
+    + '</div>'
+    + '<div class="outcomes-block">'
+    + '<div class="r-label" style="margin-bottom:8px">Données d\'efficacité <sup style="color:var(--text3);font-size:9px">' + r.refs + '</sup></div>'
+    + '<div class="outcome-row"><span class="outcome-label">OS 5 ans</span><span class="outcome-val ' + osCls + '">' + r.os + '</span></div>'
+    + '<div class="outcome-row"><span class="outcome-label">EFS / PFS 4–5 ans</span><span class="outcome-val ' + efsCls + '">' + r.efs + '</span></div>'
+    + '<div class="outcome-row"><span class="outcome-label">Cohorte</span><span class="outcome-val">' + r.n + '</span></div>'
+    + '</div>'
+    + '<div class="r-row"><div class="r-label">Chimiothérapie</div><div class="r-val">' + r.chemo + '</div></div>'
+    + rtHtml
+    + (r.note ? '<div class="r-row"><div class="r-label">Note clinique</div><div class="r-val">' + r.note + '</div></div>' : '')
+    + '<div class="result-actions">'
+    + '<button class="btn-restart" onclick="restart()">⟳ Nouvelle stratification</button>'
+    + '<button class="btn-pdf" onclick="printResult()">⬇ Exporter PDF</button>'
+    + '</div>'
+    + '</div>';
+
+  document.getElementById('app').innerHTML = html;
+}
+
+function goBack() {
+  if (!navStack.length) return;
+  var prev = navStack.pop();
+  wState = prev.state;
+  currentStep = prev.step;
+  document.getElementById('refsSection').style.display = 'none';
+  renderStep(prev.step);
+}
+
+function restart() {
+  wState = {}; navStack = []; currentStep = 'lateralite';
+  document.getElementById('refsSection').style.display = 'none';
+  renderStep('lateralite');
+}
+
+function printResult() {
+  document.getElementById('progressWrap').style.display = 'none';
+  document.querySelectorAll('.btn-back').forEach(function(b) { b.style.display = 'none'; });
+  window.print();
+  document.getElementById('progressWrap').style.display = 'block';
+  document.querySelectorAll('.btn-back').forEach(function(b) { b.style.display = ''; });
+}
+
+// ═══════════════════════════════════════════════════
+// TAB SWITCH
+// ═══════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'flow' && !window._flowBuilt) { buildFlow(); window._flowBuilt = true; }
+}
+
+// ═══════════════════════════════════════════════════
+// D3 FLOWCHART
+// ═══════════════════════════════════════════════════
+function buildFlow() {
+  var panel = document.getElementById('panel-flow');
+  var W = panel.clientWidth || window.innerWidth;
+  var H = panel.clientHeight || (window.innerHeight - 110);
+
+  var svg = d3.select('#chart').attr('width', W).attr('height', H);
+  var g = svg.append('g');
+
+  // ── Données nœuds ──
+  // Grille : ΔY=170 entre niveaux, ΔX≥160 entre voisins
+  // Ellipses rx=52(d)/64(résultats) ry=28 — validé sans collision
+  var nodes = [
+    // Y=0 — Racine
+    {id:'root',      x:0,     y:0,    type:'d',  label:'Tumeur rénale\nsuspectée'},
+
+    // Y=170 — Latéralité
+    {id:'uni',       x:-500,  y:170,  type:'d',  label:'Unilatéral'},
+    {id:'bi',        x:500,   y:170,  type:'bi', label:'Bilatéral\n(Stade V)'},
+
+    // Y=340 — Histologie / VAD bilatéral
+    {id:'fhwt',      x:-800,  y:340,  type:'d',  label:'FHWT'},
+    {id:'fawt_n',    x:-260,  y:340,  type:'hr', label:'Anaplasie\nFocale (FAWT)'},
+    {id:'dawt_n',    x:-80,   y:340,  type:'hr', label:'Anaplasie\nDiffuse (DAWT)'},
+    {id:'bi_vad',    x:500,   y:340,  type:'d',  label:'VAD néoadj.\n6 sem.'},
+
+    // Y=510 — Résultats anaplasie + bilatéral + prédisposition
+    {id:'r_fawt',    x:-260,  y:510,  type:'hr', label:'FAWT\nDD4A (I\u2013III)\nUH-1 rév. (IV)'},
+    {id:'r_dawt',    x:-80,   y:510,  type:'hr', label:'DAWT\nUH-2 révisé\nRT 19,8 Gy (III)'},
+    {id:'r_bi_r',    x:360,   y:510,  type:'bi', label:'Bilatéral\nRésécable NSS S6\nEE4A / DD4A adj.'},
+    {id:'r_bi_nr',   x:640,   y:510,  type:'bi', label:'Bilatéral\nNon résécable S6\nVAD → S12'},
+    {id:'pred',      x:-560,  y:510,  type:'sp', label:'Prédisposition\n(WAGR/BWS\u2026)'},
+    {id:'nopred',    x:-1040, y:510,  type:'d',  label:'Sans\nprédisposition'},
+
+    // Y=680 — EE4A néoadj + résécabilité
+    {id:'ee4a_neo',  x:-560,  y:680,  type:'sp', label:'EE4A néoadj.\n\u2192 NSS prioritaire'},
+    {id:'resec',     x:-1200, y:680,  type:'d',  label:'Résécable\nd\'emblée'},
+    {id:'nonresec',  x:-840,  y:680,  type:'sr', label:'Non résécable\n\u2192 DD4A néoadj.'},
+
+    // Y=850 — Résultats prédispo / néoadj + stades COG
+    {id:'r_pred',    x:-560,  y:850,  type:'sp', label:'Prédispo.\nEE4A \u2192 NSS'},
+    {id:'r_neo',     x:-840,  y:850,  type:'sr', label:'Néoadj.\nDD4A \u2192 S6\u2013S12\nRT flanc post-op'},
+    {id:'st_I',      x:-1540, y:850,  type:'d',  label:'Stade I'},
+    {id:'st_II',     x:-1360, y:850,  type:'d',  label:'Stade II'},
+    {id:'st_III',    x:-1180, y:850,  type:'sr', label:'Stade III\n(local)'},
+    {id:'st_IV',     x:-1000, y:850,  type:'hr', label:'Stade IV\n(méta)'},
+
+    // Y=1020 — Biomarqueurs + résultats SR/HR
+    {id:'bio_fav',   x:-1540, y:1020, type:'lr', label:'Pas bio.\ndéfavorable'},
+    {id:'bio_loh',   x:-1360, y:1020, type:'sr', label:'LOH 1p+16q'},
+    {id:'bio_1q',    x:-1180, y:1020, type:'sr', label:'Gain 1q'},
+    {id:'bio_11p',   x:-1000, y:1020, type:'lr', label:'LOH 11p15'},
+    {id:'r_sr',      x:-820,  y:1020, type:'sr', label:'SR\nDD4A \u00b1 Régi. M\nRT flanc 10,8 Gy'},
+    {id:'r_hr',      x:-640,  y:1020, type:'hr', label:'HR Stade IV\nDD4A \u2192 Régi. M\nWLI \u00b1 RT'},
+
+    // Y=1190 — Résultats finaux VLR / LR
+    {id:'r_vlr',     x:-1540, y:1190, type:'lr', label:'VLR\nObservation / EE4A'},
+    {id:'r_lr',      x:-1260, y:1190, type:'lr', label:'LR\nEE4A ou DD4A'},
+  ];
+
+  var edges = [
+    {s:'root',     t:'uni',       l:'Unilatéral'},
+    {s:'root',     t:'bi',        l:'Bilatéral'},
+    {s:'uni',      t:'fhwt',      l:'FHWT'},
+    {s:'uni',      t:'fawt_n',    l:'Anaplasie\nFocale'},
+    {s:'uni',      t:'dawt_n',    l:'Anaplasie\nDiffuse'},
+    {s:'fawt_n',   t:'r_fawt',   l:''},
+    {s:'dawt_n',   t:'r_dawt',   l:''},
+    {s:'bi',       t:'bi_vad',    l:'VAD d\'emblée'},
+    {s:'bi_vad',   t:'r_bi_r',   l:'NSS faisable\nS6'},
+    {s:'bi_vad',   t:'r_bi_nr',  l:'Non résécable\nS6'},
+    {s:'fhwt',     t:'pred',      l:'Prédisposition'},
+    {s:'fhwt',     t:'nopred',    l:'Sans\nprédisposition'},
+    {s:'pred',     t:'ee4a_neo',  l:'EE4A\nnéoadj.'},
+    {s:'ee4a_neo', t:'r_pred',   l:'NSS\nprioritaire'},
+    {s:'nopred',   t:'resec',     l:'Résécable'},
+    {s:'nopred',   t:'nonresec',  l:'Non\nrésécable'},
+    {s:'nonresec', t:'r_neo',    l:'DD4A néoadj.\n→ chirurgie ≤S12'},
+    {s:'resec',    t:'st_I',      l:'Stade I'},
+    {s:'resec',    t:'st_II',     l:'Stade II'},
+    {s:'resec',    t:'st_III',    l:'Stade III'},
+    {s:'resec',    t:'st_IV',     l:'Stade IV'},
+    {s:'st_I',     t:'bio_fav',   l:'Bio fav.'},
+    {s:'st_I',     t:'bio_loh',   l:'LOH 1p+16q'},
+    {s:'st_I',     t:'bio_1q',    l:'Gain 1q'},
+    {s:'st_I',     t:'bio_11p',   l:'LOH 11p15'},
+    {s:'st_II',    t:'bio_fav',   l:'Bio fav.'},
+    {s:'st_II',    t:'bio_loh',   l:'LOH 1p+16q'},
+    {s:'bio_fav',  t:'r_vlr',    l:'→ VLR'},
+    {s:'bio_loh',  t:'r_lr',     l:'DD4A\npréféré'},
+    {s:'bio_1q',   t:'r_lr',     l:'EE4A'},
+    {s:'bio_11p',  t:'r_lr',     l:'EE4A'},
+    {s:'st_III',   t:'r_sr',     l:'DD4A\n± Régi. M'},
+    {s:'st_IV',    t:'r_hr',     l:'DD4A\n→ rééval. S6'},
+  ];
+
+  // ── Styles ──
+  var NS = {
+    d:  {fill:'#dce8f5', stroke:'#1a5fa8', tc:'#0a1020', r:52, ry:26},
+    lr: {fill:'#d5edd8', stroke:'#2d7a3a', tc:'#0a1a0a', r:64, ry:28},
+    sr: {fill:'#d5e4f5', stroke:'#1a5fa8', tc:'#0a1020', r:64, ry:28},
+    hr: {fill:'#f5d8d5', stroke:'#c0392b', tc:'#200505', r:64, ry:28},
+    sp: {fill:'#f5ead5', stroke:'#a0720a', tc:'#201000', r:64, ry:28},
+    bi: {fill:'#ece0f5', stroke:'#6b3fa0', tc:'#100020', r:64, ry:28},
+  };
+
+  // ── Tooltips ──
+  var TT = {
+    r_vlr:  {title:'FHWT — TRÈS BAS RISQUE (VLR)', q:'Stade I · Pas de biomarqueur défavorable',
+              chemo:'Observation ou EE4A × 18 sem.', rt:'PAS DE RT — Stade I favorable',
+              timing:'Sans objet', efs:'OS ~98–100 % · EFS ~89–97 %', ec:'efs-good'},
+    r_lr:   {title:'FHWT — BAS RISQUE (LR)', q:'Stades I–II · LOH/LOI 11p15 ou LOH 1p+16q ou gain 1q',
+              chemo:'EE4A (bio fav.) → DD4A si LOH 1p+16q (préféré)', rt:'PAS DE RT stades I–II',
+              timing:'Sans objet', efs:'OS ~99 % · EFS ~87–91 %', ec:'efs-good'},
+    r_sr:   {title:'FHWT — RISQUE STANDARD (SR)', q:'Stade III local — DD4A ± Régime M si LOH 1p+16q',
+              chemo:'DD4A → Régime M si LOH 1p+16q (préféré, sem.7)', rt:'Flanc 10,8 Gy / WAI 10,5 Gy',
+              timing:'J10–J14 postopératoire', efs:'OS ~95–98 % · EFS ~83–90 %', ec:'efs-good'},
+    r_hr:   {title:'FHWT — HAUT RISQUE (HR)', q:'Stade IV · Méta pulm ± autres sites',
+              chemo:'DD4A → Régime M si LOH ou SIR. WLI si gain 1q + RC S6 (EFS 57% sans)', rt:'Flanc/WAI + WLI ± méta',
+              timing:'RT J10–J14. WLI selon biomarqueurs + réponse S6', efs:'OS ~89–95 % · EFS ~76–88 %', ec:'efs-mid'},
+    r_fawt: {title:'ANAPLASIE FOCALE (FAWT)', q:'DD4A (stades I–III) · UH-1 révisé (stade IV)',
+              chemo:'DD4A × 24 sem. Intensification stade III discutée', rt:'Flanc 10,8 Gy · Stade IV : UH-1 révisé + WLI',
+              timing:'J10–J14 postopératoire', efs:'EFS/OS 100 % (stade I, n=8) [AREN0321]', ec:'efs-good'},
+    r_dawt: {title:'ANAPLASIE DIFFUSE (DAWT)', q:'Stade I : DD4A · Stades II–IV : UH-2 révisé',
+              chemo:'UH-2 révisé : vincristine + doxo + cyclophos + carbo + étoposide + irinotécan', rt:'Flanc 10,8 Gy (stades I–II) · 19,8 Gy stade III',
+              timing:'Stade I : J10–J14. Stades II–IV : J10–J14 + WLI si méta', efs:'OS ~73 % · EFS ~67 % (stades II–IV, n=66)', ec:'efs-bad'},
+    r_pred: {title:'FHWT — PRÉDISPOSITION (AREN0534)', q:'EE4A néoadj. 6 sem. → NSS prioritaire',
+              chemo:'EE4A → NSS S6. Adjuvant : EE4A / DD4A / Régime I selon histo+stade', rt:'RT si stade III post-op (biopsie seule → pas RT)',
+              timing:'J10–J14 si RT indiquée', efs:'OS 100 % · EFS 94 % (n=34, AREN0534)', ec:'efs-good'},
+    r_bi_r: {title:'BILATÉRAL — Résécable NSS à S6', q:'VAD → NSS bilatérale S6',
+              chemo:'EE4A (stade I non blastemal) · DD4A (II–III) · Régime I (blastemal prédom.)', rt:'RT si stade III post-op',
+              timing:'J10–J14 si RT indiquée', efs:'OS 97,7 % · EFS 83 % (n=189, AREN0534)', ec:'efs-good'},
+    r_bi_nr:{title:'BILATÉRAL — Non résécable à S6', q:'VAD continué ± biopsies ouvertes si < réponse partielle',
+              chemo:'VAD → chirurgie ≤ S12 impérative. Biopsies si < réponse → adapter chimio', rt:'RT si stade III post-op',
+              timing:'J10–J14 si RT indiquée', efs:'Néphectomie totale si NSS impossible à S12', ec:'efs-mid'},
+    r_neo:  {title:'FHWT — NÉOADJUVANT (WILMS-5)', q:'Non résécable · Biopsie → DD4A néoadj.',
+              chemo:'DD4A néoadj. → rééval. S6 ± S12 → néphectomie ≤ S12. Adjuvant : DD4A ou Régime M', rt:'Flanc stade III (biopsie = upstage) ou WAI',
+              timing:'RT J10–J14 postopératoire', efs:'EFS 80–88 % · OS ~90–95 %', ec:'efs-mid'},
+  };
+
+  // ── Arêtes ──
+  edges.forEach(function(e) {
+    var src = nodes.find(function(n){return n.id===e.s;});
+    var tgt = nodes.find(function(n){return n.id===e.t;});
+    if (!src || !tgt) return;
+    var mx = (src.x + tgt.x) / 2;
+    var my = (src.y + tgt.y) / 2;
+    g.append('path')
+      .attr('d', 'M'+src.x+','+src.y+' C'+mx+','+src.y+' '+mx+','+tgt.y+' '+tgt.x+','+tgt.y)
+      .attr('fill','none')
+      .attr('stroke','#2a3441')
+      .attr('stroke-width', 1.5)
+      .attr('marker-end','url(#arr)');
+    if (e.l) {
+      var lines = e.l.split('\n');
+      var lt = g.append('text').attr('x',mx).attr('y',my)
+        .attr('text-anchor','middle')
+        .attr('font-size','8.5').attr('font-family','DM Mono, monospace').attr('fill','#6e7681');
+      lines.forEach(function(ln, i) {
+        lt.append('tspan').attr('x', mx).attr('dy', i === 0 ? -2 : 11).text(ln);
+      });
+    }
+  });
+
+  // ── Arrow marker ──
+  svg.append('defs').append('marker')
+    .attr('id','arr').attr('viewBox','0 0 8 8').attr('refX',8).attr('refY',4)
+    .attr('markerWidth',5).attr('markerHeight',5).attr('orient','auto')
+    .append('path').attr('d','M0,0 L8,4 L0,8 Z').attr('fill','#2a3441');
+
+  // ── Nœuds ──
+  nodes.forEach(function(n) {
+    var st = NS[n.type] || NS.d;
+    var grp = g.append('g').attr('transform','translate('+n.x+','+n.y+')')
+      .style('cursor', TT[n.id] ? 'pointer' : 'default');
+
+    // Shadow
+    grp.append('ellipse').attr('rx', st.r + 2).attr('ry', st.ry + 2)
+      .attr('cx',2).attr('cy',2).attr('fill','rgba(0,0,0,0.07)');
+
+    // Main
+    grp.append('ellipse').attr('rx', st.r).attr('ry', st.ry)
+      .attr('fill', st.fill).attr('stroke', st.stroke).attr('stroke-width', 1.8);
+
+    // Label
+    var lines = n.label.split('\n');
+    var totalH = lines.length * 11;
+    var txt = grp.append('text').attr('text-anchor','middle')
+      .attr('font-size','9.5').attr('font-family','DM Mono, monospace')
+      .attr('fill', st.tc).attr('font-weight','500');
+    lines.forEach(function(line, i) {
+      txt.append('tspan').attr('x',0)
+        .attr('dy', i === 0 ? (-totalH/2 + 9) : 13)
+        .text(line);
+    });
+
+    // Tooltip
+    if (TT[n.id]) {
+      var tt_data = TT[n.id];
+      grp.on('mouseover', function(event){ showTT(event, tt_data); })
+         .on('mousemove', function(event){ moveTT(event); })
+         .on('mouseout', function(){ hideTT(); });
+      grp.select('ellipse').on('mouseover', null); // delegate to group
+    }
+  });
+
+  // ── Zoom auto-fit ──
+  var xs = nodes.map(function(n){return n.x;});
+  var ys = nodes.map(function(n){return n.y;});
+  var minX = Math.min.apply(null, xs) - 80;
+  var maxX = Math.max.apply(null, xs) + 80;
+  var minY = Math.min.apply(null, ys) - 50;
+  var maxY = Math.max.apply(null, ys) + 60;
+  var scaleW = W / (maxX - minX);
+  var scaleH = H / (maxY - minY);
+  var initScale = Math.min(scaleW, scaleH, 1) * 0.86;
+  var initTx = W / 2 - (minX + maxX) / 2 * initScale;
+  var initTy = H / 2 - (minY + maxY) / 2 * initScale;
+
+  var zoom = d3.zoom().scaleExtent([0.1, 3]).on('zoom', function(event) {
+    g.attr('transform', event.transform);
+  });
+  svg.call(zoom);
+  var initT = d3.zoomIdentity.translate(initTx, initTy).scale(initScale);
+  svg.call(zoom.transform, initT);
+
+  document.getElementById('btnReset').onclick = function() {
+    svg.transition().duration(600).call(zoom.transform, initT);
+  };
+}
+
+// ── Tooltip D3 ──
+var ttEl = document.getElementById('tooltip');
+function showTT(event, d) {
+  ttEl.innerHTML = '<div class="tt-title">' + d.title + '</div>'
+    + '<div class="tt-q">' + d.q + '</div>'
+    + '<div class="tt-section"><div class="tt-section-lbl">Chimiothérapie</div><div class="tt-val">' + d.chemo + '</div></div>'
+    + '<div class="tt-section"><div class="tt-section-lbl">Radiothérapie</div><div class="tt-val">' + d.rt + '</div></div>'
+    + '<div class="tt-section"><div class="tt-section-lbl">Timing RT</div><div class="tt-val">' + d.timing + '</div></div>'
+    + '<div class="tt-outcome-line"><span class="' + d.ec + '">' + d.efs + '</span></div>';
+  ttEl.style.display = 'block';
+  moveTT(event);
+}
+function moveTT(event) {
+  var x = event.clientX + 14, y = event.clientY + 14;
+  var tw = 300, th = ttEl.offsetHeight;
+  if (x + tw > window.innerWidth - 10) x = event.clientX - tw - 14;
+  if (y + th > window.innerHeight - 10) y = event.clientY - th - 14;
+  ttEl.style.left = x + 'px'; ttEl.style.top = y + 'px';
+}
+function hideTT() { ttEl.style.display = 'none'; }
+
+// ═══════════════════════════════════════════════════
+// THÈME
+// ═══════════════════════════════════════════════════
+var THEME_KEY = 'theme-cog-wilms';
+function initTheme() {
+  try { if (localStorage.getItem(THEME_KEY) === 'light') applyTheme('light'); } catch(e) {}
+}
+function toggleTheme() {
+  applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+}
+function applyTheme(mode) {
+  var btn = document.getElementById('btn-theme');
+  if (mode === 'light') {
+    document.body.classList.add('light');
+    btn.textContent = '☀'; btn.title = 'Passer en mode sombre';
+    try { localStorage.setItem(THEME_KEY, 'light'); } catch(e) {}
+  } else {
+    document.body.classList.remove('light');
+    btn.textContent = '◑'; btn.title = 'Passer en mode clair';
+    try { localStorage.setItem(THEME_KEY, 'dark'); } catch(e) {}
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+initTheme();
+renderStep('lateralite');
+
+// Layout dynamique
+(function() {
+  function fixLayout() {
+    var hh = document.querySelector('header').offsetHeight;
+    var nav = document.querySelector('.tab-nav');
+    nav.style.top = hh + 'px';
+    var navH = nav.offsetHeight;
+    var pf = document.getElementById('panel-flow');
+    pf.style.height = (window.innerHeight - hh - navH) + 'px';
+  }
+  fixLayout();
+  window.addEventListener('resize', fixLayout);
+})();
+</script>
+</body>
+</html>
