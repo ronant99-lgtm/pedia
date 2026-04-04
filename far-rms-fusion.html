@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>FaR-RMS · Rhabdomyosarcome — Stratification & Logigramme</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── THÈME (root = sombre défaut + body.light) ── */
+:root{
+  --bg:#0d1117;
+  --surface:#161b22;
+  --surface2:#1c2330;
+  --surface3:#21262d;
+  --border:#2a3441;
+  --border2:#30363d;
+  --text:#e6edf3;
+  --text2:#8b949e;
+  --text3:#6e7681;
+  --green:#3fb950;
+  --blue:#388bfd;
+  --red:#f85149;
+  --yellow:#d29922;
+  --purple:#a371f7;
+  --orange:#f0883e;
+  --cyan:#39c5cf;
+  --accent:#d29922;
+  --accent-rgb:210,153,34;
+  --radius:10px;
+}
+body.light{
+  --bg:#f5f0e8;
+  --surface:#ffffff;
+  --surface2:#ede8dc;
+  --surface3:#e6e0d2;
+  --border:#c8bfaa;
+  --border2:#d4ccba;
+  --text:#1a1208;
+  --text2:#5a4f3a;
+  --text3:#9a8f7a;
+  --green:#2d7a3a;
+  --blue:#1a5fa8;
+  --red:#c0392b;
+  --yellow:#a0720a;
+  --purple:#6b3fa0;
+  --orange:#c45a10;
+  --cyan:#1a7a8a;
+  --accent:#a0720a;
+  --accent-rgb:160,114,10;
+}
+
+/* ── BASE ── */
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(13,17,23,0.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:12px 20px;
+  display:flex;align-items:center;gap:12px;flex-wrap:nowrap;
+}
+body.light header{background:rgba(245,240,232,0.97);}
+.hdr-logo{
+  width:32px;height:32px;
+  border:1.5px solid var(--accent);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:9px;
+  color:var(--accent);font-weight:500;flex-shrink:0;
+}
+.hdr-texts{flex:1;min-width:0;}
+.hdr-title{
+  font-family:'DM Serif Display',serif;font-size:15px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px;}
+.hdr-badge{
+  font-family:'DM Mono',monospace;font-size:9px;
+  padding:3px 10px;border-radius:20px;
+  background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.3);
+  color:var(--accent);margin-left:auto;flex-shrink:0;white-space:nowrap;
+}
+.btn-theme{
+  width:30px;height:30px;border-radius:6px;
+  border:1px solid var(--border2);background:transparent;
+  color:var(--text2);font-size:14px;cursor:pointer;
+  transition:all .18s;display:flex;align-items:center;justify-content:center;
+  margin-left:8px;flex-shrink:0;
+}
+.btn-theme:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── TAB NAV ── */
+.tab-nav{
+  display:flex;border-bottom:1px solid var(--border);
+  background:var(--surface);
+  position:sticky;z-index:150;
+}
+body.light .tab-nav{background:var(--surface2);}
+.tab-btn{
+  flex:1;padding:11px 16px;border:none;background:none;
+  color:var(--text2);font-family:'DM Sans',sans-serif;
+  font-size:12px;font-weight:500;cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .2s;
+}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+body.light .tab-btn:hover{background:rgba(0,0,0,.04);}
+
+/* ── PANELS ── */
+.panel{display:none;}
+.panel.active{display:block;}
+#panel-flow{overflow:hidden;position:relative;}
+#chart{width:100%;height:100%;cursor:grab;}
+#chart:active{cursor:grabbing;}
+
+/* ── WIZARD LAYOUT ── */
+.container{max-width:860px;margin:0 auto;padding:32px 20px 80px;}
+.progress-wrap{margin-bottom:28px;}
+.progress-header{
+  display:flex;justify-content:space-between;
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--text3);margin-bottom:8px;
+}
+.progress-bar-bg{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;}
+.section-label{
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:2px;color:var(--text3);
+  text-transform:uppercase;margin-bottom:10px;
+}
+
+/* ── CARDS QUESTIONS ── */
+.step-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;margin-bottom:14px;
+  position:relative;animation:fadeSlide .3s ease;overflow:hidden;
+}
+.step-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:3px;background:var(--accent);
+}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.q-title{font-family:'DM Serif Display',serif;font-size:19px;margin-bottom:6px;line-height:1.4;}
+.q-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.55;}
+.options{display:flex;flex-direction:column;gap:10px;}
+.opt-btn{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:8px;padding:13px 16px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;
+  cursor:pointer;text-align:left;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.opt-btn::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--accent);
+  transform:scaleY(0);transition:transform .2s;
+}
+.opt-btn:hover{border-color:var(--accent);background:rgba(var(--accent-rgb),.06);}
+.opt-btn:hover::before{transform:scaleY(1);}
+.opt-btn strong{display:block;margin-bottom:3px;font-weight:600;}
+.opt-desc{font-size:11px;color:var(--text3);margin-top:3px;}
+.btn-back{
+  background:none;border:1px solid var(--border2);color:var(--text2);
+  padding:8px 14px;border-radius:6px;font-family:'DM Sans',sans-serif;
+  font-size:12px;cursor:pointer;margin-bottom:20px;transition:all .2s;
+}
+.btn-back:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── RESULT CARD ── */
+.result-card{border-radius:var(--radius);padding:28px;animation:fadeSlide .3s ease;border-width:1px;border-style:solid;}
+.result-card.lr{border-color:var(--green);border-top-width:3px;background:rgba(63,185,80,.04);}
+.result-card.sr{border-color:var(--blue);border-top-width:3px;background:rgba(56,139,253,.04);}
+.result-card.hr{border-color:var(--red);border-top-width:3px;background:rgba(248,81,73,.05);}
+.result-card.vhr{border-color:var(--yellow);border-top-width:3px;background:rgba(210,153,34,.05);}
+.result-card.relapse{border-color:var(--purple);border-top-width:3px;background:rgba(163,113,247,.05);}
+body.light .result-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.result-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;}
+.result-title{font-family:'DM Serif Display',serif;font-size:20px;}
+.result-subgroup{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:6px;}
+.risk-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;flex-shrink:0;}
+.risk-badge.lr{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);}
+.risk-badge.sr{background:rgba(56,139,253,.15);color:var(--blue);border:1px solid rgba(56,139,253,.3);}
+.risk-badge.hr{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3);}
+.risk-badge.vhr{background:rgba(210,153,34,.15);color:var(--yellow);border:1px solid rgba(210,153,34,.3);}
+.risk-badge.relapse{background:rgba(163,113,247,.15);color:var(--purple);border:1px solid rgba(163,113,247,.3);}
+.r-row{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+body.light .r-row{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.r-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;}
+.r-val{font-size:13px;color:var(--text);line-height:1.6;}
+
+/* ── OUTCOMES ── */
+.outcomes-block{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+body.light .outcomes-block{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.outcome-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.outcome-row:last-child{border-bottom:none;}
+.outcome-label{color:var(--text2);font-family:'DM Sans',sans-serif;}
+.outcome-val{font-family:'DM Mono',monospace;font-size:11px;}
+.ov-good{color:var(--green);}
+.ov-mid{color:var(--yellow);}
+.ov-bad{color:var(--red);}
+
+/* ── RT BLOCK ── */
+.rt-block{
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:3px solid var(--blue);border-radius:8px;
+  padding:16px;margin-bottom:10px;
+}
+body.light .rt-block{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.rt-block-title{
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:1.5px;color:var(--blue);
+  text-transform:uppercase;margin-bottom:12px;
+}
+.rt-section{margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid var(--border);}
+.rt-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.rt-section-hdr{
+  font-size:12px;font-weight:500;color:var(--text);
+  margin-bottom:7px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+}
+.rt-tag{
+  font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;
+  border-radius:4px;background:rgba(56,139,253,.12);color:var(--blue);flex-shrink:0;
+}
+.rt-tag.rando{background:rgba(var(--accent-rgb),.12);color:var(--accent);}
+.rt-tag.no-rt{background:rgba(110,118,129,.12);color:var(--text3);}
+.rt-tag.yellow{background:rgba(210,153,34,.12);color:var(--yellow);}
+.rt-tag.alert{background:rgba(248,81,73,.12);color:var(--red);}
+.rt-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:560px){.rt-2col{grid-template-columns:1fr;}}
+.rt-box{background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:9px 11px;margin-bottom:6px;}
+.rt-box-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.rt-box-val{font-size:12px;color:var(--text);line-height:1.5;}
+.rt-dose{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--blue);}
+.rt-dose.esc{color:var(--yellow);}
+.rt-dose.highesc{color:var(--red);}
+.rt-sub{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4;}
+.rt-note{font-size:11px;color:var(--text2);margin-top:5px;line-height:1.5;}
+.no-rt-box{
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:3px solid var(--text3);border-radius:8px;
+  padding:12px 16px;font-size:13px;color:var(--text3);margin-bottom:10px;
+}
+.rt-code{font-family:'DM Mono',monospace;color:var(--accent);font-size:10px;}
+
+/* ── REFS ── */
+.refs-section{margin-top:48px;border-top:1px solid var(--border);padding-top:24px;}
+.refs-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;}
+.ref-item{display:flex;gap:12px;margin-bottom:16px;}
+.ref-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;padding-top:2px;}
+.ref-body{font-size:12px;}
+.ref-authors{font-weight:500;color:var(--text);}
+.ref-title-text{color:var(--text);margin-top:2px;}
+.ref-journal{color:var(--text2);font-size:11px;margin-top:1px;}
+.ref-doi{margin-top:2px;}
+.ref-doi a{color:var(--blue);font-size:11px;font-family:'DM Mono',monospace;text-decoration:none;}
+.ref-doi a:hover{text-decoration:underline;}
+.nct-link{font-family:'DM Mono',monospace;font-size:11px;color:var(--blue);text-decoration:none;}
+.nct-link:hover{text-decoration:underline;}
+
+/* ── RESULT ACTIONS ── */
+.result-actions{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;}
+.btn-restart{background:none;border:1px solid var(--border2);color:var(--text2);padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s;}
+.btn-restart:hover{border-color:var(--accent);color:var(--accent);}
+.btn-pdf{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s;}
+.btn-pdf:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ── D3 FLOWCHART ── */
+.btn-reset-zoom{
+  position:absolute;top:14px;right:14px;
+  background:var(--surface);border:1px solid var(--border2);color:var(--text2);
+  padding:7px 14px;border-radius:6px;
+  font-family:'DM Mono',monospace;font-size:11px;
+  cursor:pointer;z-index:10;transition:all .2s;
+}
+.btn-reset-zoom:hover{border-color:var(--accent);color:var(--accent);}
+body.light .btn-reset-zoom{background:var(--surface);}
+.flow-legend{
+  position:absolute;bottom:14px;left:14px;
+  display:flex;flex-wrap:wrap;gap:8px;z-index:10;pointer-events:none;
+}
+.leg-it{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);}
+.leg-dot{width:9px;height:9px;border-radius:50%;}
+
+/* ── TOOLTIP D3 (toujours sombre) ── */
+.tt-body{
+  position:fixed;pointer-events:none;z-index:300;
+  background:rgba(13,17,23,.97);
+  border-radius:10px;padding:14px 16px;width:310px;
+  box-shadow:0 6px 28px rgba(0,0,0,.35);
+  border:1px solid rgba(210,153,34,.2);
+  display:none;
+}
+.tt-title{font-family:'DM Mono',monospace;font-size:9px;color:#6e7681;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;}
+.tt-q{font-size:13px;font-weight:500;color:#e6edf3;margin-bottom:10px;line-height:1.4;}
+.tt-section{margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid #2a3441;}
+.tt-section:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.tt-section-lbl{font-family:'DM Mono',monospace;font-size:9px;color:#6e7681;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.tt-val{font-size:11px;color:#8b949e;line-height:1.5;}
+.tt-dose{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:#388bfd;}
+.tt-dose.esc{color:#d29922;}
+.tt-dose.highesc{color:#f85149;}
+.tt-outcome-line{margin-top:8px;font-family:'DM Mono',monospace;font-size:11px;}
+.efs-good{color:#3fb950;}
+.efs-mid{color:#d29922;}
+.efs-bad{color:#f85149;}
+
+/* ── PRINT ── */
+.print-footer{display:none;}
+@media print{
+  body,body.light{background:#fff!important;color:#000!important;}
+  header,body.light header{position:static!important;background:#fff!important;border-bottom:1px solid #ccc!important;}
+  .tab-nav,.btn-pdf,.btn-restart,.progress-wrap,.btn-back,#panel-flow,.btn-theme{display:none!important;}
+  .panel{display:block!important;}
+  .result-card{border:1.5px solid #333!important;background:#fff!important;break-inside:avoid;}
+  .rt-block{border-left:3px solid #1a5fa8!important;background:#f5f5f5!important;}
+  .rt-dose{color:#1a5fa8!important;}
+  .rt-dose.esc{color:#a0720a!important;}
+  .rt-dose.highesc{color:#c0392b!important;}
+  .print-footer{display:block;font-size:8pt;color:#999;margin-top:22px;border-top:1px solid #ddd;padding-top:8px;}
+  :root,body.light{--text:#000;--text2:#444;--text3:#888;--surface:#fff;--surface2:#f5f5f5;--surface3:#eeeeee;--border:#ddd;--border2:#eee;--blue:#1a5fa8;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">FR</div>
+  <div class="hdr-texts">
+    <div class="hdr-title">FaR-RMS — Stratification &amp; Logigramme</div>
+    <div class="hdr-sub">FaR-RMS v2.0c · EudraCT 2018-000515-24 · NCT04625907 · Timing · Volumes · Doses RT</div>
+  </div>
+  <span class="hdr-badge">FaR-RMS · EpSSG 2024</span>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Passer en mode clair">◑</button>
+</header>
+
+<div class="tab-nav" id="tab-nav">
+  <button class="tab-btn active" id="tab-wizard" onclick="switchTab('wizard')">⬡ Stratification pas-à-pas</button>
+  <button class="tab-btn" id="tab-flow" onclick="switchTab('flow')">⬡ Logigramme interactif</button>
+</div>
+
+<!-- PANEL WIZARD -->
+<div class="panel active" id="panel-wizard">
+  <div class="container">
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-header">
+        <span id="stepLabel">Étape 1 / 6</span>
+        <span id="stepName">Statut Fusion</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-fill" id="progressFill" style="width:16%"></div></div>
+    </div>
+    <div id="app"></div>
+
+    <div class="refs-section" id="refsSection" style="display:none">
+      <div class="refs-title">Références</div>
+      <div class="ref-item">
+        <span class="ref-num">1</span>
+        <div class="ref-body">
+          <div class="ref-authors">Jenney M, Bisogno G, Mandeville H, et al.</div>
+          <div class="ref-title-text">FaR-RMS Protocol v2.0c — Frontline and Relapsed Rhabdomyosarcoma</div>
+          <div class="ref-journal">University of Birmingham / EpSSG · 21 March 2024 · EudraCT 2018-000515-24</div>
+          <div class="ref-doi">
+            <a href="https://clinicaltrials.gov/study/NCT04625907" target="_blank">NCT04625907</a>
+            · <a href="https://www.isrctn.com/ISRCTN45535982" target="_blank">ISRCTN45535982</a>
+          </div>
+        </div>
+      </div>
+      <div class="ref-item">
+        <span class="ref-num">2</span>
+        <div class="ref-body">
+          <div class="ref-authors">Bisogno G, De Salvo GL, et al. (EpSSG)</div>
+          <div class="ref-title-text">Vinorelbine and continuous low-dose cyclophosphamide as maintenance chemotherapy in rhabdomyosarcoma — RMS 2005</div>
+          <div class="ref-journal">Lancet Oncol 2019 ; 20 : 1493–1504</div>
+          <div class="ref-doi"><a href="https://doi.org/10.1016/S1470-2045(19)30617-3" target="_blank">doi:10.1016/S1470-2045(19)30617-3</a></div>
+        </div>
+      </div>
+      <div class="ref-item">
+        <span class="ref-num">3</span>
+        <div class="ref-body">
+          <div class="ref-authors">Mandeville H, et al. (SIOPE QUARTET RTQA group)</div>
+          <div class="ref-title-text">FaR-RMS QUARTET — Radiotherapy Quality Assurance Guidelines · Target volumes, margins, dose prescriptions</div>
+          <div class="ref-journal">EpSSG / SIOPE QUARTET · 2024 — Complémentaire au protocole FaR-RMS v2.0c</div>
+        </div>
+      </div>
+      <div class="ref-item">
+        <span class="ref-num">4</span>
+        <div class="ref-body">
+          <div class="ref-authors">Oberlin O, Rey A, Lyden E, et al.</div>
+          <div class="ref-title-text">Prognostic factors in metastatic rhabdomyosarcomas — results of a pooled analysis from United States and European cooperative groups</div>
+          <div class="ref-journal">J Clin Oncol 2008 ; 26 : 2384–2389</div>
+          <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.2007.14.7207" target="_blank">doi:10.1200/JCO.2007.14.7207</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="print-footer">Outil d'aide à la décision — Ne se substitue pas au jugement clinique.<br>FaR-RMS v2.0c · NCT04625907 · EudraCT 2018-000515-24</div>
+  </div>
+</div>
+
+<!-- PANEL FLOW -->
+<div class="panel" id="panel-flow">
+  <button class="btn-reset-zoom" id="btnReset">⊙ Recentrer</button>
+  <div id="chart"></div>
+  <div class="flow-legend">
+    <div class="leg-it"><div class="leg-dot" style="background:#1a5fa8"></div>Décision</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#2d7a3a"></div>LR — Pas de RT</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#1a5fa8;opacity:.6"></div>SR — RT conditionnelle</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#c0392b"></div>HR — RT indiquée</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#a0720a"></div>VHR — RT + RT2 méta</div>
+    <div class="leg-it"><div class="leg-dot" style="background:#6b3fa0"></div>Rechute CT3</div>
+  </div>
+  <div class="tt-body" id="tooltip"></div>
+</div>
+
+<script>
+// ═══ THÈME ═══
+var THEME_KEY = 'theme-far-rms';
+
+function initTheme() {
+  try { if (localStorage.getItem(THEME_KEY) === 'light') applyTheme('light'); } catch(e) {}
+}
+function toggleTheme() {
+  applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+}
+function applyTheme(mode) {
+  var btn = document.getElementById('btn-theme');
+  if (mode === 'light') {
+    document.body.classList.add('light');
+    btn.textContent = '☀';
+    btn.title = 'Passer en mode sombre';
+    try { localStorage.setItem(THEME_KEY, 'light'); } catch(e) {}
+  } else {
+    document.body.classList.remove('light');
+    btn.textContent = '◑';
+    btn.title = 'Passer en mode clair';
+    try { localStorage.setItem(THEME_KEY, 'dark'); } catch(e) {}
+  }
+}
+
+// ═══ LAYOUT ═══
+function fixLayout() {
+  var hh = document.querySelector('header').offsetHeight;
+  var navH = document.querySelector('.tab-nav').offsetHeight;
+  document.getElementById('panel-flow').style.height = (window.innerHeight - hh - navH) + 'px';
+  document.querySelector('.tab-nav').style.top = hh + 'px';
+}
+window.addEventListener('resize', fixLayout);
+
+// ═══ TABS ═══
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'flow' && !window._flowBuilt) {
+    buildFlow();
+    window._flowBuilt = true;
+  }
+}
+
+// ═══ DONNÉES RT ═══
+var RT = {
+  A: {
+    indication: false,
+    noRT_reason: 'PAS DE RT — IRS I complet (R0), Fusion–, N0 : pas de RT systématique dans ce sous-groupe.'
+  },
+  B: {
+    indication: 'RT conditionnelle — IRS I seul sans résidu : pas de RT. Si IRS II détecté au bilan final ou résection incomplète, RT indiquée.',
+    context: 'Eligibilité aux randomisations RT1A (pré-op vs post-op) et RT1B (HLFR si site défavorable ou âge ≥ 18 ans). Décision multidisciplinaire après C3.',
+    randomisations: ['RT1A — RT pré-op (C4, sem. 13) vs post-op (C post-op 2)', 'RT1B — HLFR si site défavorable ou âge ≥ 18 ans'],
+    timing: [
+      { label: 'Décision locale', val: 'Après C3 (sem. 10) — évaluation résécabilité.' },
+      { label: 'RT préopératoire', val: 'Après C4 — semaine 13. Chirurgie 4–6 sem après fin RT.' },
+      { label: 'RT postopératoire', val: 'Dès le 2ème cycle de chimio postopératoire.' }
+    ],
+    volumes: [
+      { label: 'GTVp_pre → CTVp_pre', val: '+1 cm circumférentiel. Si extrémité : +2 cm sup/inf, +1 cm circumférentiel.' },
+      { label: 'GTVp_post → CTVp_post', val: '+0,5 cm — boost Phase 2 uniquement (HLFR escaladé RT1B).' },
+      { label: 'CTV → PTV', val: '+3 à 10 mm selon technique et IGRT locale.' }
+    ],
+    doses: [
+      { label: 'SLFR — Standard', dose: '41,4 Gy / 23 fr / 1,8 Gy/fr', sub: 'Sur PTVp_pre. R0/R1, risque standard.' },
+      { label: 'HLFR RT1B — Escaladé', dose: '50,4 Gy / 28 fr / 5,5 sem', sub: 'Ph1 : 41,4 Gy → PTVp_pre · Ph2 : +9 Gy / 5 fr → PTVp_post', esc: true }
+    ],
+    nodeRT: null,
+    metaRT: null
+  },
+  C: {
+    indication: 'RT systématique sur site primitif — sauf R0 secondaire à site très favorable (paratesticulaire, utérus).',
+    context: 'Sites GU, orbite, H&N non-PM : RT souvent indiquée même après R0 secondaire. Eligible RT1A, RT1B, RT1C selon résécabilité et HLFR.',
+    randomisations: ['RT1A — RT pré-op vs post-op (résécable)', 'RT1B — HLFR si site défav. ou âge ≥ 18 ans', 'RT1C — HLFR non résécable + irino/vincristine (RI)'],
+    timing: [
+      { label: 'Décision locale', val: 'Après C3 (localisé).' },
+      { label: 'RT préopératoire', val: 'Après C4 — semaine 13. Chirurgie 4–6 sem après fin RT.' },
+      { label: 'RT postopératoire', val: 'Dès C post-op 2.' }
+    ],
+    volumes: [
+      { label: 'GTVp_pre → CTVp_pre', val: '+1 cm. Si extrémité : +2 cm sup/inf, +1 cm circumférentiel.' },
+      { label: 'GTVp_post → CTVp_post', val: '+0,5 cm (boost Phase 2 — HLFR escaladé).' },
+      { label: 'CTV → PTV', val: '+3 à 10 mm selon technique et IGRT.' }
+    ],
+    doses: [
+      { label: 'SLFR / RC non résécable — Standard', dose: '41,4 Gy / 23 fr / 1,8 Gy/fr', sub: 'Sur PTVp_pre.' },
+      { label: 'HLFR RT1B résécable — Escaladé', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy → PTVp_pre · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'HLFR non résécable + RI (SLFR)', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy → PTVp_pre · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'HLFR non résécable + RI — RT1C Escaladé', dose: '59,4 Gy / 33 fr / 6,5 sem', sub: 'Ph1 : 41,4 Gy → PTVp_pre · Ph2 : +18 Gy / 10 fr → PTVp_post', highesc: true }
+    ],
+    nodeRT: null,
+    metaRT: null
+  },
+  D: {
+    indication: 'RT indiquée — site défavorable = HLFR automatique. Eligibilité RT1A/RT1B/RT1C selon résécabilité.',
+    context: 'Fusion–, N0, site défavorable. Site défavorable entraîne automatiquement le bras HLFR dans RT1B/RT1C. RT1A (pré-op vs post-op) si résécable.',
+    randomisations: ['RT1A — RT pré-op vs post-op', 'RT1B — HLFR site défav. → escalade dose', 'RT1C — HLFR non résécable + RI'],
+    timing: [
+      { label: 'Décision locale', val: 'Après C3 (localisé).' },
+      { label: 'RT préopératoire', val: 'Après C4 — semaine 13. Chirurgie 4–6 sem après fin RT.' },
+      { label: 'RT postopératoire', val: 'Dès C post-op 2.' }
+    ],
+    volumes: [
+      { label: 'GTVp_pre → CTVp_pre', val: '+1 cm. Si extrémité : +2 cm sup/inf, +1 cm circumférentiel.' },
+      { label: 'GTVp_post → CTVp_post', val: '+0,5 cm (boost Phase 2 — dose escaladée).' },
+      { label: 'CTV → PTV', val: '+3 à 10 mm.' }
+    ],
+    doses: [
+      { label: 'SLFR résécable R0/R1 ou RC non résécable', dose: '41,4 Gy / 23 fr / 1,8 Gy/fr', sub: 'Sur PTVp_pre.' },
+      { label: 'HLFR RT1B résécable — Escaladé', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy → PTVp_pre · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'HLFR non résécable + RI (SLFR)', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'HLFR non résécable + RI — RT1C Escaladé', dose: '59,4 Gy / 33 fr / 6,5 sem', sub: 'Ph1 : 41,4 Gy · Ph2 : +18 Gy / 10 fr → PTVp_post', highesc: true }
+    ],
+    nodeRT: null,
+    metaRT: null
+  },
+  E: {
+    indication: 'RT primitif + RT ganglionnaire N1 systématique (indépendante de la chirurgie ganglionnaire).',
+    context: 'Fusion–, N1. RT sur site primitif ET sur ganglions N1 envahis — obligatoire quelle que soit la chirurgie ganglionnaire. Eligibilité RT1A/RT1B/RT1C pour le primitif.',
+    randomisations: ['RT1A — RT pré-op vs post-op (primitif)', 'RT1B — HLFR site défav. ou âge ≥ 18 ans', 'RT1C — HLFR non résécable + RI'],
+    timing: [
+      { label: 'Décision locale', val: 'Après C3 (localisé).' },
+      { label: 'RT préopératoire', val: 'Après C4 — semaine 13. Chirurgie 4–6 sem après fin RT.' },
+      { label: 'RT postopératoire', val: 'Dès C post-op 2. RT ganglionnaire simultanée au primitif.' }
+    ],
+    volumes: [
+      { label: 'GTVp_pre → CTVp_pre', val: '+1 cm (primitif). Si extrémité : +2 cm sup/inf.' },
+      { label: 'GTVn → CTVn', val: '+3 cm sup/inf dans la direction du drainage lymphatique, circumférentiel.' },
+      { label: 'GTVn_post → CTVn_post', val: '+0,5 cm si résidu bulky ganglionnaire (boost).' },
+      { label: 'CTV → PTV', val: '+3 à 10 mm (primitif et ganglions).' }
+    ],
+    doses: [
+      { label: 'Primitif — SLFR/RC non résécable', dose: '41,4 Gy / 23 fr / 1,8 Gy/fr', sub: 'Sur PTVp_pre.' },
+      { label: 'Primitif — HLFR RT1B escaladé', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'Primitif — HLFR RT1C escaladé', dose: '59,4 Gy / 33 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +18 Gy → PTVp_post', highesc: true },
+      { label: 'Ganglions N1 — Standard', dose: '41,4 Gy / 23 fr', sub: 'Sur CTVn. Irradiation obligatoire quelle que soit la chirurgie.' },
+      { label: 'Boost ganglionnaire bulky résiduel', dose: '+9 Gy / 5 fr', sub: 'Sur CTVn_post si résidu macroscopique ganglionnaire bulky.', esc: true }
+    ],
+    nodeRT: true,
+    metaRT: null
+  },
+  F: {
+    indication: 'RT indiquée sur site primitif. Site défavorable = HLFR automatique. Eligibilité RT1A/RT1B/RT1C.',
+    context: 'Fusion+, IRS I–III, N0. Pronostic intermédiaire-défavorable. Site défavorable → HLFR. Fusion+ ne modifie pas les volumes mais majore le risque de rechute locale.',
+    randomisations: ['RT1A — RT pré-op vs post-op (résécable)', 'RT1B — HLFR si site défav. ou âge ≥ 18 ans', 'RT1C — HLFR non résécable + RI'],
+    timing: [
+      { label: 'Décision locale', val: 'Après C3 (localisé).' },
+      { label: 'RT préopératoire', val: 'Après C4 — semaine 13. Chirurgie 4–6 sem après fin RT.' },
+      { label: 'RT postopératoire', val: 'Dès C post-op 2.' }
+    ],
+    volumes: [
+      { label: 'GTVp_pre → CTVp_pre', val: '+1 cm. Si extrémité : +2 cm sup/inf, +1 cm circumférentiel.' },
+      { label: 'GTVp_post → CTVp_post', val: '+0,5 cm (boost Phase 2 — HLFR escaladé).' },
+      { label: 'CTV → PTV', val: '+3 à 10 mm.' }
+    ],
+    doses: [
+      { label: 'SLFR / RC non résécable — Standard', dose: '41,4 Gy / 23 fr / 1,8 Gy/fr', sub: 'Sur PTVp_pre.' },
+      { label: 'HLFR RT1B résécable — Escaladé', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'HLFR non résécable RT1C std', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'HLFR non résécable RT1C — Escaladé', dose: '59,4 Gy / 33 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +18 Gy → PTVp_post', highesc: true }
+    ],
+    nodeRT: null,
+    metaRT: null
+  },
+  G: {
+    indication: 'RT primitif + RT ganglionnaire N1 obligatoire. Site défavorable = HLFR automatique. Eligibilité RT1A/RT1B/RT1C + RT ganglionnaire.',
+    context: 'Fusion+, N1. RT ganglionnaire obligatoire quelle que soit la chirurgie. Pronostic très défavorable — RT la plus intensive du protocole pour les localisés.',
+    randomisations: ['RT1A — RT pré-op vs post-op (primitif)', 'RT1B — HLFR site défav. ou âge ≥ 18 ans', 'RT1C — HLFR non résécable + RI'],
+    timing: [
+      { label: 'Décision locale', val: 'Après C3 (localisé).' },
+      { label: 'RT préopératoire', val: 'Après C4 — semaine 13. Chirurgie 4–6 sem après fin RT.' },
+      { label: 'RT postopératoire', val: 'Dès C post-op 2. RT ganglionnaire simultanée au primitif.' }
+    ],
+    volumes: [
+      { label: 'GTVp_pre → CTVp_pre', val: '+1 cm (primitif). Si extrémité : +2 cm sup/inf.' },
+      { label: 'GTVn → CTVn', val: '+3 cm sup/inf (drainage lymphatique), circumférentiel.' },
+      { label: 'GTVn_post → CTVn_post', val: '+0,5 cm si résidu bulky ganglionnaire (boost).' },
+      { label: 'CTV → PTV', val: '+3 à 10 mm (primitif et ganglions).' }
+    ],
+    doses: [
+      { label: 'Primitif — SLFR/RC non résécable', dose: '41,4 Gy / 23 fr / 1,8 Gy/fr', sub: 'Sur PTVp_pre.' },
+      { label: 'Primitif — HLFR RT1B escaladé', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'Primitif — HLFR RT1C escaladé', dose: '59,4 Gy / 33 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +18 Gy → PTVp_post', highesc: true },
+      { label: 'Ganglions N1 — Standard', dose: '41,4 Gy / 23 fr', sub: 'Sur CTVn. Irradiation obligatoire.' },
+      { label: 'Boost ganglionnaire bulky résiduel', dose: '+9 Gy / 5 fr', sub: 'Sur CTVn_post si résidu macroscopique bulky.', esc: true }
+    ],
+    nodeRT: true,
+    metaRT: null
+  },
+  H: {
+    indication: 'RT primitif (± N1) + RT métastatique selon score Oberlin Modifié. Randomisation RT2 si Oberlin ≥ 2.',
+    context: 'IRS IV — maladie métastatique. RT primitif et ganglionnaire selon mêmes règles que localisés. RT des métastases (RT2) selon score Oberlin Modifié : ≤ 1 point = RT radicale SoC ; ≥ 2 points = randomisation RT2.',
+    randomisations: ['RT1A — RT pré-op vs post-op (primitif)', 'RT1B — HLFR site défav. ou âge ≥ 18 ans', 'RT1C — HLFR non résécable + RI', 'RT2 — RT méta (si Oberlin ≥ 2) : RT radicale vs pas de RT méta'],
+    timing: [
+      { label: 'RT primitif — Décision', val: 'Après C6 (sem. 22). RT préop → C7. RT postop → C post-op 2.' },
+      { label: 'RT2 randomisation', val: 'Après C6, avant début C9. Décision MDT.' },
+      { label: 'WLI (méta pulmonaires)', val: 'Concurrent avec RT primitif ou séquentiel selon volume.' }
+    ],
+    volumes: [
+      { label: 'GTVp_pre → CTVp_pre', val: '+1 cm (primitif). +2 cm sup/inf si extrémité.' },
+      { label: 'GTV_meta → CTV_meta', val: '+5 à 10 mm (chaque site métastatique).' },
+      { label: 'GTVmeta_post → CTVmeta_post', val: '+5 mm si résidu macroscopique bulky métastatique.' },
+      { label: 'GTVn → CTVn', val: '+3 cm sup/inf si N1 (idem SG G).' }
+    ],
+    doses: [
+      { label: 'Primitif — Standard (SLFR/RC)', dose: '41,4 Gy / 23 fr / 1,8 Gy/fr', sub: 'Sur PTVp_pre.' },
+      { label: 'Primitif — HLFR RT1B escaladé', dose: '50,4 Gy / 28 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +9 Gy → PTVp_post', esc: true },
+      { label: 'Primitif — HLFR RT1C escaladé', dose: '59,4 Gy / 33 fr', sub: 'Ph1 : 41,4 Gy · Ph2 : +18 Gy → PTVp_post', highesc: true },
+      { label: 'Méta — RT2 bras RT (Oberlin ≥ 2)', dose: '41,4 Gy / 23 fr', sub: 'Sur chaque PTVmeta_pre. Boost +9 Gy si résidu bulky.', esc: true },
+      { label: 'Méta — Oberlin ≤ 1 (SoC)', dose: 'RT radicale toutes méta feasibles', sub: '41,4 Gy / 23 fr sur chaque site. Hors WLI si poumons uniquement.' }
+    ],
+    nodeRT: true,
+    metaRT: true
+  },
+  relapse: {
+    indication: 'RT locale si faisable — décision multidisciplinaire individuelle après ≥ 2 cycles CT3.',
+    context: 'VIRT/VIRR compatible avec RT concomitante après évaluation bénéfice/risque. Regorafenib : arrêter ≥ 14 jours avant chirurgie majeure. Reprendre après cicatrisation complète.',
+    randomisations: [],
+    timing: [
+      { label: 'Timing RT', val: 'Après ≥ 2 cycles CT3. Discussion MDT individuelle.' },
+      { label: 'Regorafenib + chirurgie', val: 'Arrêt ≥ 14j avant chirurgie majeure. Reprise après cicatrisation.' }
+    ],
+    volumes: [
+      { label: 'Volumes', val: 'Selon site de rechute et disponibilité de RT antérieure. Décision individuelle.' }
+    ],
+    doses: [
+      { label: 'Dose RT rechute', dose: 'Selon disponibilité RT antérieure', sub: 'Pas de dose protocolaire définie. Décision multidisciplinaire — comité d\'experts.' }
+    ],
+    nodeRT: null,
+    metaRT: null
+  }
+};
+
+// ═══ SOUS-GROUPES (RES) ═══
+var RES = {
+  A: {
+    cls: 'lr', badge: 'LR', badgeCls: 'lr',
+    title: 'Sous-groupe A — Bas Risque',
+    subgroup: 'FaR-RMS · Sous-groupe A',
+    chemo: 'IVA × 4 cycles (Ifosfamide + Vincristine + Actinomycine-D). Durée totale ~12 semaines.',
+    rtKey: 'A',
+    os: '> 90 %', efs: '~95 %', n: 'Cohorte EpSSG RMS 2005 / FaR-RMS', refs: '[1,2]',
+    note: 'Critères stricts : Fusion–, IRS I (R0 complet), N0, taille ≤ 5 cm ET âge 1–10 ans (les deux conditions), site favorable. Tout critère défavorable bascule en sous-groupe B.'
+  },
+  B: {
+    cls: 'sr', badge: 'SR', badgeCls: 'sr',
+    title: 'Sous-groupe B — Risque Standard',
+    subgroup: 'FaR-RMS · Sous-groupe B',
+    chemo: 'IVA × 9 cycles (Ifosfamide + Vincristine + Actinomycine-D). Durée totale ~27 semaines. Maintenance non indiquée.',
+    rtKey: 'B',
+    os: '~85 %', efs: '~77 %', n: 'Cohorte EpSSG RMS 2005', refs: '[1,2]',
+    note: 'IRS I mais ≥ 1 critère défavorable : taille > 5 cm OU âge < 1 an ou ≥ 10 ans. RT conditionnelle uniquement si résection incomplète secondairement identifiée.'
+  },
+  C: {
+    cls: 'sr', badge: 'SR', badgeCls: 'sr',
+    title: 'Sous-groupe C — Risque Standard',
+    subgroup: 'FaR-RMS · Sous-groupe C',
+    chemo: 'IVA × 9 cycles. Durée totale ~27 semaines. Maintenance non indiquée.',
+    rtKey: 'C',
+    os: '~85 %', efs: '~77 %', n: 'Cohorte EpSSG RMS 2005', refs: '[1,2]',
+    note: 'Site favorable (GU non-VP, orbite, H&N non-PM, voies biliaires) — RT systématique sauf chirurgie R0 secondaire à site paratesticulaire ou utérus. Sites GU, orbite, H&N : RT souvent requise même après R0.'
+  },
+  D: {
+    cls: 'hr', badge: 'HR', badgeCls: 'hr',
+    title: 'Sous-groupe D — Haut Risque',
+    subgroup: 'FaR-RMS · Sous-groupe D',
+    chemo: 'IVA × 9 cycles (CT1B std) ou IRIVA × 9 cycles (CT1B randomisation — irinotécan + vincristine). Maintenance : Vinorelbine + Cyclophosphamide × 6 cycles → CT2B (arrêt vs +6 cycles).',
+    rtKey: 'D',
+    os: '~70 %', efs: '~65 %', n: 'Cohorte EpSSG RMS 2005', refs: '[1,2]',
+    note: 'Site défavorable (membres, paraméningé, tronc, rétropéritoine, périnée) = HLFR automatique dans RT1B/RT1C. Maintenance VnC systématique. CT2B randomisation (arrêt vs prolongation).'
+  },
+  E: {
+    cls: 'hr', badge: 'HR', badgeCls: 'hr',
+    title: 'Sous-groupe E — Haut Risque',
+    subgroup: 'FaR-RMS · Sous-groupe E',
+    chemo: 'IVA × 9 cycles (CT1B std) ou IRIVA × 9 cycles (CT1B randomisation). Maintenance : VnC × 6 cycles → CT2B.',
+    rtKey: 'E',
+    os: '~60 %', efs: '~55 %', n: 'Cohorte EpSSG / analyse poolée', refs: '[1,2]',
+    note: 'N1 (≥ 1 ganglion régional envahi) sans Fusion+. RT ganglionnaire obligatoire en plus du primitif, indépendamment de la chirurgie ganglionnaire.'
+  },
+  F: {
+    cls: 'hr', badge: 'HR', badgeCls: 'hr',
+    title: 'Sous-groupe F — Haut Risque',
+    subgroup: 'FaR-RMS · Sous-groupe F',
+    chemo: 'IVA × 9 cycles (CT1B std) ou IRIVA × 9 cycles (CT1B randomisation). Maintenance : VnC × 6 cycles → CT2B.',
+    rtKey: 'F',
+    os: '~60–70 %', efs: '~55–65 %', n: 'Cohorte EpSSG / FaR-RMS', refs: '[1,2]',
+    note: 'Fusion+ sans N1. Pronostic intermédiaire-défavorable. Site défavorable → HLFR automatique. La positivité du gène de fusion PAX-FOXO1 ne modifie pas les volumes RT mais majore le risque de rechute locale.'
+  },
+  G: {
+    cls: 'vhr', badge: 'VHR', badgeCls: 'vhr',
+    title: 'Sous-groupe G — Très Haut Risque',
+    subgroup: 'FaR-RMS · Sous-groupe G',
+    chemo: 'IVADo × 9 cycles (CT1A std — Ifosfamide + Vincristine + Actinomycine-D + Doxorubicine) ou IRIVA × 9 cycles (CT1A randomisation). Maintenance : VnC × 12 cycles → CT2A.',
+    rtKey: 'G',
+    os: '~43–50 %', efs: '~35–45 %', n: 'Cohorte EpSSG / FaR-RMS', refs: '[1,2]',
+    note: 'Fusion+ ET N1 (≥ 1 ganglion) — pire pronostic des localisés. Chimiothérapie intensifiée (IVADo ou CT1A). Maintenance prolongée × 12 cycles. RT ganglionnaire obligatoire.'
+  },
+  H: {
+    cls: 'vhr', badge: 'VHR', badgeCls: 'vhr',
+    title: 'Sous-groupe H — Très Haut Risque (Métastatique)',
+    subgroup: 'FaR-RMS · Sous-groupe H',
+    chemo: 'IVADo × 9 cycles (CT1A std) ou IRIVA × 9 cycles (CT1A randomisation — Ifo + Vinca + Irinotecan). Maintenance : VnC × 12 cycles → CT2A.',
+    rtKey: 'H',
+    os: '~34 % (3 ans)', efs: '~27 % (3 ans)', n: 'Cohorte EpSSG poolée — Oberlin et al. 2008', refs: '[1,4]',
+    note: 'IRS IV (M1) — tout statut fusion. Score Oberlin Modifié : 1 point / facteur [âge ≥ 10 ans / site extrémité-autre-inconnu / os ou moelle / ≥ 3 sites méta]. ≤ 1 = RT radicale SoC. ≥ 2 = randomisation RT2.'
+  },
+  relapse: {
+    cls: 'relapse', badge: 'CT3', badgeCls: 'relapse',
+    title: 'Rechute — Bras CT3',
+    subgroup: 'FaR-RMS · Rechute',
+    chemo: 'VIRT (Vinorelbine + Irinotecan + RT) ou VIRR (Vinorelbine + Irinotecan + Regorafenib) — CT3 randomisation. Maximum 12 cycles.',
+    rtKey: 'relapse',
+    os: '< 20 % (5 ans)', efs: '~30 % (1 an)', n: 'Cohorte historique EpSSG rechutes', refs: '[1]',
+    note: 'Rechute histologiquement vérifiée, non-réfractaire. VIRT et VIRR sont compatibles avec RT concomitante après évaluation individuelle bénéfice/risque. Regorafenib : arrêt ≥ 14j avant toute chirurgie majeure.'
+  }
+};
+
+// ═══ STEPS ═══
+var wState = {};
+var navStack = [];
+var currentStep = 'fusion';
+
+var STEPS = {
+  fusion: {
+    label: 'Statut Fusion / Histologie', num: 1, total: 6,
+    q: 'Statut du gène de fusion PAX-FOXO1',
+    sub: 'Tester PAX3-FOXO1 et PAX7-FOXO1 par RT-PCR ou FISH. En l\'absence de résultat moléculaire : histologie alvéolaire = Fusion+, histologie non-alvéolaire = Fusion–.',
+    opts: [
+      { val: 'neg', label: 'Fusion– (Négatif)', desc: 'PAX3/PAX7-FOXO1 non détecté — ou histologie non-alvéolaire (ERMS)' },
+      { val: 'pos', label: 'Fusion+ (Positif)', desc: 'PAX3-FOXO1 ou PAX7-FOXO1 détecté — ou histologie alvéolaire (ARMS)' },
+      { val: 'relapse', label: 'Rechute / Récidive', desc: 'Rechute histologiquement vérifiée → bras CT3 directement' }
+    ],
+    next: function(val) {
+      if (val === 'relapse') return '_result_relapse';
+      return 'irs';
+    }
+  },
+  irs: {
+    label: 'Stade IRS post-chirurgical', num: 2, total: 6,
+    q: 'Groupe IRS (stade chirurgical)',
+    sub: 'Basé sur l\'étendue de la résection chirurgicale initiale (ou biopsie seule si non résécable d\'emblée).',
+    opts: [
+      { val: 'I', label: 'IRS I — Résection R0', desc: 'Résection complète microscopique — marges saines' },
+      { val: 'II', label: 'IRS II', desc: 'Résection macroscopique, marges microscopiques + ou N1 réséqués' },
+      { val: 'III', label: 'IRS III', desc: 'Résidu macroscopique ou biopsie seule' },
+      { val: 'IV', label: 'IRS IV — Métastatique', desc: 'Maladie à distance → Sous-groupe H (VHR)' }
+    ],
+    next: function(val) {
+      if (val === 'IV') return '_result_H';
+      return 'nodes';
+    }
+  },
+  nodes: {
+    label: 'Atteinte ganglionnaire', num: 3, total: 6,
+    q: 'Statut ganglionnaire régional (N)',
+    sub: 'N1 = ≥ 1 ganglion régional envahi histologiquement ou par FDG-PET-CT positif confirmé. Évaluation clinique + imagerie + biopsie si doute.',
+    opts: [
+      { val: 'N0', label: 'N0 — Pas d\'envahissement ganglionnaire', desc: '' },
+      { val: 'N1', label: 'N1 — ≥ 1 ganglion régional envahi', desc: '' }
+    ],
+    next: function(val) {
+      if (wState.fusion === 'pos' && val === 'N1') return '_result_G';
+      if (wState.fusion === 'pos' && val === 'N0') return '_result_F';
+      if (wState.fusion === 'neg' && val === 'N1') return '_result_E';
+      return 'site';
+    }
+  },
+  site: {
+    label: 'Localisation tumorale', num: 4, total: 6,
+    q: 'Localisation du site primitif',
+    sub: 'Sites favorables : GU non-VP (vessie-prostate), tête & cou non paraméningé, orbite, voies biliaires. Tous les autres = défavorables.',
+    opts: [
+      { val: 'fav', label: 'Site Favorable', desc: 'GU (hors vessie-prostate), tête & cou non paraméningé, orbite, voies biliaires' },
+      { val: 'unfav', label: 'Site Défavorable', desc: 'Membres, paraméningé, tronc, rétropéritoine, périnée, GU (vessie-prostate), autres' }
+    ],
+    next: function(val) {
+      if (wState.irs === 'I') return 'sizeage';
+      return val === 'fav' ? '_result_C' : '_result_D';
+    }
+  },
+  sizeage: {
+    label: 'Taille tumorale et âge (IRS I, Fusion–)', num: 5, total: 6,
+    q: 'Taille tumorale et âge (IRS I uniquement)',
+    sub: 'Les DEUX critères doivent être favorables pour classifier en sous-groupe A (LR). Un seul critère défavorable → sous-groupe B (SR).',
+    opts: [
+      { val: 'bf', label: 'Taille ≤ 5 cm ET âge 1–10 ans', desc: '→ Sous-groupe A — Bas Risque (LR)' },
+      { val: 'bu', label: 'Taille > 5 cm OU âge < 1 an / ≥ 10 ans', desc: '→ Sous-groupe B — Risque Standard (SR)' }
+    ],
+    next: function(val) {
+      return val === 'bf' ? '_result_A' : '_result_B';
+    }
+  }
+};
+
+// ═══ BUILD RT HTML ═══
+function buildRT(rtKey) {
+  var rt = RT[rtKey];
+  if (!rt) return '';
+  if (rt.indication === false) {
+    return '<div class="no-rt-box">' + rt.noRT_reason + '</div>';
+  }
+
+  var h = '<div class="rt-block">'
+    + '<div class="rt-block-title">Radiothérapie — Timing · Volumes · Doses <sup style="color:var(--text3);font-size:8px">[1,3]</sup></div>';
+
+  // Indication + contexte + randomisations
+  h += '<div class="rt-section"><div class="rt-section-hdr">' + rt.indication + '</div>'
+    + '<div class="rt-note">' + rt.context + '</div>';
+  if (rt.randomisations && rt.randomisations.length) {
+    h += '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">';
+    rt.randomisations.forEach(function(r) { h += '<span class="rt-tag rando">⚡ ' + r + '</span>'; });
+    h += '</div>';
+  }
+  h += '</div>';
+
+  // Timing
+  if (rt.timing && rt.timing.length) {
+    h += '<div class="rt-section"><div class="rt-section-hdr">Timing <span class="rt-tag">Séquence thérapeutique</span></div><div class="rt-2col">';
+    rt.timing.forEach(function(t) {
+      h += '<div class="rt-box"><div class="rt-box-label">' + t.label + '</div><div class="rt-box-val">' + t.val + '</div></div>';
+    });
+    h += '</div></div>';
+  }
+
+  // Volumes
+  if (rt.volumes && rt.volumes.length) {
+    h += '<div class="rt-section"><div class="rt-section-hdr">Volumes cibles <span style="font-size:11px;color:var(--text2)">GTVp_pre → CTV → PTV</span></div><div class="rt-2col">';
+    rt.volumes.forEach(function(v) {
+      h += '<div class="rt-box"><div class="rt-box-label"><span class="rt-code">' + v.label + '</span></div><div class="rt-box-val">' + v.val + '</div></div>';
+    });
+    h += '</div></div>';
+  }
+
+  // Doses
+  if (rt.doses && rt.doses.length) {
+    h += '<div class="rt-section"><div class="rt-section-hdr">Doses prescrites <span class="rt-tag">Fractionnement</span></div><div class="rt-2col">';
+    rt.doses.forEach(function(d) {
+      var cls = d.highesc ? 'rt-dose highesc' : d.esc ? 'rt-dose esc' : 'rt-dose';
+      h += '<div class="rt-box"><div class="rt-box-label">' + d.label + '</div>'
+        + '<div class="rt-box-val"><span class="' + cls + '">' + d.dose + '</span>'
+        + (d.sub ? '<div class="rt-sub">' + d.sub + '</div>' : '')
+        + '</div></div>';
+    });
+    h += '</div></div>';
+  }
+
+  // RT ganglionnaire N1
+  if (rt.nodeRT) {
+    h += '<div class="rt-section"><div class="rt-section-hdr">RT ganglionnaire <span class="rt-tag yellow">N1 — Obligatoire</span></div>'
+      + '<div class="rt-note">Irradiation des ganglions N1 obligatoire quelle que soit la chirurgie ganglionnaire réalisée.<br>'
+      + 'GTVn → CTVn : +3 cm dans la direction du drainage lymphatique, circumférentiel.<br>'
+      + 'Dose : 41,4 Gy / 23 fr sur CTVn. Boost bulky résiduel : +9 Gy / 5 fr sur CTVn_post.</div></div>';
+  }
+
+  // RT métastatique (SG H)
+  if (rt.metaRT) {
+    h += '<div class="rt-section"><div class="rt-section-hdr"><span class="rt-tag rando">Score Oberlin Modifié — RT2</span></div>'
+      + '<div class="rt-note" style="margin-bottom:10px">1 point / facteur : âge ≥ 10 ans · site extrémité/autre/inconnu · atteinte os ou moelle · ≥ 3 sites métastatiques<br>'
+      + '<strong style="color:var(--green)">Score ≤ 1 :</strong> RT radicale de toutes les métastases feasibles (Standard of Care) — 41,4 Gy / 23 fr.<br>'
+      + '<strong style="color:var(--red)">Score ≥ 2 :</strong> Randomisation RT2 (bras RT méta vs pas de RT méta).</div>'
+      + '<div class="rt-2col">'
+      + '<div class="rt-box"><div class="rt-box-label">Poumons (WLI)</div><div class="rt-box-val"><span class="rt-dose">15 Gy / 10 fr</span><div class="rt-sub">Irradiation pulmonaire totale si méta pulmonaires. AP/PA ou IMRT.</div></div></div>'
+      + '<div class="rt-box"><div class="rt-box-label">Cerveau</div><div class="rt-box-val">≤ 3 méta, vol ≤ 20 cc, Ø &lt; 3 cm : <span class="rt-dose">SRT stéréotaxique</span><div class="rt-sub">Multiples : <span class="rt-dose esc">30 Gy / 10 fr</span> encéphale entier.</div></div></div>'
+      + '<div class="rt-box"><div class="rt-box-label">Péritoine / Ascite</div><div class="rt-box-val"><span class="rt-dose esc">24 Gy / 16 fr</span> abdomen total<div class="rt-sub">Boost primitif : 41,4 Gy (micro) / 50,4 Gy (macro).</div></div></div>'
+      + '<div class="rt-box"><div class="rt-box-label">SBRT oligométastatique</div><div class="rt-box-val">Envisageable si ≤ 3 méta, petit volume — en complément WLI ou selon protocole centre.</div></div>'
+      + '</div></div>';
+  }
+
+  h += '</div>';
+  return h;
+}
+
+// ═══ BUILD RESULT ═══
+function buildResult(key) {
+  var r = RES[key];
+  if (!r) return '<p>Résultat non trouvé.</p>';
+
+  var osNum = parseFloat(r.os);
+  var osCls = osNum >= 90 ? 'ov-good' : (osNum >= 70 ? 'ov-mid' : 'ov-bad');
+  var efsCls = parseFloat(r.efs) >= 80 ? 'ov-good' : (parseFloat(r.efs) >= 55 ? 'ov-mid' : 'ov-bad');
+
+  var h = '<button class="btn-back" onclick="goBack()">← Retour</button>'
+    + '<div class="result-card ' + r.cls + '">'
+    + '<div class="result-header">'
+    + '<div><div class="result-subgroup">' + r.subgroup + '</div><div class="result-title">' + r.title + '</div></div>'
+    + '<span class="risk-badge ' + r.badgeCls + '">' + r.badge + '</span>'
+    + '</div>'
+
+    // Outcomes
+    + '<div class="outcomes-block">'
+    + '<div class="r-label">Données d\'efficacité <sup>' + r.refs + '</sup></div>'
+    + '<div class="outcome-row"><span class="outcome-label">OS</span><span class="outcome-val ' + osCls + '">' + r.os + '</span></div>'
+    + '<div class="outcome-row"><span class="outcome-label">EFS</span><span class="outcome-val ' + efsCls + '">' + r.efs + '</span></div>'
+    + '<div class="outcome-row"><span class="outcome-label">Cohorte</span><span class="outcome-val">' + r.n + '</span></div>'
+    + '</div>'
+
+    // Chimiothérapie
+    + '<div class="r-row"><div class="r-label">Chimiothérapie d\'induction</div><div class="r-val">' + r.chemo + '</div></div>'
+
+    // RT
+    + buildRT(r.rtKey)
+
+    // Note clinique
+    + (r.note ? '<div class="r-row"><div class="r-label">Note clinique</div><div class="r-val">' + r.note + '</div></div>' : '')
+
+    // Essai
+    + '<div class="r-row"><div class="r-label">Essai clinique</div><div class="r-val">'
+    + '<a class="nct-link" href="https://clinicaltrials.gov/study/NCT04625907" target="_blank">NCT04625907</a>'
+    + ' — FaR-RMS v2.0c · EudraCT 2018-000515-24</div></div>'
+
+    + '<div class="result-actions">'
+    + '<button class="btn-restart" onclick="restart()">⟳ Nouvelle stratification</button>'
+    + '<button class="btn-pdf" onclick="printResult()">⬇ Exporter PDF</button>'
+    + '</div></div>';
+
+  return h;
+}
+
+// ═══ NAVIGATION ═══
+function navigate(sid, val) {
+  navStack.push({ step: currentStep, state: JSON.parse(JSON.stringify(wState)) });
+  wState[sid] = val;
+  var nxt = STEPS[sid].next(val);
+  if (nxt.startsWith('_result_')) {
+    renderResult(nxt.slice(8));
+  } else {
+    currentStep = nxt;
+    renderStep(nxt);
+  }
+}
+
+function renderStep(sid) {
+  var s = STEPS[sid];
+  var pct = Math.round(s.num / s.total * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepLabel').textContent = 'Étape ' + s.num + ' / ' + s.total;
+  document.getElementById('stepName').textContent = s.label;
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('refsSection').style.display = 'none';
+  var back = navStack.length ? '<button class="btn-back" onclick="goBack()">← Retour</button>' : '';
+  var opts = s.opts.map(function(o) {
+    return '<button class="opt-btn" onclick="navigate(\'' + sid + '\',\'' + o.val + '\')">'
+      + '<strong>' + o.label + '</strong>'
+      + (o.desc ? '<div class="opt-desc">' + o.desc + '</div>' : '')
+      + '</button>';
+  }).join('');
+  document.getElementById('app').innerHTML = back
+    + '<div class="step-card">'
+    + '<div class="section-label">Question ' + s.num + '</div>'
+    + '<div class="q-title">' + s.q + '</div>'
+    + '<div class="q-sub">' + s.sub + '</div>'
+    + '<div class="options">' + opts + '</div>'
+    + '</div>';
+}
+
+function renderResult(key) {
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('stepLabel').textContent = 'Résultat';
+  document.getElementById('stepName').textContent = 'Sous-groupe ' + key + ' identifié';
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('refsSection').style.display = 'block';
+  document.getElementById('app').innerHTML = buildResult(key);
+}
+
+function goBack() {
+  if (!navStack.length) return;
+  var prev = navStack.pop();
+  wState = prev.state;
+  currentStep = prev.step;
+  document.getElementById('refsSection').style.display = 'none';
+  renderStep(prev.step);
+}
+
+function restart() {
+  wState = {}; navStack = []; currentStep = 'fusion';
+  document.getElementById('refsSection').style.display = 'none';
+  renderStep('fusion');
+}
+
+function printResult() {
+  document.getElementById('progressWrap').style.display = 'none';
+  document.querySelectorAll('.btn-back').forEach(function(b) { b.style.display = 'none'; });
+  window.print();
+  document.getElementById('progressWrap').style.display = 'block';
+  document.querySelectorAll('.btn-back').forEach(function(b) { b.style.display = ''; });
+}
+
+// ═══ D3 LOGIGRAMME ═══
+var _flowInitT = null;
+var _flowZoom = null;
+var _flowSvg = null;
+
+function buildFlow() {
+  // Couleurs nœuds hardcodées (SVG hors portée CSS custom properties)
+  var NS = {
+    d:       { fill: '#dce8f5', stroke: '#1a5fa8', tc: '#0a1020', rw: 148, rh: 48 },
+    lr:      { fill: '#d5edd8', stroke: '#2d7a3a', tc: '#0a1a0a', rw: 148, rh: 48 },
+    sr:      { fill: '#d5e4f5', stroke: '#1a5fa8', tc: '#0a1020', rw: 148, rh: 48 },
+    hr:      { fill: '#f5d8d5', stroke: '#c0392b', tc: '#200505', rw: 148, rh: 48 },
+    vhr:     { fill: '#f5ead5', stroke: '#a0720a', tc: '#201000', rw: 148, rh: 48 },
+    relapse: { fill: '#ece0f5', stroke: '#6b3fa0', tc: '#100020', rw: 148, rh: 48 }
+  };
+
+  // Données tooltip logigramme
+  var TT = {
+    root: {
+      title: 'ENTRÉE ALGORITHME',
+      q: 'RMS histologiquement confirmé — Non pléomorphe',
+      chemo: 'Bilan d\'extension complet. FDG-PET-CT + IRM. Statut fusion avant randomisation.',
+      rt: 'Dépend du sous-groupe (voir branches)',
+      timing: 'Statut PAX-FOXO1 obligatoire avant entrée protocole.',
+      efs: 'EFS variable selon sous-groupe A–H', ec: 'efs-mid'
+    },
+    fn: {
+      title: 'FUSION– (PAX-FOXO1 NÉGATIF)',
+      q: 'Non-alvéolaire (ERMS) ou PAX3/PAX7-FOXO1 non détecté',
+      chemo: '→ Évaluer IRS, N, site primitif, taille et âge.',
+      rt: 'RT selon IRS, N et site — voir sous-groupes A–E',
+      timing: 'Décision RT après C3 pour les localisés.',
+      efs: 'EFS 3 ans : 55–95 % selon sous-groupe', ec: 'efs-mid'
+    },
+    fp: {
+      title: 'FUSION+ (PAX-FOXO1 POSITIF)',
+      q: 'Alvéolaire (ARMS) ou PAX3-FOXO1 / PAX7-FOXO1 détecté — Pronostic défavorable',
+      chemo: '→ Évaluer N (N0 = SG F, N1 = SG G).',
+      rt: 'RT systématique sur site primitif. Site défavorable = HLFR automatique.',
+      timing: 'Décision RT après C3 pour les localisés.',
+      efs: 'EFS 3 ans : 35–65 % selon N', ec: 'efs-bad'
+    },
+    fn_i: {
+      title: 'FUSION– · IRS I (R0)',
+      q: 'Résection complète microscopique. Évaluer taille et âge.',
+      chemo: 'IVA × 4 cycles (SG A) ou × 9 cycles (SG B).',
+      rt: 'RT non systématique — dépend taille/âge',
+      timing: 'Pas de RT si SG A. Si SG B avec IRS II : RT après C3.',
+      efs: 'EFS 3 ans : 77–95 %', ec: 'efs-good'
+    },
+    fn_ii: {
+      title: 'FUSION– · IRS II–III',
+      q: 'Résidu macroscopique ou marges microscopiques +.',
+      chemo: 'IVA × 9 cycles (CT1B) ± IRIVA. Maintenance VnC.',
+      rt: 'RT indiquée pour la majorité. Dépend site et N.',
+      timing: 'Décision après C3. RT préop → C4. RT postop → C post-op 2.',
+      efs: 'EFS 3 ans : 55–77 % selon site et N', ec: 'efs-mid'
+    },
+    fn_n0: {
+      title: 'FUSION– · IRS II–III · N0',
+      q: 'Pas d\'envahissement ganglionnaire. Évaluer site primitif.',
+      chemo: 'IVA × 9 cycles (CT1B std) ± IRIVA.',
+      rt: 'RT site primitif. Site favorable = SG C, défavorable = SG D.',
+      timing: 'Décision RT après C3.',
+      efs: 'EFS 3 ans : 65–77 % selon site', ec: 'efs-mid'
+    },
+    sgA: {
+      title: 'SOUS-GROUPE A — LR',
+      q: 'Fusion–, IRS I, N0, taille ≤ 5 cm, âge 1–10 ans, site favorable',
+      chemo: 'IVA × 4 cycles (~12 sem). Maintenance non indiquée.',
+      rt: 'PAS DE RT — IRS I R0 complet, Fusion–, tous critères favorables',
+      timing: 'Pas de RT. Surveillance après 4 cycles.',
+      volumes: 'Pas de délinéation.',
+      efs: 'EFS 3 ans : ~95 % · OS 5 ans : > 90 %', ec: 'efs-good'
+    },
+    sgB: {
+      title: 'SOUS-GROUPE B — SR',
+      q: 'Fusion–, IRS I, N0 — taille > 5 cm OU âge hors 1–10 ans',
+      chemo: 'IVA × 9 cycles (~27 sem). Maintenance non indiquée.',
+      rt: 'RT conditionnelle — si IRS II détecté ou résection incomplète',
+      timing: 'Si RT : préop après C4 (sem. 13) ou postop dès C post-op 2.',
+      volumes: 'GTVp_pre → CTVp_pre +1 cm. GTVp_post → CTVp_post +0,5 cm. PTV = CTV +3–10 mm.',
+      efs: 'EFS 3 ans : ~77 % · OS 5 ans : ~85 %', ec: 'efs-mid'
+    },
+    sgC: {
+      title: 'SOUS-GROUPE C — SR',
+      q: 'Fusion–, IRS II–III, N0, site favorable',
+      chemo: 'IVA × 9 cycles. Maintenance non indiquée.',
+      rt: 'RT systématique — sauf R0 secondaire paratesticulaire/utérus. SLFR 41,4 Gy. HLFR RT1B/RT1C.',
+      timing: 'RT préop → C4 sem. 13. RT postop → C post-op 2.',
+      volumes: 'GTVp_pre → CTVp_pre +1 cm. GTVp_post → CTVp_post +0,5 cm. CTV → PTV +3–10 mm.',
+      efs: 'EFS 3 ans : ~77 % · OS 5 ans : ~85 %', ec: 'efs-mid'
+    },
+    sgD: {
+      title: 'SOUS-GROUPE D — HR',
+      q: 'Fusion–, IRS II–III, N0, site défavorable',
+      chemo: 'IVA × 9 (CT1B) ou IRIVA × 9. Maintenance VnC × 6 → CT2B.',
+      rt: 'RT indiquée — site défav. = HLFR automatique. RT1A/RT1B/RT1C.',
+      timing: 'RT préop → C4 sem. 13. RT postop → C post-op 2.',
+      volumes: 'GTVp_pre → CTVp_pre +1 cm (+2 sup/inf extrémité). Boost +0,5 cm. PTV +3–10 mm.',
+      efs: 'EFS 3 ans : ~65 % · OS 5 ans : ~70 %', ec: 'efs-mid'
+    },
+    sgE: {
+      title: 'SOUS-GROUPE E — HR',
+      q: 'Fusion–, IRS II–III, N1 (≥ 1 ganglion)',
+      chemo: 'IVA × 9 (CT1B) ou IRIVA × 9. Maintenance VnC × 6 → CT2B.',
+      rt: 'RT primitif + RT ganglionnaire N1 obligatoire (indépendante chirurgie gang.)',
+      timing: 'RT préop → C4 ou postop → C post-op 2. RT gang. simultanée.',
+      volumes: 'Primitif : GTVp_pre → CTVp_pre +1 cm. Ganglions : GTVn → CTVn +3 cm sup/inf. Boost gang. +0,5 cm.',
+      efs: 'EFS 3 ans : ~55 % · OS 5 ans : ~60 %', ec: 'efs-mid'
+    },
+    sgF: {
+      title: 'SOUS-GROUPE F — HR',
+      q: 'Fusion+, IRS I–III, N0',
+      chemo: 'IVA × 9 (CT1B) ou IRIVA × 9. Maintenance VnC × 6 → CT2B.',
+      rt: 'RT indiquée — site défav. = HLFR automatique. SLFR 41,4 Gy ou HLFR RT1B/RT1C.',
+      timing: 'RT préop → C4 sem. 13. RT postop → C post-op 2.',
+      volumes: 'GTVp_pre → CTVp_pre +1 cm. GTVp_post → CTVp_post +0,5 cm. PTV +3–10 mm.',
+      efs: 'EFS 3 ans : ~55–65 % · OS 5 ans : ~60–70 %', ec: 'efs-mid'
+    },
+    sgG: {
+      title: 'SOUS-GROUPE G — VHR',
+      q: 'Fusion+, IRS II–III, N1 — Très haut risque',
+      chemo: 'IVADo × 9 (CT1A) ou IRIVA × 9. Maintenance VnC × 12 → CT2A.',
+      rt: 'RT primitif + RT ganglionnaire N1 obligatoire. HLFR si site défav. RT1A/RT1B/RT1C.',
+      timing: 'RT préop → C4 sem. 13. RT postop → C post-op 2. Gang. simultané.',
+      volumes: 'Primitif : GTVp_pre → CTVp_pre +1 cm. Ganglions : GTVn → CTVn +3 cm sup/inf. Boost +0,5 cm.',
+      efs: 'EFS 3 ans : ~35–45 % · OS 5 ans : ~43–50 %', ec: 'efs-bad'
+    },
+    sgH: {
+      title: 'SOUS-GROUPE H — VHR MÉTASTATIQUE',
+      q: 'IRS IV (M1) — Maladie métastatique. Tout statut fusion.',
+      chemo: 'IVADo × 9 (CT1A) ou IRIVA × 9. Maintenance VnC × 12 → CT2A.',
+      rt: 'RT primitif + RT méta selon score Oberlin Modifié + randomisation RT2 si Oberlin ≥ 2.',
+      timing: 'Décision après C6 (sem. 22). RT préop → C7. RT2 randomisation après C6 avant C9.',
+      volumes: 'Primitif : CTVp_pre +1 cm. Méta : CTV +5–10 mm. WLI si poumons. GTVn → CTVn +3 cm si N1.',
+      efs: 'EFS 3 ans : ~27 % · OS 3 ans : ~34 %', ec: 'efs-bad'
+    },
+    relapse: {
+      title: 'RECHUTE — CT3',
+      q: 'Rechute histologiquement vérifiée. Non-réfractaire. Bras CT3.',
+      chemo: 'VIRT ou VIRR (Regorafenib) — CT3 randomisation — max 12 cycles.',
+      rt: 'RT locale si faisable — décision multidisciplinaire individuelle après ≥ 2 cycles CT3.',
+      timing: 'Après ≥ 2 cycles CT3. Regorafenib : arrêt ≥ 14j avant chirurgie majeure.',
+      volumes: 'Selon site de rechute et disponibilité RT antérieure.',
+      efs: 'EFS 1 an : ~30 % · OS 5 ans : < 20 %', ec: 'efs-bad'
+    }
+  };
+
+  // Noeuds et liens
+  var nodes = [
+    { id: 'root',    type: 'd',       label: 'RMS confirmé\n(non pléomorphe)' },
+    { id: 'fn',      type: 'd',       label: 'Fusion–\n(PAX-FOXO1–)' },
+    { id: 'fp',      type: 'd',       label: 'Fusion+\n(PAX-FOXO1+)' },
+    { id: 'fn_i',    type: 'd',       label: 'IRS I — R0\n(Fusion–)' },
+    { id: 'fn_ii',   type: 'd',       label: 'IRS II–III\n(Fusion–)' },
+    { id: 'fn_n0',   type: 'd',       label: 'N0 — Site ?' },
+    { id: 'sgA',     type: 'lr',      label: 'Sous-groupe A\nBas Risque (LR)' },
+    { id: 'sgB',     type: 'sr',      label: 'Sous-groupe B\nRisque Standard (SR)' },
+    { id: 'sgC',     type: 'sr',      label: 'Sous-groupe C\nRisque Standard (SR)' },
+    { id: 'sgD',     type: 'hr',      label: 'Sous-groupe D\nHaut Risque (HR)' },
+    { id: 'sgE',     type: 'hr',      label: 'Sous-groupe E\nHaut Risque (HR)' },
+    { id: 'sgF',     type: 'hr',      label: 'Sous-groupe F\nHaut Risque (HR)' },
+    { id: 'sgG',     type: 'vhr',     label: 'Sous-groupe G\nTrès Haut Risque' },
+    { id: 'sgH',     type: 'vhr',     label: 'Sous-groupe H\nVHR Métastatique' },
+    { id: 'relapse', type: 'relapse', label: 'Rechute CT3' }
+  ];
+
+  var links = [
+    { s: 'root', t: 'fn',    el: 'Fusion–' },
+    { s: 'root', t: 'fp',    el: 'Fusion+' },
+    { s: 'root', t: 'sgH',   el: 'IRS IV\n(Métastatique)' },
+    { s: 'root', t: 'relapse', el: 'Rechute\nHistologique' },
+    { s: 'fn',   t: 'fn_i',  el: 'IRS I' },
+    { s: 'fn',   t: 'fn_ii', el: 'IRS II–III' },
+    { s: 'fn_i', t: 'sgA',   el: 'Taille ≤5cm\nÂge 1–10ans' },
+    { s: 'fn_i', t: 'sgB',   el: 'Taille >5cm\nou âge hors 1–10ans' },
+    { s: 'fn_ii', t: 'fn_n0', el: 'N0' },
+    { s: 'fn_ii', t: 'sgE',  el: 'N1' },
+    { s: 'fn_n0', t: 'sgC',  el: 'Site Favorable' },
+    { s: 'fn_n0', t: 'sgD',  el: 'Site Défavorable' },
+    { s: 'fp',   t: 'sgF',   el: 'N0' },
+    { s: 'fp',   t: 'sgG',   el: 'N1\n+ IRS II–III' }
+  ];
+
+  // Positions manuelles (px)
+  var POS = {
+    root:    { x: 0,     y: 0   },
+    fn:      { x: -620,  y: 110 },
+    fp:      { x: 580,   y: 110 },
+    sgH:     { x: 1200,  y: 110 },
+    relapse: { x: 1800,  y: 110 },
+    fn_i:    { x: -950,  y: 230 },
+    fn_ii:   { x: -310,  y: 230 },
+    sgA:     { x: -1110, y: 360 },
+    sgB:     { x: -790,  y: 360 },
+    fn_n0:   { x: -450,  y: 360 },
+    sgE:     { x: -90,   y: 360 },
+    sgC:     { x: -580,  y: 490 },
+    sgD:     { x: -310,  y: 490 },
+    sgF:     { x: 460,   y: 230 },
+    sgG:     { x: 700,   y: 230 }
+  };
+  nodes.forEach(function(n) {
+    var p = POS[n.id];
+    if (p) { n.x = p.x; n.y = p.y; } else { n.x = 0; n.y = 0; }
+    n.detail = TT[n.id] || {};
+  });
+
+  var chartEl = document.getElementById('chart');
+  var W = chartEl.clientWidth;
+  var H = chartEl.clientHeight;
+
+  var svg = d3.select('#chart').append('svg').attr('width', '100%').attr('height', '100%');
+  _flowSvg = svg;
+
+  var defs = svg.append('defs');
+  Object.keys(NS).forEach(function(t) {
+    var s = NS[t];
+    defs.append('marker').attr('id', 'arr-' + t).attr('markerWidth', 8).attr('markerHeight', 8)
+      .attr('refX', 6).attr('refY', 3).attr('orient', 'auto')
+      .append('path').attr('d', 'M0,0 L0,6 L8,3 z').attr('fill', s.stroke).attr('opacity', 0.5);
+  });
+
+  var g = svg.append('g');
+
+  // Auto-fit
+  var xs = nodes.map(function(n) { return n.x; });
+  var ys = nodes.map(function(n) { return n.y; });
+  var NW2 = 80, NH2 = 30;
+  var minX = Math.min.apply(null, xs) - NW2;
+  var maxX = Math.max.apply(null, xs) + NW2;
+  var minY = Math.min.apply(null, ys) - NH2;
+  var maxY = Math.max.apply(null, ys) + NH2;
+  var initScale = Math.min(W / (maxX - minX), H / (maxY - minY), 1) * 0.86;
+  var initTx = W / 2 - (minX + maxX) / 2 * initScale;
+  var initTy = H / 2 - (minY + maxY) / 2 * initScale;
+  var initT = d3.zoomIdentity.translate(initTx, initTy).scale(initScale);
+  _flowInitT = initT;
+
+  var zoom = d3.zoom().scaleExtent([0.1, 3]).on('zoom', function(event) { g.attr('transform', event.transform); });
+  _flowZoom = zoom;
+  svg.call(zoom);
+  svg.call(zoom.transform, initT);
+
+  document.getElementById('btnReset').onclick = function() {
+    svg.transition().duration(600).call(zoom.transform, initT);
+  };
+
+  // Liens
+  var nById = {};
+  nodes.forEach(function(n) { nById[n.id] = n; });
+  var NW = 148, NH = 48;
+
+  links.forEach(function(lk) {
+    var sn = nById[lk.s], tn = nById[lk.t];
+    if (!sn || !tn) return;
+    var st = NS[tn.type] || NS.d;
+    var x1 = sn.x, y1 = sn.y + NH / 2;
+    var x2 = tn.x, y2 = tn.y - NH / 2;
+    var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    g.append('path')
+      .attr('d', 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + my + ' ' + x2 + ',' + my + ' ' + x2 + ',' + y2)
+      .attr('fill', 'none').attr('stroke', st.stroke).attr('stroke-opacity', 0.4)
+      .attr('stroke-width', 1.5).attr('marker-end', 'url(#arr-' + tn.type + ')');
+
+    if (lk.el) {
+      var lines = lk.el.split('\n');
+      var lt = g.append('text').attr('x', mx).attr('y', my)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '8.5').attr('font-family', 'DM Mono,monospace')
+        .attr('fill', '#6e7681');
+      lines.forEach(function(ln, i) {
+        lt.append('tspan').attr('x', mx).attr('dy', i === 0 ? -2 : 11).text(ln);
+      });
+    }
+  });
+
+  // Ombres nœuds
+  nodes.forEach(function(n) {
+    g.append('rect')
+      .attr('x', n.x - NW / 2 + 2).attr('y', n.y - NH / 2 + 2)
+      .attr('width', NW).attr('height', NH)
+      .attr('rx', n.type === 'd' ? 4 : 8).attr('fill', 'rgba(0,0,0,0.07)');
+  });
+
+  // Nœuds
+  var ng = g.selectAll('.nd').data(nodes).enter().append('g').attr('class', 'nd')
+    .attr('transform', function(n) { return 'translate(' + n.x + ',' + n.y + ')'; })
+    .style('cursor', 'default');
+
+  ng.append('rect')
+    .attr('x', -NW / 2).attr('y', -NH / 2).attr('width', NW).attr('height', NH)
+    .attr('rx', function(d) { return d.type === 'd' ? 4 : 8; })
+    .attr('fill', function(d) { return NS[d.type] ? NS[d.type].fill : '#fff'; })
+    .attr('stroke', function(d) { return NS[d.type] ? NS[d.type].stroke : '#888'; })
+    .attr('stroke-width', 1.5);
+
+  // Accent bar
+  ng.append('rect')
+    .attr('x', -NW / 2).attr('y', -NH / 2).attr('width', NW).attr('height', 3)
+    .attr('rx', function(d) { return d.type === 'd' ? 4 : 8; })
+    .attr('fill', function(d) { return NS[d.type] ? NS[d.type].stroke : '#888'; })
+    .attr('opacity', 0.7);
+
+  // Badge risque sur résultats
+  var BDGE = { lr: 'LR', sr: 'SR', hr: 'HR', vhr: 'VHR', relapse: 'CT3' };
+  ng.filter(function(d) { return d.type !== 'd'; }).append('text')
+    .attr('x', NW / 2 - 14).attr('y', -NH / 2 + 11)
+    .attr('text-anchor', 'middle')
+    .attr('font-family', 'DM Mono,monospace').attr('font-size', '7').attr('font-weight', '500')
+    .attr('fill', function(d) { return NS[d.type] ? NS[d.type].stroke : '#888'; })
+    .text(function(d) { return BDGE[d.type] || ''; });
+
+  // Labels nœuds
+  ng.each(function(d) {
+    var el = d3.select(this);
+    var st = NS[d.type] || NS.d;
+    var lines = d.label.split('\n');
+    var by = lines.length === 1 ? 0 : -(lines.length - 1) * 6;
+    lines.forEach(function(line, i) {
+      el.append('text')
+        .attr('x', 0).attr('y', by + i * 13)
+        .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
+        .attr('font-family', i === 0 ? 'DM Sans,sans-serif' : 'DM Mono,monospace')
+        .attr('font-size', i === 0 ? '11' : '9')
+        .attr('font-weight', i === 0 ? '500' : '400')
+        .attr('fill', st.tc)
+        .text(line);
+    });
+  });
+
+  // Hover tooltip
+  var ttEl = document.getElementById('tooltip');
+
+  ng.on('mouseenter', function(ev, d) {
+    d3.select(this).select('rect').attr('stroke-width', 2.5);
+    showTT(ev, d);
+  }).on('mousemove', function(ev) {
+    moveTT(ev);
+  }).on('mouseleave', function() {
+    d3.select(this).select('rect').attr('stroke-width', 1.5);
+    ttEl.style.display = 'none';
+  });
+
+  function showTT(ev, d) {
+    var det = d.detail || {};
+    var html = '<div class="tt-title">' + (det.title || d.id) + '</div>'
+      + '<div class="tt-q">' + (det.q || d.label.replace('\n', ' — ')) + '</div>';
+
+    if (det.chemo) {
+      html += '<div class="tt-section"><div class="tt-section-lbl">Chimiothérapie</div>'
+        + '<div class="tt-val">' + det.chemo + '</div></div>';
+    }
+    if (det.rt) {
+      html += '<div class="tt-section"><div class="tt-section-lbl">Radiothérapie</div>'
+        + '<div class="tt-val">' + det.rt + '</div></div>';
+    }
+    if (det.timing) {
+      html += '<div class="tt-section"><div class="tt-section-lbl">Timing RT</div>'
+        + '<div class="tt-val">' + det.timing + '</div></div>';
+    }
+    if (det.volumes) {
+      html += '<div class="tt-section"><div class="tt-section-lbl">Volumes</div>'
+        + '<div class="tt-val">' + det.volumes + '</div></div>';
+    }
+    if (det.efs) {
+      html += '<div class="tt-outcome-line"><span class="' + (det.ec || 'efs-mid') + '">' + det.efs + '</span></div>';
+    }
+
+    ttEl.innerHTML = html;
+    ttEl.style.display = 'block';
+    moveTT(ev);
+  }
+
+  function moveTT(ev) {
+    var x = ev.clientX + 14, y = ev.clientY + 14;
+    if (x + 320 > window.innerWidth - 10) x = ev.clientX - 324;
+    if (y + ttEl.offsetHeight > window.innerHeight - 10) y = ev.clientY - ttEl.offsetHeight - 14;
+    ttEl.style.left = x + 'px';
+    ttEl.style.top = y + 'px';
+  }
+}
+
+// ═══ INIT ═══
+initTheme();
+renderStep('fusion');
+fixLayout();
+</script>
+</body>
+</html>
