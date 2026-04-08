@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wilms Tumor (Nephroblastoma) — RT &amp; Trials Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1e2530;
+      --border:   #2a3340;
+      --accent:   #58a6ff;
+      --accent2:  #3fb950;
+      --accent4:  #d2a8ff;
+      --accent5:  #ffa657;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --tag-bg:   #1c2a3a;
+    }
+    body.light {
+      --bg:       #f5f0e8;
+      --surface:  #ffffff;
+      --surface2: #ede8dc;
+      --border:   #c8bfaa;
+      --accent:   #1a5fa8;
+      --accent2:  #2d7a3a;
+      --accent4:  #6b3fa0;
+      --accent5:  #c45a10;
+      --text:     #1a1208;
+      --muted:    #5a4f3a;
+      --tag-bg:   #e6dfd0;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ──────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+    .header-title { font-family: 'DM Serif Display', serif; font-size: 22px; }
+    .header-sub { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .header-meta { margin-top: 8px; display: flex; gap: 20px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+    .header-meta span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .dot-blue { background: var(--accent); }
+    .dot-green { background: var(--accent2); }
+    .dot-orange { background: var(--accent5); }
+    .disclaimer { margin-top: 8px; font-size: 10.5px; color: #5a6370; font-style: italic; }
+
+    /* ── MAIN ────────────────────────────────────── */
+    main { padding: 32px 32px 80px; max-width: 1240px; margin: 0 auto; }
+
+    /* ── LANDING GRID ────────────────────────────── */
+    #landing { display: block; }
+    .landing-intro {
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      letter-spacing: 0.2px;
+    }
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .nav-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 18px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 10px 10px 0 0;
+    }
+    .nav-card.c1::before { background: var(--accent2); }
+    .nav-card.c2::before { background: var(--accent); }
+    .nav-card.c3::before { background: var(--accent4); }
+    .nav-card.c4::before { background: #f78166; }
+    .nav-card.c5::before { background: var(--accent5); }
+    .nav-card:hover {
+      border-color: #3a4a5a;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .nav-card-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .nav-card-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .nav-card-dose {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .nav-card-trials {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .nav-card-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .tag-green  { background: #0d2a1a; color: var(--accent2); border: 1px solid #1a4a2a; }
+    .tag-blue   { background: #1a2a40; color: var(--accent);  border: 1px solid #2a4060; }
+    .tag-purp   { background: #2a1a40; color: var(--accent4); border: 1px solid #4a2a60; }
+    .tag-orange { background: #2a1a0a; color: var(--accent5); border: 1px solid #4a2a0a; }
+    .tag-red    { background: #2a0d0d; color: #f85149;        border: 1px solid #4a1a1a; }
+
+    /* ── COMPARE TABLE ───────────────────────────── */
+    .compare-wrap { margin-bottom: 8px; }
+    .compare-wrap h2 {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .compare-wrap h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .ct { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .ct th { background: var(--surface2); color: var(--muted); font-weight: 500; font-size: 11px;
+              padding: 8px 12px; text-align: left; border: 1px solid var(--border); }
+    .ct td { padding: 9px 12px; border: 1px solid var(--border); vertical-align: top; }
+    .ct tr:nth-child(odd) td  { background: var(--surface); }
+    .ct tr:nth-child(even) td { background: var(--surface2); }
+    .ct tr:hover td { background: #1e2a38; }
+    .mono   { font-family: 'DM Mono', monospace; color: var(--accent);  font-size: 12px; }
+    .mono-g { font-family: 'DM Mono', monospace; color: var(--accent2); font-size: 12px; }
+    .mono-o { font-family: 'DM Mono', monospace; color: var(--accent5); font-size: 12px; }
+    .mono-r { font-family: 'DM Mono', monospace; color: #f85149;        font-size: 12px; }
+
+    /* ── PANELS ──────────────────────────────────── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 24px;
+      padding: 6px 12px 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      transition: color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .back-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .panel-header { margin-bottom: 24px; }
+    .panel-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 30px;
+      margin-bottom: 4px;
+    }
+    .panel-subtitle { font-size: 12px; color: var(--muted); }
+
+    /* ── SECTION LABEL ───────────────────────────── */
+    .slabel {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 28px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slabel::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── RT TABLE ────────────────────────────────── */
+    .rt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rt-table th { background: var(--surface2); color: var(--muted); font-weight: 500;
+                   font-size: 11px; padding: 8px 12px; text-align: left; border: 1px solid var(--border); }
+    .rt-table td { padding: 9px 12px; border: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+    .rt-table tr:nth-child(odd)  td { background: var(--surface); }
+    .rt-table tr:nth-child(even) td { background: var(--surface2); }
+    .rt-table tr:hover td { background: #1e2a38; }
+    .val  { font-family: 'DM Mono', monospace; color: var(--accent);  font-size: 12.5px; }
+    .val2 { font-family: 'DM Mono', monospace; color: var(--accent2); font-size: 12.5px; }
+    .val3 { font-family: 'DM Mono', monospace; color: var(--accent5); font-size: 12.5px; }
+    .val4 { font-family: 'DM Mono', monospace; color: #f85149;        font-size: 12.5px; }
+    .nt   { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+
+    /* ── TRIAL CARDS ─────────────────────────────── */
+    .trials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 14px;
+    }
+    .trial-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+    .trial-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .tc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .nct-id { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); text-decoration: none; }
+    .nct-id:hover { text-decoration: underline; }
+    .sbadge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .s-r  { background: #0d2a1a; color: var(--accent2); border: 1px solid #1a4a2a; }
+    .s-a  { background: #1a1a2e; color: var(--accent4); border: 1px solid #2a2a4e; }
+    .s-ny { background: #2a1a0a; color: var(--accent5); border: 1px solid #4a2a0a; }
+    .tc-title { font-size: 13px; font-weight: 500; line-height: 1.4; margin-bottom: 10px; }
+    .tc-meta  { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .ttag { font-size: 10.5px; background: var(--tag-bg); border: 1px solid var(--border);
+            border-radius: 4px; padding: 2px 7px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .th-rt   { font-size: 10.5px; border-radius: 4px; padding: 2px 7px; font-family: 'DM Mono', monospace;
+               background: #1a2030; color: #79b4ff; border: 1px solid #2a3a5a; }
+    .th-sg   { font-size: 10.5px; border-radius: 4px; padding: 2px 7px; font-family: 'DM Mono', monospace;
+               background: #1a2a1a; color: #7dcc7d; border: 1px solid #2a4a2a; }
+    .th-ct   { font-size: 10.5px; border-radius: 4px; padding: 2px 7px; font-family: 'DM Mono', monospace;
+               background: #2a2a1a; color: #ffcc55; border: 1px solid #4a4a1a; }
+    .th-ch   { font-size: 10.5px; border-radius: 4px; padding: 2px 7px; font-family: 'DM Mono', monospace;
+               background: #2a1a1a; color: #ff9980; border: 1px solid #4a2a2a; }
+    .tc-sponsor { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .tc-sponsor strong { color: #a0b0c0; }
+
+    /* ── SIGNAL BOX ──────────────────────────────── */
+    .signal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 16px 20px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #c9d8e8;
+    }
+    .signal-box p { margin-bottom: 8px; }
+    .signal-box p:last-child { margin-bottom: 0; }
+    .signal-box strong { color: var(--text); }
+    .signal-hl  { color: var(--accent2); font-weight: 600; }
+    .signal-hl2 { color: var(--accent);  font-weight: 600; }
+    .signal-hl3 { color: var(--accent5); font-weight: 600; }
+
+    /* ── REFERENCES ──────────────────────────────── */
+    .refs-list { display: flex; flex-direction: column; gap: 8px; }
+    .ref-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .ref-num {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      background: var(--tag-bg);
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .ref-authors { color: var(--muted); }
+    .ref-title   { color: var(--text); font-weight: 500; margin: 3px 0 1px; }
+    .ref-journal { color: #79b4ff; font-style: italic; }
+    .ref-doi a   { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); text-decoration: none; }
+    .ref-doi a:hover { text-decoration: underline; }
+    .ref-note    { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+    /* ── THEME TOGGLE ────────────────────────────── */
+    .btn-theme {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 15px;
+      cursor: pointer;
+      transition: all .18s;
+      display: flex; align-items: center; justify-content: center;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .btn-theme:hover { border-color: var(--accent); color: var(--accent); }
+
+    body.light header {
+      background: rgba(245,240,232,0.97);
+      backdrop-filter: blur(10px);
+    }
+    body.light .nav-card:hover { background: #f8f4ee; }
+    body.light .ct tr:hover td { background: #ede8dc; }
+    body.light .rt-table tr:hover td { background: #ede8dc; }
+    body.light .trial-card { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    body.light .back-btn:hover { background: #ede8dc; }
+    body.light .signal-box { color: #3a2e1a; }
+
+    @media (max-width: 700px) {
+      header, main { padding-left: 16px; padding-right: 16px; }
+      .trials-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span class="header-title">Wilms Tumor (Nephroblastoma)</span>
+    <span class="header-sub">RT Protocols &amp; Active Clinical Trials — St. Jude Observership 2026</span>
+  </div>
+  <div class="header-meta">
+    <span><span class="dot dot-green"></span>SIOP–RTSG UMBRELLA 2016</span>
+    <span><span class="dot dot-blue"></span>COG AREN 2025</span>
+    <span><span class="dot dot-orange"></span>Updated: April 2026</span>
+    <span>5 clinical scenarios · 8+ active trials</span>
+  </div>
+  <div class="disclaimer">For personal educational use only. Not a substitute for institutional protocols or clinical judgment.</div>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Switch to light mode">◑</button>
+</header>
+
+<main>
+
+<!-- ═══════════════ LANDING ═══════════════ -->
+<div id="landing">
+  <p class="landing-intro">Select a scenario to view RT protocols, active trials, clinical signal, and references.</p>
+
+  <div class="nav-grid">
+    <div class="nav-card c1" onclick="show('localized-fh')">
+      <div class="nav-card-num">01</div>
+      <div class="nav-card-name">Localized FH — Stage III</div>
+      <div class="nav-card-dose">10.8 Gy flank / 6 fx</div>
+      <div class="nav-card-trials">SJWT21 · AREN2231</div>
+      <span class="nav-card-tag tag-green">Proton pivot — SJWT21</span>
+    </div>
+    <div class="nav-card c2" onclick="show('metastatic')">
+      <div class="nav-card-num">02</div>
+      <div class="nav-card-name">Stage IV — Pulmonary Mets</div>
+      <div class="nav-card-dose">12 Gy WLI · 10.8 Gy flank</div>
+      <div class="nav-card-trials">COG AREN · SJWT21</div>
+      <span class="nav-card-tag tag-blue">WLI omission if CR to chemo</span>
+    </div>
+    <div class="nav-card c3" onclick="show('anaplastic')">
+      <div class="nav-card-num">03</div>
+      <div class="nav-card-name">Diffuse Anaplasia (DAWT)</div>
+      <div class="nav-card-dose">19.8 Gy stage III · WART</div>
+      <div class="nav-card-trials">AREN1921 · UH-3 regimen</div>
+      <span class="nav-card-tag tag-red">High-risk · ~50% OS relapse</span>
+    </div>
+    <div class="nav-card c4" onclick="show('bilateral')">
+      <div class="nav-card-num">04</div>
+      <div class="nav-card-name">Bilateral (Stage V)</div>
+      <div class="nav-card-dose">Nephron-sparing first</div>
+      <div class="nav-card-trials">AREN0534 · SJWT21</div>
+      <span class="nav-card-tag tag-purp">8y EFS 75% — AREN0534</span>
+    </div>
+    <div class="nav-card c5" onclick="show('relapsed')">
+      <div class="nav-card-num">05</div>
+      <div class="nav-card-name">Relapsed / Refractory</div>
+      <div class="nav-card-dose">Whole abdomen · boost</div>
+      <div class="nav-card-trials">AREN2231 · ICE/Cyclo/Topo</div>
+      <span class="nav-card-tag tag-orange">New COG risk stratification</span>
+    </div>
+  </div>
+
+  <div class="compare-wrap">
+    <h2>SIOP vs COG — Key differences in RT approach</h2>
+    <table class="ct">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>COG (upfront surgery)</th>
+          <th>SIOP–UMBRELLA (neoadjuvant chemo)</th>
+          <th>St. Jude innovation (SJWT21)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Stage III FH — flank RT</strong></td>
+          <td><span class="mono">10.8 Gy / 6 fx (1.8 Gy)</span></td>
+          <td><span class="mono">14.4 Gy / 8 fx (1.8 Gy)</span></td>
+          <td>Proton conformal — SJWT21 (NCT04968990)</td>
+        </tr>
+        <tr>
+          <td><strong>Whole abdomen RT</strong></td>
+          <td><span class="mono">10.5 Gy / 7 fx (1.5 Gy) for spill</span></td>
+          <td><span class="mono">15 Gy if diffuse peritoneal disease</span></td>
+          <td>IMRT kidney-sparing technique — SJWT21</td>
+        </tr>
+        <tr>
+          <td><strong>Whole lung irradiation</strong></td>
+          <td><span class="mono">12 Gy / 8 fx</span> — if no CR to chemo</td>
+          <td><span class="mono">12–15 Gy</span> — CR omission standard</td>
+          <td>Cardiac-sparing WL IMRT (thyroid + breast sparing)</td>
+        </tr>
+        <tr>
+          <td><strong>Stage III DA (DAWT)</strong></td>
+          <td><span class="mono">19.8 Gy / 11 fx</span></td>
+          <td><span class="mono">19.8 Gy</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Timing post-surgery</strong></td>
+          <td>Start within 14 days (goal day 10)</td>
+          <td>Within 28 days</td>
+          <td>Within 28 days (SJWT21); day 21 goal</td>
+        </tr>
+        <tr>
+          <td><strong>Overall OS (non-anaplastic)</strong></td>
+          <td><span class="mono-g">&gt;90% (stage I–III)</span></td>
+          <td><span class="mono-g">&gt;90% (stage I–III)</span></td>
+          <td>Late effects reduction — primary SJWT21 endpoint</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: LOCALIZED FH STAGE III ═══════════════ -->
+<div id="localized-fh" class="panel">
+  <div class="back-btn" onclick="back()">← Back</div>
+  <div class="panel-header">
+    <div class="panel-title">Localized Favorable Histology — Stage III</div>
+    <div class="panel-subtitle">Wilms tumor — RT protocols, active trials, clinical signal &amp; references</div>
+  </div>
+
+  <div class="slabel">RT Protocols — COG (upfront surgery)</div>
+  <table class="rt-table">
+    <thead><tr><th>Parameter</th><th>COG Standard</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Indication for RT</td><td>Stage III FH — residual disease, nodal involvement, local spill, margin+</td><td class="nt">Stage I–II FH: no RT. Stage III triggers flank or WART per specific criteria.</td></tr>
+      <tr><td>Flank RT dose</td><td><span class="val">10.8 Gy / 6 fx (1.8 Gy/fx)</span></td><td class="nt">COG AREN0532/AREN0533 — in-field tumor control 95–100% <sup>[1]</sup></td></tr>
+      <tr><td>Whole abdomen RT (WART)</td><td><span class="val">10.5 Gy / 7 fx (1.5 Gy/fx)</span></td><td class="nt">Indicated for preoperative rupture and peritoneal implants / positive cytology ascites <sup>[1]</sup></td></tr>
+      <tr><td>LOH 1p + 16q (stage III)</td><td>Regimen M: cyclophosphamide + etoposide added to DD4A</td><td class="nt">AREN0533 — significantly improved 4y EFS + OS vs NWTS-5 <sup>[2]</sup></td></tr>
+      <tr><td>1q gain (stage III FH)</td><td>Under study in AREN2231</td><td class="nt">Present in ~30% FHWT — predicts inferior EFS/OS across all stages <sup>[3]</sup>. Will drive new risk stratification.</td></tr>
+      <tr><td>Timing</td><td>RT start ≤ 14 days post-surgery (goal ≤ 10 days)</td><td class="nt">NWTS data: interval &gt;10d correlated with flank/abdominal recurrence in UH patients <sup>[1]</sup></td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">RT Protocols — SIOP–UMBRELLA 2016 (neoadjuvant chemo)</div>
+  <table class="rt-table">
+    <thead><tr><th>Parameter</th><th>SIOP Standard</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Preoperative chemotherapy</td><td>4 weeks AV (actinomycin-D + vincristine) — standard risk; 6 weeks for large tumors</td><td class="nt">Reduces tumor rupture risk vs upfront surgery — SIOP philosophy <sup>[4]</sup></td></tr>
+      <tr><td>Flank RT dose — intermediate risk stage III</td><td><span class="val">14.4 Gy / 8 fx</span></td><td class="nt">IR = regressive / epithelial / stromal / mixed; focal anaplasia <sup>[4]</sup></td></tr>
+      <tr><td>High-risk blastemal — stage III</td><td><span class="val">25.2 Gy / 14 fx</span></td><td class="nt">Blastemal type = high risk in SIOP classification <sup>[4]</sup></td></tr>
+      <tr><td>Blastemal volume stratification</td><td>Absolute blastemal volume 20–50 mL proposed as new biomarker</td><td class="nt">UMBRELLA innovation — replaces crude % residual blastema with volumetric threshold <sup>[5]</sup></td></tr>
+      <tr><td>Low-risk (complete necrosis)</td><td>No RT — stage I–II; surgery + AV only</td><td class="nt">CPDN = cystic partially differentiated nephroblastoma — also low risk, surgery only <sup>[4]</sup></td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Volumes &amp; Technique (both COG and SIOP)</div>
+  <table class="rt-table">
+    <thead><tr><th>Volume</th><th>Definition</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>GTV_P</td><td>Unresected gross tumor at primary site (if any)</td><td class="nt">SJWT21 definition — used for proton planning <sup>[6]</sup></td></tr>
+      <tr><td>CTV_P (flank)</td><td>Pre-operative tumor bed: kidney fossa + involved structures, 5 mm expansion over GTV_P</td><td class="nt">Vertebral bodies included symmetrically to avoid scoliosis risk</td></tr>
+      <tr><td>CTV_LN</td><td>Para-aortic, paracaval, renal hilar LN + 5 mm over GTV_LN</td><td class="nt">Ipsilateral LN sampling mandatory at surgery — failure rate 9–17% in practice <sup>[2]</sup></td></tr>
+      <tr><td>Proton technique (SJWT21)</td><td>Conformal reduced retroperitoneal target; bowel gas monitoring daily</td><td class="nt">4D CT acquisition; gantry angles optimized to minimize bowel gas range errors <sup>[6]</sup></td></tr>
+      <tr><td>Modality</td><td>Photons (standard) — protons under investigation (SJWT21)</td><td class="nt">SJWT21: primary endpoint = flank growth symmetry vs contralateral side; reduce skeletal + end-organ late effects</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Active Clinical Trials</div>
+  <div class="trials-grid">
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT04968990" target="_blank">NCT04968990 — SJWT21</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Proton Beam Irradiation for Stage III–V Favorable Histology Wilms Tumor ⭐</div>
+      <div class="tc-meta"><span class="ttag">Phase II</span><span class="ttag">Multi-center</span><span class="th-rt">Proton RT</span></div>
+      <div class="tc-sponsor"><strong>St. Jude Children's Research Hospital</strong> — PI: Matthew Krasin, Andrew Davidoff. Primary endpoint: normal flank growth vs contralateral side. Conformal reduced retroperitoneal target.</div>
+    </div>
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT05521204" target="_blank">NCT05521204 — AREN2231</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Risk-Adapted Treatment for Favorable Histology Wilms Tumor — New COG FHWT Study</div>
+      <div class="tc-meta"><span class="ttag">Phase III</span><span class="ttag">COG</span><span class="th-ct">Risk-stratified</span></div>
+      <div class="tc-sponsor"><strong>COG — North America</strong>. Integrates 1q gain, 11p15 LOH, blastemal-predominant histology into new risk model (Nat Rev Urol 2025). Goal: optimize survival + minimize late effects.</div>
+    </div>
+  </div>
+
+  <div class="slabel">Clinical Signal 2025–2026</div>
+  <div class="signal-box">
+    <p>The <span class="signal-hl">SJWT21 trial</span> at St. Jude is the most significant RT innovation in Wilms tumor in years: proton beam with a conformal reduced retroperitoneal target for stage III–V, aiming to eliminate scoliosis, organ growth asymmetry and secondary malignancies. The first 13 enrolled patients have been described dosimetrically, with bowel gas now the key technical challenge for proton planning in the abdomen.</p>
+    <p>The new COG <span class="signal-hl2">AREN2231</span> study represents a fundamental shift in risk stratification: 1q gain (~30% of FHWT) now enters clinical decision-making alongside classic LOH 1p/16q and blastemal predominance. This may reclassify a significant portion of currently "standard risk" patients into higher-risk treatment arms. Liquid biopsy (peripheral blood) will be explored as a 1q gain detection method.</p>
+  </div>
+
+  <div class="slabel">References</div>
+  <div class="refs-list">
+    <div class="ref-item">
+      <span class="ref-num">1</span>
+      <span class="ref-authors">McAleer MF, et al.</span>
+      <div class="ref-title">Harmonica consensus, controversies, and future directions in radiotherapy for pediatric Wilms tumors</div>
+      <div class="ref-journal">Pediatric Blood &amp; Cancer, 2023; 70:e30090</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/pbc.30090" target="_blank">https://doi.org/10.1002/pbc.30090</a></div>
+      <div class="ref-note">Comprehensive RT consensus — COG vs SIOP doses, in-field TC 95–100%, timing data from NWTS</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">2</span>
+      <span class="ref-authors">Daw NC, et al. (COG AREN0532/AREN0533)</span>
+      <div class="ref-title">Advances in the Clinical Management of High-Risk Wilms Tumors</div>
+      <div class="ref-journal">Pediatric Blood &amp; Cancer, 2024</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/pbc.31059" target="_blank">https://doi.org/10.1002/pbc.31059</a></div>
+      <div class="ref-note">LOH 1p+16q data; Regimen M outcomes; LN sampling failure rates</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">3</span>
+      <span class="ref-authors">Mullen EA, et al.</span>
+      <div class="ref-title">Updated favourable-histology Wilms tumour risk stratification: rationale for future COG clinical trials</div>
+      <div class="ref-journal">Nature Reviews Urology, 2025; 22:775–788</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1038/s41585-025-01055-1" target="_blank">https://doi.org/10.1038/s41585-025-01055-1</a></div>
+      <div class="ref-note">1q gain in ~30% FHWT; AREN2231 rationale; liquid biopsy integration</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">4</span>
+      <span class="ref-authors">van den Heuvel-Eibrink MM, et al. (SIOP–RTSG)</span>
+      <div class="ref-title">Rationale for the treatment of Wilms tumour in the UMBRELLA SIOP–RTSG 2016 protocol</div>
+      <div class="ref-journal">Nature Reviews Urology, 2017; 14:743–752</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1038/nrurol.2017.163" target="_blank">https://doi.org/10.1038/nrurol.2017.163</a></div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">5</span>
+      <span class="ref-authors">Vujanić GM, et al. (SIOP–RTSG pathology panel)</span>
+      <div class="ref-title">The UMBRELLA SIOP–RTSG 2016 Wilms tumour pathology and molecular biology protocol</div>
+      <div class="ref-journal">Nature Reviews Urology, 2018; 15:693–701</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1038/s41585-018-0100-3" target="_blank">https://doi.org/10.1038/s41585-018-0100-3</a></div>
+      <div class="ref-note">Blastemal volume 20–50 mL threshold; UMBRELLA molecular markers</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">6</span>
+      <span class="ref-authors">Brodin NP, et al. (St. Jude, SJWT21)</span>
+      <div class="ref-title">Evaluating the Impact of Bowel Gas Variations for Wilms Tumor in Pediatric Proton Therapy</div>
+      <div class="ref-journal">Cancers, 2024; 16(3):642</div>
+      <div class="ref-doi"><a href="https://doi.org/10.3390/cancers16030642" target="_blank">https://doi.org/10.3390/cancers16030642</a></div>
+      <div class="ref-note">First 13 SJWT21 patients; GTV/CTV definitions; bowel gas range errors; gantry angle selection</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: STAGE IV PULMONARY METS ═══════════════ -->
+<div id="metastatic" class="panel">
+  <div class="back-btn" onclick="back()">← Back</div>
+  <div class="panel-header">
+    <div class="panel-title">Stage IV — Pulmonary Metastases</div>
+    <div class="panel-subtitle">Wilms tumor — RT protocols, active trials, clinical signal &amp; references</div>
+  </div>
+
+  <div class="slabel">RT Protocols</div>
+  <table class="rt-table">
+    <thead><tr><th>Parameter</th><th>Standard</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>WLI indication — COG</td><td>Whole lung irradiation if no complete radiographic response after induction chemotherapy</td><td class="nt">CXR-negative / CT-positive nodules: no proven survival benefit from WLI in NWTS-4/5 <sup>[1]</sup> — tissue diagnosis often required</td></tr>
+      <tr><td>WLI dose — COG</td><td><span class="val">12 Gy / 8 fx (1.5 Gy/fx)</span></td><td class="nt">Standard AP technique or IMRT. Cardiac-sparing WL IMRT reduces mean heart dose: 15.8 Gy (sequential) → 12.1 Gy (concurrent) <sup>[2]</sup></td></tr>
+      <tr><td>WLI dose — SIOP</td><td><span class="val">12–15 Gy</span> — only if no CR to chemotherapy</td><td class="nt">SIOP: CR to chemo → WLI omitted. More liberal omission than historical COG practice <sup>[3]</sup></td></tr>
+      <tr><td>Cardiac-sparing WL IMRT</td><td>Modified IMRT (M-WL IMRT) with PTV reduction around breast + thyroid</td><td class="nt">Reduces thyroid + breast dose without compromising cardiac protection vs standard WL IMRT <sup>[2]</sup>. Endorsed for use in current COG trials.</td></tr>
+      <tr><td>Concurrent vs sequential</td><td>Concurrent flank + WLI preferred in upcoming COG protocols</td><td class="nt">Sequential significantly increases mean heart dose (15.8 vs 12.1 Gy) and lung dose (14.1 vs 12.2 Gy) <sup>[2]</sup>. Flank RT delayed to week 6 to allow simultaneous delivery.</td></tr>
+      <tr><td>Abdominal RT (flank/WART)</td><td>Same as local stage — flank 10.8 Gy or WART 10.5 Gy, per abdominal stage III criteria</td><td class="nt">For stage IV with local stage III: RT to both sites concurrent (field matching technique on IROC atlas)</td></tr>
+      <tr><td>Liver metastases</td><td>Hepatic resection preferred; RT if unresectable or incomplete resection</td><td class="nt">No standard dose — institutional variation; protons under study in SJWT21</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Active Clinical Trials</div>
+  <div class="trials-grid">
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT04968990" target="_blank">NCT04968990 — SJWT21</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Proton RT for Stage III–V WT — includes Stage IV (local stage I–II with lung mets eligible for WLI objective)</div>
+      <div class="tc-meta"><span class="ttag">Phase II</span><span class="th-rt">Proton RT</span><span class="th-rt">WLI</span></div>
+      <div class="tc-sponsor"><strong>St. Jude</strong> — Stage IV patients with local abdominal stage I–II remain eligible for whole lung irradiation component of SJWT21.</div>
+    </div>
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT05521204" target="_blank">NCT05521204 — AREN2231</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Risk-Adapted FHWT — Stage IV enrolled; WLI omission if CR studied prospectively</div>
+      <div class="tc-meta"><span class="ttag">Phase III</span><span class="ttag">COG</span><span class="th-ct">Prospective WLI de-escalation</span></div>
+      <div class="tc-sponsor"><strong>COG North America</strong>. Integration of 1q gain in stage IV risk stratification. CR assessment standardized prospectively.</div>
+    </div>
+  </div>
+
+  <div class="slabel">Clinical Signal 2025–2026</div>
+  <div class="signal-box">
+    <p>The <span class="signal-hl">WLI omission strategy</span> in complete responders is increasingly adopted on both sides of the Atlantic, but the prospective evidence base is thin. AREN2231 will formally study this in a standardized way for the first time in COG. The key unresolved issue is how to define CR — CXR alone vs CT, and the threshold for treating CT-only nodules.</p>
+    <p>The major technical advance is <span class="signal-hl2">cardiac-sparing WL IMRT</span> combined with dosimetrically matched abdominal fields. Sequential planning significantly raises cardiac and pulmonary doses — in upcoming COG protocols, flank RT will be deliberately delayed to week 6 to allow concurrent delivery and avoid high-dose field overlap at the field junction. IROC pre-review of IMRT plans is now mandatory for COG WT protocols.</p>
+  </div>
+
+  <div class="slabel">References</div>
+  <div class="refs-list">
+    <div class="ref-item">
+      <span class="ref-num">1</span>
+      <span class="ref-authors">Grundy PE, et al. (COG/NWTS-4/5)</span>
+      <div class="ref-title">Clinical significance of pulmonary nodules detected by CT and not CXR in favorable histology Wilms tumor — NWTS-4 and -5</div>
+      <div class="ref-journal">Pediatric Blood &amp; Cancer, 2012; 59:631–635</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/pbc.24123" target="_blank">https://doi.org/10.1002/pbc.24123</a></div>
+      <div class="ref-note">CT-only nodules: no survival benefit from WLI; higher treatment-related deaths offset lung relapse reduction</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">2</span>
+      <span class="ref-authors">Hall MD, et al.</span>
+      <div class="ref-title">Evaluation of radiation dose to cardiac and pulmonary tissue among patients with stage IV Wilms tumor and pulmonary metastases</div>
+      <div class="ref-journal">Int J Radiat Oncol Biol Phys, 2024; 119(2):575–587</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1016/j.ijrobp.2023.06.002" target="_blank">https://doi.org/10.1016/j.ijrobp.2023.06.002</a></div>
+      <div class="ref-note">Sequential vs concurrent heart dose: 15.8 vs 12.1 Gy (p&lt;0.0001); lung dose: 14.1 vs 12.2 Gy (p&lt;0.0002); n=16</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">3</span>
+      <span class="ref-authors">Verschuur A, et al. (SIOP 93-01/2001)</span>
+      <div class="ref-title">Treatment of pulmonary metastases in children with stage IV nephroblastoma with risk-based use of pulmonary radiotherapy</div>
+      <div class="ref-journal">Journal of Clinical Oncology, 2012; 30:3533–3539</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1200/JCO.2011.35.8747" target="_blank">https://doi.org/10.1200/JCO.2011.35.8747</a></div>
+      <div class="ref-note">SIOP — CR after chemo → WLI omitted; outcomes non-inferior in CR patients</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">4</span>
+      <span class="ref-authors">McAleer MF, et al.</span>
+      <div class="ref-title">Harmonica consensus, controversies, and future directions in radiotherapy for pediatric Wilms tumors</div>
+      <div class="ref-journal">Pediatric Blood &amp; Cancer, 2023; 70:e30090</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/pbc.30090" target="_blank">https://doi.org/10.1002/pbc.30090</a></div>
+      <div class="ref-note">Cardiac-sparing WL IMRT technique; field matching; IROC mandatory pre-review; week-6 RT delay rationale</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: DIFFUSE ANAPLASIA (DAWT) ═══════════════ -->
+<div id="anaplastic" class="panel">
+  <div class="back-btn" onclick="back()">← Back</div>
+  <div class="panel-header">
+    <div class="panel-title">Diffuse Anaplastic Wilms Tumor (DAWT)</div>
+    <div class="panel-subtitle">Wilms tumor — RT protocols, active trials, clinical signal &amp; references</div>
+  </div>
+
+  <div class="slabel">RT Protocols</div>
+  <table class="rt-table">
+    <thead><tr><th>Parameter</th><th>COG Standard (AREN0321)</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Stage I DA (focal)</td><td>Nephrectomy → vincristine + actinomycin-D + doxorubicin + <span class="val4">flank RT 10.8 Gy / 6 fx</span></td><td class="nt">Even stage I diffuse anaplasia receives RT in COG — unlike FH <sup>[1]</sup></td></tr>
+      <tr><td>Stage II–III DA (focal)</td><td><span class="val4">Flank RT 10.8 Gy / 6 fx</span> + cyclophosphamide / etoposide (UH-1 or UH-2)</td><td class="nt">In-field TC 95% for stage I–II DA, 95% for stage III DA in AREN0321 <sup>[1]</sup></td></tr>
+      <tr><td>Stage III DA (diffuse)</td><td><span class="val4">Flank RT 19.8 Gy / 11 fx (1.8 Gy/fx)</span></td><td class="nt">Dose escalation vs FH — diffuse anaplasia is most radioresistant subtype</td></tr>
+      <tr><td>Stage IV DA</td><td>19.8 Gy flank + whole lung 12 Gy + intensive UH-3 chemotherapy</td><td class="nt">UH-3: vincristine, doxorubicin, cyclophosphamide, carboplatin, etoposide, irinotecan <sup>[2]</sup></td></tr>
+      <tr><td>Stage I DA (diffuse)</td><td>Nephrectomy → initial irinotecan + vincristine → UH chemotherapy + RT</td><td class="nt">Most aggressive upfront approach — OS still ~50–60% at relapse <sup>[2]</sup></td></tr>
+      <tr><td>WART indication</td><td>Same as FH — peritoneal spill, diffuse implants</td><td class="nt">19.5 Gy WART kidney-sparing technique via IMRT feasible for diffuse abdominal spill (McAleer, Pract Radiat Oncol 2018) <sup>[3]</sup></td></tr>
+      <tr><td>Focal anaplasia</td><td>Treated as FH equivalent — flank 10.8 Gy if stage III</td><td class="nt">Focal anaplasia: anaplastic cells confined to primary tumor without invasion. Better OS than diffuse anaplasia.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Active Clinical Trials</div>
+  <div class="trials-grid">
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT04322318" target="_blank">NCT04322318 — AREN1921</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Combination Chemotherapy (UH-3) for Newly Diagnosed Diffuse Anaplastic WT and Relapsed FHWT</div>
+      <div class="tc-meta"><span class="ttag">Phase II</span><span class="ttag">COG</span><span class="th-ch">UH-3 regimen</span></div>
+      <div class="tc-sponsor"><strong>COG North America</strong>. UH-3 (vincristine, doxorubicin, cyclophosphamide, carboplatin, etoposide, irinotecan) vs ICE/Cyclo/Topo for high-risk relapsed FHWT.</div>
+    </div>
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT04968990" target="_blank">NCT04968990 — SJWT21</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Proton RT — Stage III–V Favorable Histology only (DAWT excluded from SJWT21)</div>
+      <div class="tc-meta"><span class="ttag">Phase II</span><span class="th-rt">Proton RT</span></div>
+      <div class="tc-sponsor">DAWT is excluded from SJWT21. Unfavorable histology patients do not meet SJWT21 eligibility criteria.</div>
+    </div>
+  </div>
+
+  <div class="slabel">Clinical Signal 2025–2026</div>
+  <div class="signal-box">
+    <p>Diffuse anaplasia remains the most challenging subtype, with OS after relapse under 50% despite intensive therapy. The <span class="signal-hl">AREN1921 trial</span> studying UH-3 (6-drug regimen) is the current pivot trial — it aims to improve outcomes for newly diagnosed DAWT and high/very-high risk relapsed FHWT by intensifying chemotherapy beyond the previous UH-1/UH-2 regimens.</p>
+    <p>RT dose escalation (19.8 Gy stage III diffuse vs 10.8 Gy FH) is established but local control rates for DAWT stage III remain ~95% — systemic failure is the dominant pattern. The addition of irinotecan to the regimen for stage IV DAWT reflects the <span class="signal-hl3">emerging role of topoisomerase inhibitors</span> in Wilms tumor high-risk biology.</p>
+  </div>
+
+  <div class="slabel">References</div>
+  <div class="refs-list">
+    <div class="ref-item">
+      <span class="ref-num">1</span>
+      <span class="ref-authors">McAleer MF, et al.</span>
+      <div class="ref-title">Harmonica consensus, controversies, and future directions in radiotherapy for pediatric Wilms tumors</div>
+      <div class="ref-journal">Pediatric Blood &amp; Cancer, 2023; 70:e30090</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/pbc.30090" target="_blank">https://doi.org/10.1002/pbc.30090</a></div>
+      <div class="ref-note">Doses per histology/stage; AREN0321 in-field TC data for DA WT stages I–III</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">2</span>
+      <span class="ref-authors">Daw NC, et al.</span>
+      <div class="ref-title">Advances in the Clinical Management of High-Risk Wilms Tumors</div>
+      <div class="ref-journal">Pediatric Blood &amp; Cancer, 2024</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/pbc.31059" target="_blank">https://doi.org/10.1002/pbc.31059</a></div>
+      <div class="ref-note">UH-1/UH-2/UH-3 regimen evolution; DAWT survival data; AREN1921 rationale</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">3</span>
+      <span class="ref-authors">McAleer MF, et al.</span>
+      <div class="ref-title">Cardiac-Sparing Whole Lung IMRT in Children With Wilms Tumor — Technique and Abdominal Field Matching</div>
+      <div class="ref-journal">Practical Radiation Oncology, 2018; 8:389–398</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1016/j.prro.2018.07.009" target="_blank">https://doi.org/10.1016/j.prro.2018.07.009</a></div>
+      <div class="ref-note">Kidney-sparing WART IMRT 19.5 Gy technique; field matching with WLI</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: BILATERAL (STAGE V) ═══════════════ -->
+<div id="bilateral" class="panel">
+  <div class="back-btn" onclick="back()">← Back</div>
+  <div class="panel-header">
+    <div class="panel-title">Bilateral Wilms Tumor (Stage V)</div>
+    <div class="panel-subtitle">Wilms tumor — RT protocols, active trials, clinical signal &amp; references</div>
+  </div>
+
+  <div class="slabel">RT &amp; Surgical Approach</div>
+  <table class="rt-table">
+    <thead><tr><th>Parameter</th><th>Standard</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Primary strategy</td><td>Nephron-sparing surgery (NSS) after neoadjuvant chemotherapy</td><td class="nt">Goal: bilateral partial nephrectomy. Total nephrectomy accepted if NSS not feasible after 6 weeks chemo (partial response) or 12 weeks (any response) <sup>[1]</sup></td></tr>
+      <tr><td>Neoadjuvant chemotherapy</td><td>Minimum 6 weeks, maximum 12 weeks AV or AVD — SIOP approach adopted by COG AREN0534</td><td class="nt">AREN0534: all patients treated with neoadjuvant chemotherapy as per SIOP WT 2001 histology criteria <sup>[2]</sup></td></tr>
+      <tr><td>Post-chemotherapy histology</td><td>SIOP criteria (low / intermediate / high risk) used for adjuvant decisions — even in COG AREN0534</td><td class="nt">Reflects convergence between COG and SIOP for bilateral disease <sup>[2]</sup></td></tr>
+      <tr><td>RT indication</td><td>Post-operative per histology + local stage of each kidney independently</td><td class="nt">Each side staged separately. RT applied per side according to residual disease, margin status, histology.</td></tr>
+      <tr><td>RT dose</td><td>Same doses as unilateral — 10.8–14.4 Gy per side per risk group</td><td class="nt">Contralateral kidney dose constraint critical — SJWT21 proton WART technique explores kidney sparing</td></tr>
+      <tr><td>Outcomes — AREN0534</td><td><span class="val2">8y EFS 75%</span> · <span class="val2">8y OS ~85%</span></td><td class="nt">n=222 (190 BWT + 32 unilateral with BWT predisposition) — median follow-up 8.6y <sup>[2]</sup>. Highest relapse risk in first 2 years post-diagnosis.</td></tr>
+      <tr><td>Predisposing syndromes</td><td>BWS, Denys-Drash, WAGR — nephrogenic rests &gt;90% bilateral cases</td><td class="nt">Perilobar vs intralobar rests — different syndrome associations and RT considerations <sup>[3]</sup></td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Active Clinical Trials</div>
+  <div class="trials-grid">
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT04968990" target="_blank">NCT04968990 — SJWT21</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Proton RT for Stage V Bilateral WT — partial kidney proton beam, kidney-sparing WART</div>
+      <div class="tc-meta"><span class="ttag">Phase II</span><span class="th-rt">Proton RT</span><span class="ttag">Stage V</span></div>
+      <div class="tc-sponsor"><strong>St. Jude</strong>. Secondary objective: proton partial kidney RT for bilateral WT with involved surgical margins — non-inferior to traditional whole kidney fields. Contralateral kidney sparing via proton or IMRT WART.</div>
+    </div>
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT01231906" target="_blank">NCT01231906 — AREN0534</a><span class="sbadge s-a">LONG-TERM FOLLOW-UP</span></div>
+      <div class="tc-title">Bilateral Wilms Tumor / Bilaterally Predisposed Unilateral WT — AREN0534 (completed, follow-up ongoing)</div>
+      <div class="tc-meta"><span class="ttag">Phase III</span><span class="ttag">COG</span></div>
+      <div class="tc-sponsor">Completed enrollment 2009–2015. Long-term follow-up report: Murphy AJ et al., Int J Cancer 2024. 8y EFS 75%, 8-year OS ~85%.</div>
+    </div>
+  </div>
+
+  <div class="slabel">Clinical Signal 2025–2026</div>
+  <div class="signal-box">
+    <p>Bilateral Wilms tumor remains the most complex surgical and oncological challenge, with 8-year EFS of 75% from AREN0534 — lagging behind unilateral disease. The long-term follow-up published in 2024 shows that <span class="signal-hl">relapse risk is front-loaded</span>: the hazard is highest immediately after diagnosis and declines over 2 years, which has implications for surveillance intensity scheduling.</p>
+    <p>The <span class="signal-hl2">proton SJWT21 trial</span> offers a particularly important innovation for bilateral disease: it tests whether partial kidney proton beam RT to involved surgical margins can achieve equivalent local control to whole kidney fields — potentially preserving functional renal parenchyma and reducing the risk of chronic renal insufficiency in this vulnerable population where bilateral nephrectomy is already a risk.</p>
+  </div>
+
+  <div class="slabel">References</div>
+  <div class="refs-list">
+    <div class="ref-item">
+      <span class="ref-num">1</span>
+      <span class="ref-authors">Balis F, et al. (NCCN panel)</span>
+      <div class="ref-title">Wilms Tumor, Version 2.2025, NCCN Clinical Practice Guidelines in Oncology</div>
+      <div class="ref-journal">Journal of the National Comprehensive Cancer Network, 2025; 23(8)</div>
+      <div class="ref-doi"><a href="https://doi.org/10.6004/jnccn.2025.0044" target="_blank">https://doi.org/10.6004/jnccn.2025.0044</a></div>
+      <div class="ref-note">NSS criteria; chemotherapy timing; bilateral algorithm</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">2</span>
+      <span class="ref-authors">Murphy AJ, Brzezinski J, Renfro LA, et al. (COG AREN0534)</span>
+      <div class="ref-title">Long-term outcomes and patterns of relapse in patients with bilateral Wilms tumor — COG AREN0534</div>
+      <div class="ref-journal">International Journal of Cancer, 2024; 155(10):1824–1831</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/ijc.35080" target="_blank">https://doi.org/10.1002/ijc.35080</a></div>
+      <div class="ref-note">n=222; 8y EFS 75% (95%CI 69–83%); front-loaded hazard; FHWT vs anaplasia relapse timing</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">3</span>
+      <span class="ref-authors">Vujanić GM, et al.</span>
+      <div class="ref-title">UMBRELLA SIOP–RTSG 2016 pathology and molecular biology protocol</div>
+      <div class="ref-journal">Nature Reviews Urology, 2018; 15:693–701</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1038/s41585-018-0100-3" target="_blank">https://doi.org/10.1038/s41585-018-0100-3</a></div>
+      <div class="ref-note">Nephrogenic rests: perilobar/intralobar; &gt;90% bilateral cases; BWS/WAGR/Denys-Drash</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: RELAPSED / REFRACTORY ═══════════════ -->
+<div id="relapsed" class="panel">
+  <div class="back-btn" onclick="back()">← Back</div>
+  <div class="panel-header">
+    <div class="panel-title">Relapsed / Refractory Wilms Tumor</div>
+    <div class="panel-subtitle">Wilms tumor — RT protocols, active trials, clinical signal &amp; references</div>
+  </div>
+
+  <div class="slabel">RT Protocols</div>
+  <table class="rt-table">
+    <thead><tr><th>Parameter</th><th>Standard</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Abdominal re-RT</td><td>Possible if no prior abdominal RT — whole abdomen or local field per relapse pattern</td><td class="nt">Prior flank RT constrains retreatment — cumulative spine, renal, bowel doses limit boost potential</td></tr>
+      <tr><td>Pulmonary relapse</td><td>Whole lung 12 Gy if WLI not previously given; metastasectomy + local RT if prior WLI</td><td class="nt">Retreatment WLI: very limited data; institutional case series only</td></tr>
+      <tr><td>Standard risk relapse (FH, 2-drug initial)</td><td>UH-3 regimen: VCR + DOX + CPM + CARBO + ETO + IRINOTECAN</td><td class="nt">AREN1921 — being studied prospectively. Historical SR relapse OS ~70–80% with Regimen I / II <sup>[1]</sup></td></tr>
+      <tr><td>High-risk relapse (FH, 3+ drugs initially)</td><td>ICE/Cyclo/Topo: ifosfamide + carboplatin + etoposide / cyclophosphamide + topotecan</td><td class="nt">HR relapse OS ~50%; VHWT OS &lt;30% historically <sup>[1]</sup></td></tr>
+      <tr><td>Very-high-risk (2nd relapse or after intensive therapy)</td><td>Experimental — no established standard; clinical trial enrolment mandatory</td><td class="nt">CBL0137 (PEPN2111) and Tegavivint under study for solid tumors including WT</td></tr>
+      <tr><td>New risk stratification (AREN2231)</td><td>1q gain at relapse now being prospectively studied as risk marker</td><td class="nt">May further sub-stratify within standard/high/very-high risk relapsed FHWT <sup>[2]</sup></td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Active Clinical Trials</div>
+  <div class="trials-grid">
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT04322318" target="_blank">NCT04322318 — AREN1921</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">UH-3 (6-drug) for Newly Diagnosed DAWT &amp; Relapsed FHWT — Standard Risk, High Risk, Very High Risk Arms</div>
+      <div class="tc-meta"><span class="ttag">Phase II</span><span class="ttag">COG</span><span class="th-ch">UH-3 / ICE/Cyclo/Topo</span></div>
+      <div class="tc-sponsor"><strong>COG North America</strong>. Three relapse risk strata: SR (2-drug initial) → UH-3; HR/VHWT (3+ drug initial) → ICE/Cyclo/Topo. Primary endpoint: 2y EFS per arm.</div>
+    </div>
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT05521204" target="_blank">NCT05521204 — AREN2231</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Risk-Adapted FHWT — Relapse risk stratification incorporating 1q gain as biomarker</div>
+      <div class="tc-meta"><span class="ttag">Phase III</span><span class="ttag">COG</span><span class="th-ct">Biomarker-driven</span></div>
+      <div class="tc-sponsor"><strong>COG</strong>. 1q gain will prospectively stratify relapse risk — liquid biopsy (peripheral blood) being explored for detection.</div>
+    </div>
+    <div class="trial-card">
+      <div class="tc-top"><a class="nct-id" href="https://clinicaltrials.gov/study/NCT04734262" target="_blank">NCT04734262 — PEPN2111</a><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">CBL0137 — Phase I/II for Relapsed/Refractory Solid Tumors including Wilms Tumor</div>
+      <div class="tc-meta"><span class="ttag">Phase I/II</span><span class="ttag">St. Jude</span><span class="th-ch">Novel agent</span></div>
+      <div class="tc-sponsor"><strong>St. Jude / COG</strong>. CBL0137 (curaxin — FACT complex inhibitor). Eligible: ≥12 months old, relapsed/refractory solid tumor or lymphoma.</div>
+    </div>
+    <div class="trial-card">
+      <div class="tc-top"><span class="nct-id">Tegavivint</span><span class="sbadge s-r">RECRUITING</span></div>
+      <div class="tc-title">Tegavivint (TED347) for Relapsed/Refractory Solid Tumors — Wilms Tumor eligible</div>
+      <div class="tc-meta"><span class="ttag">Phase I/II</span><span class="ttag">Multi-center</span><span class="th-ch">WNT/β-catenin inhibitor</span></div>
+      <div class="tc-sponsor">Targets β-catenin (TBL1X/R1). Rationale: β-catenin mutations present in subset of WT. Active at UCSF, St. Jude.</div>
+    </div>
+  </div>
+
+  <div class="slabel">Clinical Signal 2025–2026</div>
+  <div class="signal-box">
+    <p>The relapse landscape is being restructured by the <span class="signal-hl">AREN1921 trial</span>, which introduces a systematic 3-tier risk stratification for relapsed FHWT and standardizes salvage regimens. The critical unmet need is in <strong>very-high-risk relapse</strong> (2nd relapse or post-intensive therapy) where OS historically falls below 30%.</p>
+    <p>The most promising biology-driven angle is <span class="signal-hl3">WNT pathway targeting</span> via tegavivint — a subset of Wilms tumors carry activating β-catenin mutations and may respond selectively. At the same time, <span class="signal-hl2">1q gain as a liquid biopsy marker</span> could enable early detection of relapse and real-time risk reclassification without requiring a new biopsy — a genuine paradigm shift if validated in AREN2231.</p>
+  </div>
+
+  <div class="slabel">References</div>
+  <div class="refs-list">
+    <div class="ref-item">
+      <span class="ref-num">1</span>
+      <span class="ref-authors">Daw NC, et al.</span>
+      <div class="ref-title">Advances in the Clinical Management of High-Risk Wilms Tumors</div>
+      <div class="ref-journal">Pediatric Blood &amp; Cancer, 2024</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1002/pbc.31059" target="_blank">https://doi.org/10.1002/pbc.31059</a></div>
+      <div class="ref-note">Relapse OS by risk stratum; regimen I/II/UH-1/UH-2 historical outcomes; AREN1921 design rationale</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">2</span>
+      <span class="ref-authors">Mullen EA, et al.</span>
+      <div class="ref-title">Updated favourable-histology Wilms tumour risk stratification: rationale for future COG clinical trials (AREN2231)</div>
+      <div class="ref-journal">Nature Reviews Urology, 2025; 22:775–788</div>
+      <div class="ref-doi"><a href="https://doi.org/10.1038/s41585-025-01055-1" target="_blank">https://doi.org/10.1038/s41585-025-01055-1</a></div>
+      <div class="ref-note">1q gain as liquid biopsy target; integration into AREN2231 prospective design</div>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">3</span>
+      <span class="ref-authors">Weil BR, Murphy AJ, Liu Q, et al. (CCSS)</span>
+      <div class="ref-title">Late Health Outcomes Among Survivors of Wilms Tumor Diagnosed Over Three Decades</div>
+      <div class="ref-journal">Childhood Cancer Survivor Study — Int J Radiat Oncol Biol Phys, 2024</div>
+      <div class="ref-note">Chronic health conditions ~25% survivors; renal failure, cardiac toxicity, restrictive pulmonary disease, SMN. Motivates late-effects-conscious RT approaches.</div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  // ═══ THÈME ═══
+  var THEME_KEY = 'theme-wilms-revue';
+
+  function initTheme() {
+    try { if (localStorage.getItem(THEME_KEY) === 'light') applyTheme('light'); } catch(e) {}
+  }
+
+  function toggleTheme() {
+    applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+  }
+
+  function applyTheme(mode) {
+    var btn = document.getElementById('btn-theme');
+    if (mode === 'light') {
+      document.body.classList.add('light');
+      btn.textContent = '☀';
+      btn.title = 'Switch to dark mode';
+      try { localStorage.setItem(THEME_KEY, 'light'); } catch(e) {}
+    } else {
+      document.body.classList.remove('light');
+      btn.textContent = '◑';
+      btn.title = 'Switch to light mode';
+      try { localStorage.setItem(THEME_KEY, 'dark'); } catch(e) {}
+    }
+  }
+
+  // ═══ NAVIGATION ═══
+  function show(id) {
+    document.getElementById('landing').style.display = 'none';
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function back() {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('landing').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  initTheme();
+</script>
+</body>
+</html>
