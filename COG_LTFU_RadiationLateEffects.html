@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>COG LTFU v6 · Radiation Late Effects — Surveillance Planning</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ── THÈME ── */
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b22;
+  --surface2: #1c2330;
+  --surface3: #21262d;
+  --border:   #2a3441;
+  --border2:  #30363d;
+  --text:     #e6edf3;
+  --text2:    #8b949e;
+  --text3:    #6e7681;
+  --green:    #3fb950;
+  --blue:     #388bfd;
+  --red:      #f85149;
+  --yellow:   #d29922;
+  --purple:   #a371f7;
+  --orange:   #f0883e;
+  --cyan:     #39c5cf;
+  --accent:   #f0883e;
+  --radius:   10px;
+}
+body.light {
+  --bg:       #f5f0e8;
+  --surface:  #ffffff;
+  --surface2: #ede8dc;
+  --surface3: #e6e0d2;
+  --border:   #c8bfaa;
+  --border2:  #d4ccba;
+  --text:     #1a1208;
+  --text2:    #5a4f3a;
+  --text3:    #9a8f7a;
+  --green:    #2d7a3a;
+  --blue:     #1a5fa8;
+  --red:      #c0392b;
+  --yellow:   #a0720a;
+  --purple:   #6b3fa0;
+  --orange:   #c45a10;
+  --cyan:     #1a7a8a;
+  --accent:   #c45a10;
+}
+
+/* ── BASE ── */
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(13,17,23,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;
+}
+body.light header {
+  background: rgba(245,240,232,0.97);
+  backdrop-filter: blur(10px);
+}
+.hdr-logo {
+  width: 32px; height: 32px;
+  border: 1.5px solid var(--accent); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--accent); font-weight: 500; flex-shrink: 0;
+}
+.hdr-texts { flex: 1; min-width: 0; }
+.hdr-title {
+  font-family: 'DM Serif Display', serif; font-size: 15px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
+}
+.hdr-sub {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--text3); margin-top: 2px;
+}
+.hdr-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(240,136,62,0.10);
+  border: 1px solid rgba(240,136,62,0.30);
+  color: var(--accent); margin-left: auto; flex-shrink: 0; white-space: nowrap;
+}
+.btn-theme {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text2); font-size: 14px; cursor: pointer;
+  transition: all .18s;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: 8px; flex-shrink: 0;
+}
+.btn-theme:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── CONTROLS ── */
+.controls {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex; flex-direction: column; gap: 8px;
+  position: sticky; top: 54px; z-index: 150;
+}
+.search-row { display: flex; gap: 8px; align-items: center; }
+.search-input {
+  flex: 1;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 7px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  outline: none; padding: 7px 12px;
+  transition: border-color .18s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text3); }
+.count-pill {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--text3); background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 5px;
+  padding: 3px 8px; white-space: nowrap; flex-shrink: 0;
+}
+.filter-row {
+  display: flex; gap: 5px; flex-wrap: wrap; align-items: center;
+}
+.filter-lbl {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text3); margin-right: 2px; flex-shrink: 0;
+}
+.chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; color: var(--text2); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500;
+  padding: 3px 10px; transition: all .15s; user-select: none; white-space: nowrap;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff; font-weight: 600;
+}
+
+/* ── LEGEND ── */
+.legend-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 20px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+.leg-lbl {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--text3);
+}
+.leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2);
+}
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── MAIN ── */
+main { padding: 16px 20px 80px; max-width: 1440px; margin: 0 auto; }
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 12px;
+}
+
+/* ── GROUP HEADER ── */
+.field-group-hdr {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px; margin-bottom: 2px;
+}
+.field-group-hdr h2 {
+  font-family: 'DM Serif Display', serif; font-size: 13px;
+  color: var(--text2); font-weight: 400; font-style: italic; white-space: nowrap;
+}
+.field-divider { flex: 1; height: 1px; background: var(--border); }
+.field-count {
+  font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3);
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 13px 15px;
+  display: flex; flex-direction: column; gap: 9px;
+  transition: box-shadow .18s, transform .15s;
+  border-left: 3px solid var(--border3, var(--border));
+}
+body.light .card { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.25), 0 0 0 1px var(--accent);
+  transform: translateY(-1px);
+}
+body.light .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.10), 0 0 0 1px var(--accent); }
+.card.s1   { border-left-color: #3fb950; }
+.card.s2A  { border-left-color: #d29922; }
+.card.s2B  { border-left-color: #f0883e; }
+.card.s3   { border-left-color: #6e7681; }
+
+/* ── CARD HEAD ── */
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.card-effect {
+  font-family: 'DM Serif Display', serif; font-size: .94rem;
+  line-height: 1.3; color: var(--text); flex: 1;
+}
+.card-sec {
+  font-family: 'DM Mono', monospace; font-size: 9.5px;
+  color: var(--text3); background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 2px 6px; flex-shrink: 0; margin-top: 2px;
+}
+
+/* ── BADGES ── */
+.badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.badge {
+  font-family: 'DM Mono', monospace; font-size: 9.5px; font-weight: 500;
+  border-radius: 4px; padding: 2px 6px; white-space: nowrap;
+}
+.badge-s1  { background: rgba(63,185,80,.12);  color: #3fb950; border: 1px solid rgba(63,185,80,.30); }
+.badge-s2A { background: rgba(210,153,34,.12); color: var(--yellow); border: 1px solid rgba(210,153,34,.30); }
+.badge-s2B { background: rgba(240,136,62,.12); color: var(--orange); border: 1px solid rgba(240,136,62,.30); }
+.badge-s3  { background: rgba(110,118,129,.12);color: var(--text2); border: 1px solid rgba(110,118,129,.28); }
+.badge-sys { background: rgba(56,139,253,.10);  color: var(--blue); border: 1px solid rgba(56,139,253,.25); }
+.badge-sex { background: rgba(163,113,247,.10); color: var(--purple); border: 1px solid rgba(163,113,247,.25); }
+
+/* ── DOSE BLOCK ── */
+.dose-block {
+  display: flex; align-items: flex-start; gap: 7px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px;
+}
+.dose-icon { font-size: 12px; flex-shrink: 0; margin-top: 1px; color: var(--text3); }
+.dose-text { font-size: 11.5px; color: var(--text2); line-height: 1.45; }
+.dose-text strong {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  font-weight: 500; color: var(--text);
+}
+
+/* ── SURVEILLANCE ── */
+.slabel {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 5px;
+}
+.freq-pill {
+  display: inline-block;
+  font-family: 'DM Mono', monospace; font-size: 9.5px;
+  background: var(--surface2); color: var(--green);
+  border: 1px solid rgba(63,185,80,.22); border-radius: 4px;
+  padding: 1px 7px; margin-bottom: 5px;
+}
+.screen-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.screen-list li {
+  font-size: 11.5px; color: var(--text2); line-height: 1.4;
+  padding-left: 13px; position: relative;
+}
+.screen-list li::before { content: '\203a'; position: absolute; left: 1px; color: var(--text3); }
+
+/* ── COUNSELING ── */
+.counseling {
+  background: rgba(56,139,253,.07);
+  border-left: 2px solid rgba(56,139,253,.35);
+  border-radius: 0 5px 5px 0;
+  font-size: 11.5px; color: var(--text2);
+  padding: 5px 9px; line-height: 1.4;
+}
+
+/* ── EMPTY ── */
+.empty-state {
+  grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+  color: var(--text3); font-family: 'DM Mono', monospace; font-size: 12px;
+}
+.empty-state .e-icon { font-size: 2rem; margin-bottom: 10px; }
+
+/* ── PRINT ── */
+@media print {
+  body, body.light { background: #fff !important; color: #000 !important; }
+  header, body.light header {
+    position: static !important; background: #fff !important;
+    backdrop-filter: none !important; border-bottom: 1px solid #ccc !important;
+  }
+  .btn-theme, .controls, .legend-bar { display: none !important; }
+  main { padding: 8px !important; }
+  .cards-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .card { break-inside: avoid; page-break-inside: avoid; box-shadow: none !important; transform: none !important; }
+  :root, body.light {
+    --bg: #fff; --surface: #f9f9f9; --surface2: #f2f2f2; --surface3: #eee;
+    --border: #ddd; --border2: #e5e5e5;
+    --text: #000; --text2: #444; --text3: #888;
+    --blue: #1a5fa8; --green: #2d7a3a; --yellow: #a0720a;
+    --orange: #c45a10; --purple: #6b3fa0;
+  }
+  .print-footer { display: block !important; }
+}
+.print-footer {
+  display: none;
+  font-family: 'DM Mono', monospace; font-size: 7pt; color: #aaa;
+  margin-top: 24px; border-top: 1px solid #ddd; padding-top: 8px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  header, .controls, .legend-bar, main { padding-left: 12px; padding-right: 12px; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .hdr-title { font-size: 13px; }
+  .hdr-badge { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header>
+  <div class="hdr-logo">COG</div>
+  <div class="hdr-texts">
+    <div class="hdr-title">COG LTFU v6 — Radiation Late Effects</div>
+    <div class="hdr-sub">Sections §44–§98 · Post-treatment surveillance planning · v6.0 Oct 2023</div>
+  </div>
+  <span class="hdr-badge">COG · LTFU 2023</span>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Switch to light mode">◑</button>
+</header>
+
+<!-- ════════ CONTROLS ════════ -->
+<div class="controls">
+  <div class="search-row">
+    <input class="search-input" id="searchInput" type="search"
+      placeholder="Search late effect, organ system, dose, keyword…" autocomplete="off">
+    <div class="count-pill" id="countPill">55 / 55</div>
+  </div>
+  <div class="filter-row" id="fieldFilters">
+    <span class="filter-lbl">Field</span>
+  </div>
+  <div class="filter-row">
+    <span class="filter-lbl">Score</span>
+    <div id="scoreFilters" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+    <span class="filter-lbl" style="margin-left:10px;">Sex</span>
+    <div id="sexFilters" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<!-- ════════ LEGEND ════════ -->
+<div class="legend-bar">
+  <span class="leg-lbl">Score</span>
+  <div class="leg-item"><div class="leg-dot" style="background:#3fb950"></div><strong>1</strong>&nbsp;— Routine; all at-risk</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#d29922"></div><strong>2A</strong>&nbsp;— Strongly consider (preferred, lower evidence)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#f0883e"></div><strong>2B</strong>&nbsp;— Consider (lower certainty)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#6e7681"></div><strong>3</strong>&nbsp;— If clinically indicated only</div>
+</div>
+
+<!-- ════════ MAIN ════════ -->
+<main>
+  <div class="cards-grid" id="cardsGrid"></div>
+  <div class="print-footer">
+    COG Long-Term Follow-Up Guidelines for Survivors of Childhood, Adolescent, and Young Adult Cancers — Version 6.0 (October 2023) · www.survivorshipguidelines.org<br>
+    This tool is a clinical reference aid and does not replace the original guidelines or individualised medical assessment.
+  </div>
+</main>
+
+<script>
+// ═══════ DONNÉES ═══════
+var DATA = [
+  {sec:44,field:"All Fields",sex:"Any",effect:"Subsequent benign or malignant neoplasm in/near radiation field",system:"SMN",score:"2A",dose:"Any RT dose",freq:"Annual",screening:["Hx: New lumps/masses, pain, skin changes","Annual physical examination"],counseling:"Periodic surveillance for new primary tumors in/near RT field throughout life.",fl:"All"},
+  {sec:45,field:"All Fields",sex:"Any",effect:"Dermatologic toxicity",system:"Integument",score:"3",dose:"Any RT dose",freq:"Annual",screening:["PE: Skin in RT field — fibrosis, telangiectasia, pigment changes, ulceration"],counseling:"Sun protection; avoid tanning; promptly evaluate suspicious skin changes.",fl:"All"},
+  {sec:46,field:"Head/Brain",sex:"Any",effect:"Brain tumor (benign or malignant)",system:"SMN",score:"1",dose:"Any cranial RT",freq:"Annual",screening:["Hx: Headache, visual changes, seizures, personality/cognitive changes","Annual neurological PE","Brain MRI: baseline at LTFU entry; repeat if symptomatic or as clinically indicated"],counseling:"Educate survivors/families re: symptoms warranting urgent evaluation.",fl:"Brain"},
+  {sec:47,field:"Head/Brain",sex:"Any",effect:"Neurocognitive deficits",system:"Neurologic",score:"1",dose:"Any cranial RT — highest risk \u226518\u201324 Gy, age <3 yrs, female sex",freq:"Annual",screening:["Hx: School/work performance, memory, attention","Neuropsychological testing at LTFU entry; repeat as clinically indicated","Assessment for ADHD, learning disability, depression"],counseling:"Refer for neuropsychological testing, educational support; IEP/school referral if applicable.",fl:"Brain"},
+  {sec:48,field:"Head/Brain",sex:"Any",effect:"Clinical leukoencephalopathy",system:"Neurologic",score:"3",dose:"Cranial RT \u226518 Gy \u2014 risk increases with IT MTX / IV MTX",freq:"Symptom-driven",screening:["Hx: Cognitive decline, gait disturbance, urinary incontinence","Brain MRI if symptomatic"],counseling:"Increased risk with intrathecal/high-dose methotrexate combination.",fl:"Brain"},
+  {sec:49,field:"Head/Brain",sex:"Any",effect:"Cerebrovascular complications (stroke/moyamoya)",system:"Neurologic",score:"1",dose:"Cranial RT \u226518 Gy; highest risk \u226550 Gy",freq:"Annual",screening:["Hx: Headache, TIA/stroke symptoms, focal neurological deficit","Annual blood pressure","Brain MRI/MRA if symptomatic or vasculopathy suspected"],counseling:"Aggressive CV risk factor management (HTN, hyperlipidemia, tobacco); refer to neurology/neurosurgery for vasculopathy.",fl:"Brain"},
+  {sec:50,field:"Head/Brain",sex:"Any",effect:"Craniofacial abnormalities",system:"Musculoskeletal",score:"3",dose:"Cranial/facial RT during growth \u2014 esp. age <5 yrs",freq:"Annual during growth",screening:["Hx/PE: Facial asymmetry, dental malocclusion, dry eye","Annual dental evaluation","Ophthalmology if lacrimal gland in field"],counseling:"Refer to craniofacial team, orthodontist, reconstructive surgery as appropriate.",fl:"Brain"},
+  {sec:51,field:"Head/Brain",sex:"Any",effect:"Chronic sinusitis",system:"ENT",score:"3",dose:"Cranial/facial RT (sinuses in field)",freq:"Annual",screening:["Hx: Chronic nasal congestion, headache, drainage","PE: Sinus tenderness"],counseling:"Refer to ENT for recurrent/refractory sinusitis.",fl:"Brain"},
+  {sec:52,field:"Head/Brain",sex:"Any",effect:"Overweight / Obesity",system:"Endocrine",score:"1",dose:"Hypothalamic RT (any dose); risk highest \u226540 Gy",freq:"Annual",screening:["PE: BMI, waist circumference","Annual fasting glucose, lipid panel"],counseling:"Nutritional counseling, physical activity promotion; evaluate for hypothalamic dysfunction.",fl:"Brain"},
+  {sec:53,field:"Head/Brain",sex:"Any",effect:"Growth hormone deficiency",system:"Endocrine",score:"1",dose:"Cranial RT \u226518 Gy; dose-dependent \u2014 GHD probable \u226530 Gy",freq:"Annual (children); consider in adults",screening:["Hx: Growth velocity, pubertal status","Annual height/weight/growth velocity in children","GH stimulation testing if growth velocity \u2193 or short stature","IGF-1 \u00b1 IGFBP-3"],counseling:"Refer to pediatric endocrinology; GH replacement therapy significantly improves outcomes.",fl:"Brain"},
+  {sec:54,field:"Head/Brain",sex:"Male",effect:"Precocious puberty (M)",system:"Endocrine",score:"3",dose:"Cranial RT \u2014 low dose 18\u201324 Gy more associated than higher doses",freq:"Annual during childhood/puberty",screening:["PE: Tanner staging annually","LH, FSH, testosterone, bone age if signs of precocious puberty"],counseling:"Refer to pediatric endocrinology; consider GnRH agonist.",fl:"Brain"},
+  {sec:55,field:"Head/Brain",sex:"Female",effect:"Precocious puberty (F)",system:"Endocrine",score:"3",dose:"Cranial RT \u2014 low dose 18\u201324 Gy more associated",freq:"Annual during childhood/puberty",screening:["PE: Tanner staging annually","LH, FSH, estradiol, bone age if signs of precocious puberty"],counseling:"Refer to pediatric endocrinology.",fl:"Brain"},
+  {sec:56,field:"Head/Brain",sex:"Any",effect:"Hyperprolactinemia",system:"Endocrine",score:"3",dose:"Hypothalamic/pituitary RT (any dose)",freq:"Annual",screening:["Hx: Galactorrhea, amenorrhea, sexual dysfunction","Prolactin if symptomatic"],counseling:"Refer to endocrinology; dopamine agonist therapy.",fl:"Brain"},
+  {sec:57,field:"Head/Brain",sex:"Any",effect:"Central hypothyroidism",system:"Endocrine",score:"1",dose:"Hypothalamic/pituitary RT \u226540 Gy (risk with \u226525 Gy)",freq:"Annual",screening:["Hx: Fatigue, weight gain, cold intolerance, constipation","Annual TSH \u2014 \u26a0 central hypothyroidism may have normal TSH: check free T4","Free T4"],counseling:"Monitor free T4 (not only TSH) in patients with hypothalamic/pituitary RT. Levothyroxine replacement.",fl:"Brain"},
+  {sec:58,field:"Head/Brain",sex:"Male",effect:"Gonadotropin deficiency (M)",system:"Endocrine",score:"1",dose:"Hypothalamic/pituitary RT \u226530\u201340 Gy",freq:"Annual",screening:["Hx: Pubertal progression, sexual function, libido","Annual PE: Tanner staging, testicular exam","LH, FSH, testosterone","Semen analysis if fertility desired"],counseling:"Refer to endocrinology; testosterone replacement if indicated.",fl:"Brain"},
+  {sec:59,field:"Head/Brain",sex:"Female",effect:"Gonadotropin deficiency (F)",system:"Endocrine",score:"1",dose:"Hypothalamic/pituitary RT \u226530\u201340 Gy",freq:"Annual",screening:["Hx: Pubertal progression, menstrual history, sexual function","Annual PE: Tanner staging","LH, FSH, estradiol","Bone density assessment"],counseling:"Refer to endocrinology; HRT if indicated.",fl:"Brain"},
+  {sec:60,field:"Head/Brain",sex:"Any",effect:"Central adrenal insufficiency",system:"Endocrine",score:"1",dose:"Hypothalamic/pituitary RT \u226540\u201350 Gy",freq:"Annual",screening:["Hx: Fatigue, weight loss, nausea, hypotension","AM cortisol \u00b1 ACTH stimulation testing if symptomatic or dose \u226540 Gy"],counseling:"Sick-day rules, steroid card, stress dosing instructions \u2014 patient education essential.",fl:"Brain"},
+  {sec:61,field:"Head/Brain",sex:"Any",effect:"Cataracts",system:"Ocular",score:"2B",dose:"Eye/orbital RT \u226510 Gy (posterior subcapsular cataracts)",freq:"Annual",screening:["Hx: Blurred vision, visual changes","Annual visual acuity","Annual ophthalmology examination"],counseling:"Refer to ophthalmology; surgical cataract extraction when clinically indicated.",fl:"Brain"},
+  {sec:62,field:"Head/Brain",sex:"Any",effect:"Ocular toxicity (retinopathy, lacrimal dysfunction, dry eye)",system:"Ocular",score:"3",dose:"Orbital/eye RT \u226530\u201340 Gy for retinopathy; \u226520 Gy for dry eye",freq:"Annual",screening:["Hx: Dry eye, visual changes, pain","Annual ophthalmology examination","Annual visual acuity"],counseling:"Refer to ophthalmology for retinopathy, dry eye, lacrimal dysfunction management.",fl:"Brain"},
+  {sec:63,field:"Head/Brain",sex:"Any",effect:"Ototoxicity (sensorineural hearing loss)",system:"Auditory",score:"1",dose:"Ear/cochlea RT \u226530 Gy; increased risk combined with cisplatin",freq:"Age-stratified audiometry",screening:["Hx: Hearing difficulties, tinnitus, vertigo","Pure tone audiometry (1000\u20138000 Hz): annually age \u22645y; every 2y age 6\u201312y; every 5y from age 13","Full audiological evaluation by audiologist"],counseling:"Speech/language therapy; hearing aids; school FM amplification. Audiology referral.",fl:"Brain"},
+  {sec:64,field:"Head/Brain",sex:"Any",effect:"Xerostomia / salivary gland dysfunction",system:"Oral",score:"1",dose:"Salivary gland RT \u226510 Gy (parotid); \u226526 Gy mean \u2192 severe xerostomia",freq:"Annual",screening:["Hx: Dry mouth, dental caries, difficulty swallowing","Annual dental examination","Salivary gland palpation"],counseling:"Dental fluoride prophylaxis; regular dental care; saliva substitutes; pilocarpine if appropriate.",fl:"Brain"},
+  {sec:65,field:"Head/Brain",sex:"Any",effect:"Dental abnormalities",system:"Oral",score:"1",dose:"Oral/dental RT (any dose during dental development)",freq:"Annual",screening:["Annual dental examination","Dental panoramic X-ray as clinically indicated"],counseling:"Preventive dental care; fluoride; refer to pediatric dentist familiar with RT late effects.",fl:"Brain"},
+  {sec:66,field:"Head/Brain",sex:"Any",effect:"Osteoradionecrosis of the jaw",system:"Oral",score:"2A",dose:"Mandible/maxilla RT \u226550\u201360 Gy",freq:"Annual",screening:["Hx: Jaw pain, trismus, ulceration, exposed bone","Annual dental/oral PE","Panoramic X-ray as clinically indicated"],counseling:"Avoid dental extractions without hyperbaric oxygen preparation; preventive dental care essential.",fl:"Brain"},
+  {sec:67,field:"Neck/Thyroid",sex:"Any",effect:"Thyroid nodules",system:"Endocrine",score:"1",dose:"Neck/thyroid RT \u226520 Gy; dose-dependent risk",freq:"Annual",screening:["PE: Annual thyroid palpation","Annual thyroid ultrasound"],counseling:"Refer to endocrinology/surgery for nodules >1 cm or suspicious features on ultrasound.",fl:"Neck"},
+  {sec:68,field:"Neck/Thyroid",sex:"Any",effect:"Thyroid cancer",system:"SMN",score:"2A",dose:"Neck/thyroid RT \u226520 Gy; dose-dependent up to ~20\u201329 Gy",freq:"Annual",screening:["PE: Annual thyroid palpation","Annual thyroid ultrasound"],counseling:"Annual thyroid ultrasound lifelong; prompt biopsy for suspicious nodules.",fl:"Neck"},
+  {sec:69,field:"Neck/Thyroid",sex:"Any",effect:"Hypothyroidism (primary)",system:"Endocrine",score:"1",dose:"Thyroid RT \u226520 Gy; risk increases with dose up to \u226540 Gy",freq:"Annual",screening:["Hx: Fatigue, weight gain, cold intolerance","Annual TSH (\u00b1 free T4)"],counseling:"Levothyroxine replacement therapy when indicated.",fl:"Neck"},
+  {sec:70,field:"Neck/Thyroid",sex:"Any",effect:"Hyperthyroidism (Graves\u2019 disease)",system:"Endocrine",score:"3",dose:"Neck/thyroid RT (any dose)",freq:"Annual",screening:["Hx: Weight loss, palpitations, heat intolerance, tremor","Annual TSH"],counseling:"Refer to endocrinology.",fl:"Neck"},
+  {sec:71,field:"Neck/Thyroid",sex:"Any",effect:"Carotid artery disease",system:"Vascular",score:"2A",dose:"Neck RT \u226535\u201340 Gy",freq:"Every 5 yrs from 10 yrs post-RT",screening:["Hx: TIA/stroke symptoms, neck bruit, dizziness","Carotid duplex ultrasound every 5 years beginning 10 yrs post-RT (\u226535 Gy neck dose)","Annual BP, lipid panel, smoking cessation assessment"],counseling:"Aggressive CV risk factor modification (HTN, dyslipidemia, tobacco). Vascular surgery referral.",fl:"Neck"},
+  {sec:72,field:"Neck/Thyroid",sex:"Any",effect:"Subclavian artery disease",system:"Vascular",score:"3",dose:"Neck/axillary RT \u226540 Gy",freq:"Annual",screening:["Hx: Arm claudication, blood pressure differential","BP both arms annually"],counseling:"Vascular surgery referral for symptomatic subclavian stenosis.",fl:"Neck"},
+  {sec:73,field:"Chest/Breast",sex:"Female",effect:"Breast cancer",system:"SMN",score:"1",dose:"Chest RT \u226520 Gy (female); risk onset ~8\u201310 yrs post-RT",freq:"Annual clinical exam; annual MRI + mammography from age 25 or 8 yrs post-RT",screening:["Annual clinical breast examination","Annual breast MRI + mammography: start age 25 or 8 yrs post-RT (whichever later); \u2264 age 30 at latest","Breast self-examination education"],counseling:"Combined MRI + mammography screening recommended. Genetic counseling re: hereditary risk.",fl:"Breast"},
+  {sec:74,field:"Chest/Breast",sex:"Female",effect:"Breast tissue hypoplasia",system:"Integument",score:"3",dose:"Breast RT during growth / prepubertal",freq:"Annual",screening:["PE: Breast development assessment"],counseling:"Refer to plastic surgery for reconstruction if desired.",fl:"Breast"},
+  {sec:75,field:"Chest",sex:"Any",effect:"Pulmonary toxicity (fibrosis/pneumonitis)",system:"Pulmonary",score:"1",dose:"Lung/chest RT \u226515 Gy; risk increases with volume; dose \u226530 Gy",freq:"Annual",screening:["Hx: Cough, dyspnea on exertion, wheezing","Annual pulmonary PE","PFTs (spirometry + DLCO) at LTFU entry; repeat if symptomatic or prior abnormality"],counseling:"Smoking avoidance; influenza/pneumococcal vaccines; pulmonology referral for symptomatic dysfunction.",fl:"Chest"},
+  {sec:76,field:"Chest",sex:"Any",effect:"Lung cancer",system:"SMN",score:"2A",dose:"Lung RT \u226510 Gy; combined alkylating agents/tobacco markedly increases risk",freq:"Annual LDCT (eligible survivors)",screening:["Hx: Cough, hemoptysis, weight loss, dyspnea","Annual low-dose CT chest if age \u226525, \u226510 yrs post-RT, chest RT \u226510 Gy AND current/former smoker"],counseling:"Tobacco cessation strongly reinforced; low-dose CT lung screening where eligible.",fl:"Chest"},
+  {sec:77,field:"Chest/Heart",sex:"Any",effect:"Cardiac toxicity (CAD, cardiomyopathy, valvular, pericardial)",system:"Cardiac",score:"1",dose:"Heart/mediastinal RT \u226515 Gy; CAD risk \u226510 Gy mean heart; highest risk \u226535\u201340 Gy",freq:"Annual CV assessment; Echo every 5 yrs (RT \u226535 Gy)",screening:["Hx: Chest pain, dyspnea, palpitations, edema","Annual BP, BMI, fasting glucose, lipid panel","Echocardiogram: baseline at LTFU entry if RT \u226515 Gy to heart; then every 5 yrs","ECG as clinically indicated"],counseling:"Aggressive CV risk modification (HTN, lipids, DM, tobacco, exercise); ASA if indicated; cardiology referral.",fl:"Chest"},
+  {sec:78,field:"Abdomen",sex:"Any",effect:"Functional asplenia",system:"Immunologic",score:"1",dose:"Splenic RT \u226520 Gy (TBI, whole-abdomen, left flank)",freq:"Annual",screening:["Annual PE: spleen assessment","Immunizations: pneumococcal, meningococcal, Hib (age-appropriate per schedule)"],counseling:"Encapsulated organism vaccination ESSENTIAL. Penicillin prophylaxis per institutional protocol. Emergency plan for febrile illness.",fl:"Abdomen"},
+  {sec:79,field:"Neck/Esophagus",sex:"Any",effect:"Esophageal stricture",system:"GI",score:"3",dose:"Esophageal RT \u226540\u201350 Gy",freq:"Symptom-driven",screening:["Hx: Dysphagia, odynophagia, weight loss"],counseling:"Gastroenterology/surgery referral for progressive dysphagia; endoscopic dilation as needed.",fl:"Neck"},
+  {sec:80,field:"Abdomen",sex:"Any",effect:"Impaired glucose metabolism / Diabetes mellitus",system:"Metabolic",score:"1",dose:"Pancreatic RT \u226510 Gy (abdominal/whole-abdominal); increased risk with TBI",freq:"Annual",screening:["Annual fasting glucose","HbA1c every 3 years (or annually if at risk)","Annual BMI, waist circumference"],counseling:"Diet/lifestyle counseling; refer to endocrinology/diabetes team if impaired glucose.",fl:"Abdomen"},
+  {sec:81,field:"Abdomen",sex:"Any",effect:"Dyslipidemia",system:"Metabolic",score:"2B",dose:"Abdominal RT (any dose with hepatic/GI exposure); TBI",freq:"Annual",screening:["Annual fasting lipid panel"],counseling:"Lifestyle modification; statin therapy per cardiovascular risk assessment.",fl:"Abdomen"},
+  {sec:82,field:"Abdomen",sex:"Any",effect:"Hepatic toxicity (fibrosis, cirrhosis)",system:"Hepatic",score:"2B",dose:"Hepatic RT \u226520 Gy (risk \u226530\u201335 Gy)",freq:"Annual",screening:["Annual LFTs (ALT, AST, bilirubin, alkaline phosphatase)","Annual PE: hepatomegaly, jaundice"],counseling:"Avoid hepatotoxins (alcohol, certain medications); hepatology referral if abnormal.",fl:"Abdomen"},
+  {sec:83,field:"Abdomen",sex:"Any",effect:"Cholelithiasis",system:"GI",score:"3",dose:"Right upper quadrant RT (any dose)",freq:"Annual",screening:["Hx: RUQ pain, nausea, fatty food intolerance","Abdominal ultrasound as clinically indicated"],counseling:"Refer to surgery/gastroenterology for symptomatic cholelithiasis.",fl:"Abdomen"},
+  {sec:84,field:"Abdomen",sex:"Any",effect:"Bowel obstruction (adhesions, stricture)",system:"GI",score:"3",dose:"Abdominal/pelvic RT \u226540 Gy (esp. post-surgical adhesions)",freq:"Symptom-driven",screening:["Hx: Abdominal pain, distension, nausea/vomiting, change in bowel habits"],counseling:"Prompt surgical evaluation for obstruction symptoms.",fl:"Abdomen"},
+  {sec:85,field:"Abdomen/Pelvis",sex:"Any",effect:"Chronic enterocolitis; fistula; GI strictures",system:"GI",score:"3",dose:"Pelvic/abdominal RT \u226545 Gy",freq:"Annual",screening:["Hx: Chronic diarrhea, rectal bleeding, fecal urgency, fistula symptoms"],counseling:"Gastroenterology referral for chronic GI symptoms; nutritional support.",fl:"Abdomen"},
+  {sec:86,field:"Abdomen/Pelvis",sex:"Any",effect:"Colorectal cancer",system:"SMN",score:"2A",dose:"Abdominal/pelvic RT \u226530 Gy (esp. whole-abdomen)",freq:"Colonoscopy every 5 yrs from age 35 or 10 yrs post-RT",screening:["Hx: Rectal bleeding, change in bowel habits, weight loss","Colonoscopy every 5 years starting age 35 or 10 yrs post-RT, whichever comes first"],counseling:"Earlier and more frequent colonoscopy than general population.",fl:"Abdomen"},
+  {sec:87,field:"Abdomen",sex:"Any",effect:"Renal toxicity (nephropathy)",system:"Urinary",score:"1",dose:"Renal RT \u226515\u201320 Gy (whole kidney); bilateral > unilateral",freq:"Annual",screening:["Annual blood pressure","Annual BUN, creatinine","Annual urinalysis (protein, blood)"],counseling:"ACE inhibitor/ARB for proteinuria; aggressive BP control; nephrology referral.",fl:"Pelvis"},
+  {sec:88,field:"Pelvis",sex:"Any",effect:"Urinary tract toxicity (hemorrhagic cystitis, bladder dysfunction)",system:"Urinary",score:"1",dose:"Bladder RT \u226540\u201345 Gy (pelvic fields)",freq:"Annual",screening:["Hx: Hematuria, urgency, frequency, incontinence, nocturia","Annual urinalysis"],counseling:"Urology referral for culture-negative hematuria or persistent bladder dysfunction.",fl:"Pelvis"},
+  {sec:89,field:"Pelvis",sex:"Any",effect:"Bladder malignancy",system:"SMN",score:"2A",dose:"Pelvic RT \u226540 Gy (bladder dose \u226530 Gy)",freq:"Annual",screening:["Hx: Hematuria, urgency, weight loss","Annual urinalysis","Cystoscopy/urology referral for culture-negative hematuria"],counseling:"Refer to urology for culture-negative hematuria; lifelong surveillance.",fl:"Pelvis"},
+  {sec:90,field:"Testes",sex:"Male",effect:"Testicular hormonal dysfunction (Leydig cell failure)",system:"Reproductive (M)",score:"1",dose:"Testicular RT \u226520 Gy (scrotal scatter >2 Gy at risk)",freq:"Annual",screening:["Hx: Pubertal progression, sexual function, energy, libido","Annual PE: Tanner staging, testicular volume","Annual LH, FSH, testosterone"],counseling:"Testosterone replacement therapy when indicated; endocrinology referral.",fl:"Gonads"},
+  {sec:91,field:"Testes",sex:"Male",effect:"Impaired spermatogenesis",system:"Reproductive (M)",score:"1",dose:"Testicular RT \u22652\u20133 Gy (scatter); severe azoospermia \u22656 Gy; likely permanent \u226512 Gy",freq:"Annual (pubertal); semen analysis when fertility desired",screening:["Hx: Fertility desires and plans","Annual LH, FSH in puberty/early adulthood","Semen analysis when fertility is desired"],counseling:"Fertility counseling; sperm banking pre-treatment ideally; reproductive endocrinology referral.",fl:"Gonads"},
+  {sec:92,field:"Pelvis",sex:"Female",effect:"Ovarian hormone deficiencies (premature ovarian failure)",system:"Reproductive (F)",score:"1",dose:"Ovarian/pelvic RT \u22655\u201310 Gy; likely permanent POF \u226520 Gy (prepubertal tolerate more)",freq:"Annual",screening:["Hx: Pubertal progression, menstrual history, vasomotor symptoms","Annual PE: Tanner staging","Annual LH, FSH, estradiol","Bone density if amenorrheic"],counseling:"HRT until age 50 unless contraindicated; fertility preservation counseling pre-treatment.",fl:"Gonads"},
+  {sec:93,field:"Pelvis",sex:"Female",effect:"Diminished ovarian reserve (DOR)",system:"Reproductive (F)",score:"1",dose:"Pelvic RT \u22655 Gy (scattered dose to ovaries)",freq:"Annual",screening:["Hx: Menstrual irregularity, fertility concerns","Annual LH, FSH, estradiol","AMH when fertility desired"],counseling:"Reproductive endocrinology referral when pregnancy desired.",fl:"Gonads"},
+  {sec:94,field:"Pelvis",sex:"Female",effect:"Uterine vascular insufficiency (adverse pregnancy outcomes)",system:"Reproductive (F)",score:"2A",dose:"Uterine/pelvic RT \u226525\u201330 Gy",freq:"Annual",screening:["Hx: Pregnancy history, menstrual history","Annual gynecologic examination","High-risk OB referral when pregnant"],counseling:"High-risk obstetric care essential; increased risk of preterm birth, low birth weight, miscarriage.",fl:"Gonads"},
+  {sec:95,field:"Pelvis",sex:"Female",effect:"Vaginal fibrosis/stenosis",system:"Reproductive (F)",score:"3",dose:"Pelvic RT \u226525 Gy (postpubertal); \u226535 Gy (prepubertal); brachytherapy especially high risk",freq:"Annual",screening:["Hx: Dyspareunia, vaginal dryness, difficulty with intercourse","Annual gynecologic examination (vaginal \u00b1 speculum)"],counseling:"Vaginal dilators; lubricants; early initiation post-RT; gynecology referral.",fl:"Gonads"},
+  {sec:96,field:"All RT (trunk)",sex:"Any",effect:"Musculoskeletal growth problems (hypoplasia, asymmetry)",system:"Musculoskeletal",score:"3",dose:"Trunk/limb RT during growth (any dose)",freq:"Annual during growth",screening:["Annual PE: height, growth velocity, limb length, asymmetry"],counseling:"Refer to orthotics/orthopaedics for limb discrepancy; physical therapy.",fl:"Musculo"},
+  {sec:97,field:"Chest",sex:"Any",effect:"Scoliosis/Kyphosis",system:"Musculoskeletal",score:"2B",dose:"Spinal/paraspinal RT during growth (any dose, esp. asymmetric fields)",freq:"Annual during growth; every 2 yrs as adult",screening:["Annual PE: spinal curvature assessment","Spine X-ray if curve suspected or progression noted"],counseling:"Orthopaedic referral for curves >10\u00b0; physical therapy; follow Cobb angle.",fl:"Musculo"},
+  {sec:98,field:"All RT (not spine)",sex:"Any",effect:"Radiation-induced fracture",system:"Musculoskeletal",score:"2B",dose:"Bone RT \u226540\u201350 Gy (esp. femoral neck, ribs, clavicle)",freq:"Annual",screening:["Annual PE: bone pain, functional limitation","DEXA if BMD risk factors","X-ray for localized bone pain in prior RT field"],counseling:"DEXA for BMD; calcium/vitamin D; bisphosphonate if low BMD; orthopaedic referral for fracture.",fl:"Musculo"}
+];
+
+// ═══════ CONFIG FILTRES ═══════
+var FIELD_ORDER  = ["All","Brain","Neck","Breast","Chest","Abdomen","Pelvis","Gonads","Musculo"];
+var FIELD_LABELS = {
+  All:"All Fields", Brain:"Brain / Head", Neck:"Neck & Thyroid",
+  Breast:"Chest \u2013 Breast", Chest:"Chest & Heart", Abdomen:"Abdomen & GI",
+  Pelvis:"Pelvis & Urinary", Gonads:"Gonads", Musculo:"Musculoskeletal"
+};
+var FIELD_ICONS = {
+  All:"\u2622", Brain:"\uD83E\uDDE0", Neck:"\uD83E\uDD8B", Breast:"\uD83E\uDE7A",
+  Chest:"\uD83E\uDEB7", Abdomen:"\uD83E\uDEC3", Pelvis:"\uD83E\uDEC8",
+  Gonads:"\u2695", Musculo:"\uD83E\uDDB4"
+};
+
+// ═══════ ÉTAT ═══════
+var activeField = "all";
+var activeScore = "all";
+var activeSex   = "all";
+var searchQ     = "";
+
+// ═══════ FILTRES ═══════
+function buildFilters() {
+  var ff = document.getElementById('fieldFilters');
+  ff.appendChild(makeChip("all", "All", true, "field"));
+  for (var i = 0; i < FIELD_ORDER.length; i++) {
+    var f = FIELD_ORDER[i];
+    ff.appendChild(makeChip(f, (FIELD_ICONS[f]||'') + '\u00a0' + FIELD_LABELS[f], false, "field"));
+  }
+  var sf = document.getElementById('scoreFilters');
+  var sc = [["all","All"],["1","1"],["2A","2A"],["2B","2B"],["3","3"]];
+  for (var j = 0; j < sc.length; j++) sf.appendChild(makeChip(sc[j][0], sc[j][1], j===0, "score"));
+  var xf = document.getElementById('sexFilters');
+  var sx = [["all","All"],["Any","Any"],["Male","M"],["Female","F"]];
+  for (var k = 0; k < sx.length; k++) xf.appendChild(makeChip(sx[k][0], sx[k][1], k===0, "sex"));
+}
+
+function makeChip(val, lbl, isActive, type) {
+  var c = document.createElement('button');
+  c.className = 'chip' + (isActive ? ' active' : '');
+  c.textContent = lbl;
+  c.dataset.value = val;
+  c.dataset.type = type;
+  c.onclick = (function(v,t) {
+    return function() {
+      if (t==='field') activeField = v;
+      else if (t==='score') activeScore = v;
+      else activeSex = v;
+      var sibs = document.querySelectorAll('.chip[data-type="'+t+'"]');
+      for (var i=0;i<sibs.length;i++) sibs[i].classList.remove('active');
+      this.classList.add('active');
+      renderCards();
+    };
+  })(val, type);
+  return c;
+}
+
+// ═══════ FILTRAGE ═══════
+function filtered() {
+  return DATA.filter(function(d) {
+    var fOK = activeField==='all' || d.fl===activeField;
+    var sOK = activeScore==='all' || d.score===activeScore;
+    var xOK = activeSex==='all' || d.sex===activeSex || d.sex==='Any';
+    var q   = searchQ.toLowerCase();
+    var hay = [d.effect,d.system,d.field,d.dose,d.counseling,d.freq].concat(d.screening).join(' ').toLowerCase();
+    return fOK && sOK && xOK && (!q || hay.indexOf(q)!==-1);
+  });
+}
+
+// ═══════ RENDU ═══════
+function renderCards() {
+  var grid  = document.getElementById('cardsGrid');
+  var items = filtered();
+  document.getElementById('countPill').textContent = items.length+' / '+DATA.length;
+  grid.innerHTML = '';
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="e-icon">\uD83D\uDD2D</div><div>No sections match current filters.</div></div>';
+    return;
+  }
+  var byField = {};
+  for (var i=0;i<FIELD_ORDER.length;i++) byField[FIELD_ORDER[i]]=[];
+  for (var j=0;j<items.length;j++) {
+    if (!byField[items[j].fl]) byField[items[j].fl]=[];
+    byField[items[j].fl].push(items[j]);
+  }
+  var first = true;
+  for (var k=0;k<FIELD_ORDER.length;k++) {
+    var fl = FIELD_ORDER[k];
+    var grp = byField[fl]||[];
+    if (!grp.length) continue;
+    var hdr = document.createElement('div');
+    hdr.className = 'field-group-hdr';
+    if (!first) hdr.style.marginTop='16px';
+    hdr.innerHTML =
+      '<h2>'+(FIELD_ICONS[fl]||'')+' '+(FIELD_LABELS[fl]||fl)+'</h2>'+
+      '<div class="field-divider"></div>'+
+      '<span class="field-count">'+grp.length+'</span>';
+    grid.appendChild(hdr);
+    first = false;
+    for (var m=0;m<grp.length;m++) grid.appendChild(makeCard(grp[m]));
+  }
+}
+
+function makeCard(d) {
+  var card = document.createElement('div');
+  var sc   = d.score.replace(/[^a-zA-Z0-9]/g,'');
+  card.className = 'card s'+sc;
+  var sexHtml = d.sex!=='Any' ? '<span class="badge badge-sex">'+esc(d.sex)+'</span>' : '';
+  var scrHtml = '';
+  for (var i=0;i<d.screening.length;i++) scrHtml += '<li>'+esc(d.screening[i])+'</li>';
+  card.innerHTML =
+    '<div class="card-head">'+
+      '<div class="card-effect">'+esc(d.effect)+'</div>'+
+      '<div class="card-sec">\u00a7'+d.sec+'</div>'+
+    '</div>'+
+    '<div class="badges">'+
+      '<span class="badge badge-s'+sc+'">Score '+esc(d.score)+'</span>'+
+      '<span class="badge badge-sys">'+esc(d.system)+'</span>'+
+      sexHtml+
+    '</div>'+
+    '<div class="dose-block">'+
+      '<div class="dose-icon">\u2622</div>'+
+      '<div class="dose-text"><strong>Dose threshold:</strong> '+esc(d.dose)+'</div>'+
+    '</div>'+
+    '<div>'+
+      '<div class="slabel">Surveillance</div>'+
+      '<div class="freq-pill">'+esc(d.freq)+'</div>'+
+      '<ul class="screen-list">'+scrHtml+'</ul>'+
+    '</div>'+
+    '<div class="counseling">\uD83D\uDCAC '+esc(d.counseling)+'</div>';
+  return card;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════ RECHERCHE ═══════
+document.getElementById('searchInput').oninput = function(e) {
+  searchQ = e.target.value.trim();
+  renderCards();
+};
+
+// ═══════ THÈME ═══════
+var THEME_KEY = 'theme-cog-ltfu-rad';
+
+function initTheme() {
+  try { if (localStorage.getItem(THEME_KEY)==='light') applyTheme('light'); } catch(e) {}
+}
+
+function toggleTheme() {
+  applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+}
+
+function applyTheme(mode) {
+  var btn = document.getElementById('btn-theme');
+  if (mode==='light') {
+    document.body.classList.add('light');
+    btn.textContent = '\u2600';
+    btn.title = 'Switch to dark mode';
+    try { localStorage.setItem(THEME_KEY,'light'); } catch(e) {}
+  } else {
+    document.body.classList.remove('light');
+    btn.textContent = '\u25d1';
+    btn.title = 'Switch to light mode';
+    try { localStorage.setItem(THEME_KEY,'dark'); } catch(e) {}
+  }
+}
+
+// ═══════ INIT ═══════
+buildFilters();
+renderCards();
+initTheme();
+</script>
+</body>
+</html>
