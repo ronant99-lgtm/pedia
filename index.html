@@ -57,7 +57,6 @@
     transition: background 0.3s ease, color 0.3s ease;
   }
 
-  /* ── Header ── */
   .header {
     background: var(--header-bg);
     border-bottom: 1px solid var(--border);
@@ -95,7 +94,6 @@
     text-transform: uppercase;
   }
 
-  /* ── Theme toggle ── */
   .theme-toggle {
     position: absolute;
     top: 1.2rem;
@@ -119,14 +117,12 @@
     color: var(--accent);
   }
 
-  /* ── Main content ── */
   .main {
     max-width: 900px;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
   }
 
-  /* ── Section ── */
   .section { margin-bottom: 2.5rem; }
 
   .section-header {
@@ -157,7 +153,6 @@
     color: var(--text-primary);
   }
 
-  /* ── Tool cards ── */
   .tools-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -189,14 +184,16 @@
     transform: translateX(3px);
   }
 
-  /* Card comparatif — bordure gauche accent */
   .tool-card.comparatif {
     border-left: 3px solid var(--accent);
   }
 
-  /* Card revue — bordure gauche bleue */
   .tool-card.revue {
     border-left: 3px solid #3b82f6;
+  }
+
+  .tool-card.ltfu {
+    border-left: 3px solid #10b981;
   }
 
   .tool-type-icon {
@@ -283,6 +280,17 @@
     border-color: rgba(59,130,246,0.2);
   }
 
+  .tag.tag-ltfu {
+    background: rgba(16,185,129,0.1);
+    color: #10b981;
+    border-color: rgba(16,185,129,0.25);
+  }
+  body.light .tag.tag-ltfu {
+    color: #047857;
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.2);
+  }
+
   .tool-arrow {
     color: var(--text-muted);
     font-size: 1.1rem;
@@ -290,7 +298,6 @@
     transition: all 0.2s ease;
   }
 
-  /* ── Subsection label ── */
   .subsection-label {
     font-family: 'DM Mono', monospace;
     font-size: 0.7rem;
@@ -300,7 +307,6 @@
     margin: 1rem 0 0.4rem 0.1rem;
   }
 
-  /* ── Footer ── */
   .footer {
     max-width: 900px;
     margin: 0 auto;
@@ -315,14 +321,12 @@
 
   .footer a { color: var(--accent); text-decoration: none; }
 
-  /* ── Responsive ── */
   @media (max-width: 600px) {
     .header h1 { font-size: 1.6rem; }
     .main { padding: 1.5rem 1rem 3rem; }
     .tool-card { padding: 0.85rem 1rem; }
   }
 
-  /* ── Print ── */
   @media print {
     .theme-toggle { display: none; }
     body, body.light { background: #fff; color: #000; }
@@ -342,6 +346,29 @@
 </header>
 
 <main class="main">
+
+  <!-- Effets Tardifs & Suivi -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-icon">🩺</div>
+      <h2 class="section-title">Effets Tardifs &amp; Suivi</h2>
+    </div>
+    <div class="tools-grid">
+
+      <p class="subsection-label">COG · Long-Term Follow-Up Guidelines v6.0</p>
+
+      <a class="tool-card ltfu" href="COG_LTFU_RadiationLateEffects.html">
+        <div class="tool-type-icon">📡</div>
+        <div class="tool-info">
+          <div class="tool-name">COG LTFU — Effets tardifs de la radiothérapie</div>
+          <div class="tool-desc">Outil interactif de consultation des recommandations COG LTFU v6.0 pour les effets tardifs liés à la radiothérapie — par organe irradié, dose seuil, et modalité de surveillance recommandée</div>
+          <div class="tool-tags"><span class="tag tag-ltfu">ltfu</span><span class="tag tag-cog">cog</span><span class="tag">v6.0</span><span class="tag">effets tardifs</span></div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </a>
+
+    </div>
+  </section>
 
   <!-- Néphroblastome -->
   <section class="section">
@@ -508,7 +535,7 @@
     </div>
   </section>
 
-  <!-- PENTEC Pédiatrique -->
+  <!-- Contraintes Dosimétriques -->
   <section class="section">
     <div class="section-header">
       <div class="section-icon">⚡</div>
@@ -530,7 +557,7 @@
 </main>
 
 <footer class="footer">
-  Pedia v1.4 · Avril 2026 · <a href="https://github.com/ronant99-lgtm/pedia">GitHub</a>
+  Pedia v1.5 · Mai 2026 · <a href="https://github.com/ronant99-lgtm/pedia">GitHub</a>
 </footer>
 
 <script>
