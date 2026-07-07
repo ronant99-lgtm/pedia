@@ -288,6 +288,131 @@ body.light .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.10), 0 0 0 1px var(-
 }
 .empty-state .e-icon { font-size: 2rem; margin-bottom: 10px; }
 
+/* ── WORKUP MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.60);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 20px 16px 40px;
+  overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); width: 100%; max-width: 860px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  overflow: hidden; margin: auto;
+}
+body.light .modal-box { box-shadow: 0 8px 32px rgba(0,0,0,.15); }
+.modal-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.modal-header-title {
+  font-family: 'DM Serif Display', serif; font-size: 1rem; flex: 1;
+}
+.modal-header-sub {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--text3); margin-top: 2px;
+}
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text2); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+.modal-body {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+}
+@media (max-width: 620px) { .modal-body { grid-template-columns: 1fr; } }
+.modal-col {
+  padding: 16px 18px;
+  border-right: 1px solid var(--border);
+}
+.modal-col:last-child { border-right: none; }
+.modal-col-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+}
+.modal-col-header.female { border-bottom-color: var(--purple); }
+.modal-col-header.male   { border-bottom-color: var(--blue);   }
+.modal-col-title {
+  font-family: 'DM Serif Display', serif; font-size: 1rem;
+}
+.modal-col-header.female .modal-col-title { color: var(--purple); }
+.modal-col-header.male   .modal-col-title { color: var(--blue);   }
+.modal-sex-icon { font-size: 1.2rem; }
+
+/* Workup axes */
+.wx-block { margin-bottom: 12px; }
+.wx-axis {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.wx-axis-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.wx-tests { display: flex; flex-direction: column; gap: 4px; }
+.wx-test {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px;
+}
+.wx-test-name {
+  font-family: 'DM Mono', monospace; font-size: 11.5px;
+  font-weight: 500; color: var(--text);
+}
+.wx-test-cond {
+  font-size: 10.5px; color: var(--text2); margin-top: 2px; line-height: 1.4;
+}
+.wx-test-cond .ref {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--text3); margin-left: 4px;
+}
+.wx-tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 1px 6px; border-radius: 4px; margin-top: 3px;
+}
+.wx-tag.sys  { background: rgba(56,139,253,.12); color: var(--blue); border: 1px solid rgba(56,139,253,.25); }
+.wx-tag.sym  { background: rgba(110,118,129,.12); color: var(--text2); border: 1px solid rgba(110,118,129,.25); }
+.wx-tag.dose { background: rgba(240,136,62,.10); color: var(--orange); border: 1px solid rgba(240,136,62,.28); }
+.wx-tag.fert { background: rgba(163,113,247,.10); color: var(--purple); border: 1px solid rgba(163,113,247,.25); }
+
+/* Minimum annual summary */
+.wx-minimum {
+  margin: 0 18px 16px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-left: 3px solid var(--orange);
+  border-radius: 0 6px 6px 0; padding: 10px 14px;
+}
+.wx-minimum-lbl {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--orange); margin-bottom: 6px;
+}
+.wx-minimum-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+.wx-pill {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  background: var(--surface3); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 3px 8px; color: var(--text);
+}
+
+/* Btn workup in controls */
+.btn-workup {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--text2);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 5px 12px; cursor: pointer;
+  transition: all .18s; white-space: nowrap; flex-shrink: 0;
+}
+.btn-workup:hover { border-color: var(--accent); color: var(--accent); }
+
 /* ── PRINT ── */
 @media print {
   body, body.light { background: #fff !important; color: #000 !important; }
@@ -342,6 +467,7 @@ body.light .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.10), 0 0 0 1px var(-
     <input class="search-input" id="searchInput" type="search"
       placeholder="Search late effect, organ system, dose, keyword…" autocomplete="off">
     <div class="count-pill" id="countPill">55 / 55</div>
+    <button class="btn-workup" onclick="openWorkup()">📋 Bilan endocrinien</button>
   </div>
   <div class="filter-row" id="fieldFilters">
     <span class="filter-lbl">Field</span>
@@ -371,6 +497,256 @@ body.light .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.10), 0 0 0 1px var(-
     This tool is a clinical reference aid and does not replace the original guidelines or individualised medical assessment.
   </div>
 </main>
+
+<!-- ════════ WORKUP MODAL ════════ -->
+<div class="modal-overlay" id="workupOverlay" onclick="closeWorkupOnBg(event)">
+  <div class="modal-box" id="workupBox">
+
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">Bilan endocrinien — Suivi après radiothérapie</div>
+        <div class="modal-header-sub">Synthèse COG LTFU v6.0 · §52–§60 · §69–§70 · §80–§81 · §90–§95</div>
+      </div>
+      <button class="modal-close" onclick="closeWorkup()" title="Fermer">&times;</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- ── FEMME ── -->
+      <div class="modal-col">
+        <div class="modal-col-header female">
+          <div class="modal-sex-icon">♀</div>
+          <div class="modal-col-title">Femme</div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--blue)"></div>
+            Axe thyroïdien
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">TSH + T4 libre</div>
+              <div class="wx-test-cond">Annuel &mdash; T4L indispensable pour ne pas manquer une hypothyroïdie centrale (TSH peut être normale)<span class="ref">§57 §69</span></div>
+              <span class="wx-tag dose">Dose cou ≥ 20 Gy ou hypophyse ≥ 25 Gy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--purple)"></div>
+            Axe gonadotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">LH &middot; FSH &middot; Estradiol</div>
+              <div class="wx-test-cond">Annuel &mdash; + staging Tanner à l'examen clinique<span class="ref">§55 §59 §92 §93</span></div>
+              <span class="wx-tag dose">Pelvis ≥ 5 Gy ou hypophyse ≥ 30 Gy</span>
+            </div>
+            <div class="wx-test">
+              <div class="wx-test-name">AMH</div>
+              <div class="wx-test-cond">Si désir de grossesse ou évaluation de la réserve ovarienne<span class="ref">§93</span></div>
+              <span class="wx-tag fert">Désir de grossesse</span>
+            </div>
+            <div class="wx-test">
+              <div class="wx-test-name">Ostéodensitométrie (DXA)</div>
+              <div class="wx-test-cond">Si aménorrhée ou insuffisance ovarienne confirmée<span class="ref">§92</span></div>
+              <span class="wx-tag sym">Si aménorrhée</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--green)"></div>
+            Axe somatotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">IGF-1 &plusmn; IGFBP-3</div>
+              <div class="wx-test-cond">Annuel en croissance ; chez l'adulte si point d'appel clinique. Test de stimulation GH si IGF-1 bas ou ralentissement statural<span class="ref">§53</span></div>
+              <span class="wx-tag dose">Crâne ≥ 18 Gy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--yellow)"></div>
+            Axe corticotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">Cortisol matinal (&plusmn; Synacthène)</div>
+              <div class="wx-test-cond">Si dose hypothalamo-hypophysaire ≥ 40 Gy ou fatigue inexpliquée, hypotension, hyponatrémie<span class="ref">§60</span></div>
+              <span class="wx-tag dose">Hypophyse ≥ 40 Gy</span>
+              <span class="wx-tag sym">Ou clinique évocatrice</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--text3)"></div>
+            Axe lactotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">Prolactine</div>
+              <div class="wx-test-cond">Seulement si symptômes : galactorrhée, aménorrhée, dysfonction sexuelle<span class="ref">§56</span></div>
+              <span class="wx-tag sym">Si symptômes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--cyan)"></div>
+            Bilan métabolique
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">Glycémie à jeun</div>
+              <div class="wx-test-cond">Annuel<span class="ref">§52 §80</span></div>
+            </div>
+            <div class="wx-test">
+              <div class="wx-test-name">HbA1c</div>
+              <div class="wx-test-cond">Tous les 3 ans (ou annuel si à risque)<span class="ref">§80</span></div>
+              <span class="wx-tag dose">Abdomen ≥ 10 Gy ou TBI</span>
+            </div>
+            <div class="wx-test">
+              <div class="wx-test-name">Bilan lipidique à jeun</div>
+              <div class="wx-test-cond">Annuel (CT, LDL, HDL, TG)<span class="ref">§81</span></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /col female -->
+
+      <!-- ── GARÇON ── -->
+      <div class="modal-col">
+        <div class="modal-col-header male">
+          <div class="modal-sex-icon">♂</div>
+          <div class="modal-col-title">Garçon / Homme</div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--blue)"></div>
+            Axe thyroïdien
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">TSH + T4 libre</div>
+              <div class="wx-test-cond">Annuel &mdash; T4L systématique si irradiation hypothalamo-hypophysaire (TSH peut être normale)<span class="ref">§57 §69</span></div>
+              <span class="wx-tag dose">Dose cou ≥ 20 Gy ou hypophyse ≥ 25 Gy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--blue)"></div>
+            Axe gonadotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">LH &middot; FSH &middot; Testostérone totale</div>
+              <div class="wx-test-cond">Annuel &mdash; + staging Tanner et volume testiculaire à l'examen clinique<span class="ref">§54 §58 §90</span></div>
+              <span class="wx-tag dose">Testicules scatter &gt; 2 Gy ou hypophyse ≥ 30 Gy</span>
+            </div>
+            <div class="wx-test">
+              <div class="wx-test-name">Spermogramme</div>
+              <div class="wx-test-cond">Si désir de paternité ou évaluation de la fertilité<span class="ref">§91</span></div>
+              <span class="wx-tag fert">Désir de paternité</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--green)"></div>
+            Axe somatotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">IGF-1 &plusmn; IGFBP-3</div>
+              <div class="wx-test-cond">Annuel en croissance ; chez l'adulte si point d'appel clinique. Test de stimulation GH si IGF-1 bas ou ralentissement statural<span class="ref">§53</span></div>
+              <span class="wx-tag dose">Crâne ≥ 18 Gy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--yellow)"></div>
+            Axe corticotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">Cortisol matinal (&plusmn; Synacthène)</div>
+              <div class="wx-test-cond">Si dose hypothalamo-hypophysaire ≥ 40 Gy ou fatigue inexpliquée, hypotension<span class="ref">§60</span></div>
+              <span class="wx-tag dose">Hypophyse ≥ 40 Gy</span>
+              <span class="wx-tag sym">Ou clinique évocatrice</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--text3)"></div>
+            Axe lactotrope
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">Prolactine</div>
+              <div class="wx-test-cond">Seulement si symptômes : gynécomastie, dysfonction sexuelle, infertilité inexpliquée<span class="ref">§56</span></div>
+              <span class="wx-tag sym">Si symptômes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wx-block">
+          <div class="wx-axis">
+            <div class="wx-axis-dot" style="background:var(--cyan)"></div>
+            Bilan métabolique
+          </div>
+          <div class="wx-tests">
+            <div class="wx-test">
+              <div class="wx-test-name">Glycémie à jeun</div>
+              <div class="wx-test-cond">Annuel<span class="ref">§52 §80</span></div>
+            </div>
+            <div class="wx-test">
+              <div class="wx-test-name">HbA1c</div>
+              <div class="wx-test-cond">Tous les 3 ans (ou annuel si à risque)<span class="ref">§80</span></div>
+              <span class="wx-tag dose">Abdomen ≥ 10 Gy ou TBI</span>
+            </div>
+            <div class="wx-test">
+              <div class="wx-test-name">Bilan lipidique à jeun</div>
+              <div class="wx-test-cond">Annuel (CT, LDL, HDL, TG)<span class="ref">§81</span></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /col male -->
+
+    </div><!-- /modal-body -->
+
+    <!-- Minimum annuel summary -->
+    <div class="wx-minimum">
+      <div class="wx-minimum-lbl">Minimum annuel — commun aux deux sexes</div>
+      <div class="wx-minimum-pills">
+        <span class="wx-pill">TSH + T4L</span>
+        <span class="wx-pill">IGF-1</span>
+        <span class="wx-pill">Glycémie à jeun</span>
+        <span class="wx-pill">Bilan lipidique</span>
+        <span class="wx-pill" style="color:var(--purple)">+ LH · FSH · Estradiol (F)</span>
+        <span class="wx-pill" style="color:var(--blue)">+ LH · FSH · Testostérone (M)</span>
+        <span class="wx-pill" style="color:var(--orange)">+ Cortisol matinal si dose ≥ 40 Gy</span>
+      </div>
+    </div>
+
+  </div><!-- /modal-box -->
+</div><!-- /modal-overlay -->
 
 <script>
 // ═══════ DONNÉES ═══════
@@ -597,6 +973,19 @@ function applyTheme(mode) {
     btn.title = 'Switch to light mode';
     try { localStorage.setItem(THEME_KEY,'dark'); } catch(e) {}
   }
+}
+
+// ═══════ MODAL WORKUP ═══════
+function openWorkup() {
+  document.getElementById('workupOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeWorkup() {
+  document.getElementById('workupOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeWorkupOnBg(e) {
+  if (e.target === document.getElementById('workupOverlay')) closeWorkup();
 }
 
 // ═══════ INIT ═══════
