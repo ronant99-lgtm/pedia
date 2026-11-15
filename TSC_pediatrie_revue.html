@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Tératome sacro-coccygien de l'enfant — Prise en charge</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── THÈME ── */
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;
+  --border:#2a3441;--border2:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --green:#3fb950;--blue:#388bfd;--red:#f85149;--yellow:#d29922;
+  --purple:#a371f7;--orange:#f0883e;--cyan:#39c5cf;
+  --accent:#f0883e;--radius:10px;
+}
+body.light{
+  --bg:#f5f0e8;--surface:#ffffff;--surface2:#ede8dc;--surface3:#e6e0d2;
+  --border:#c8bfaa;--border2:#d4ccba;
+  --text:#1a1208;--text2:#5a4f3a;--text3:#9a8f7a;
+  --green:#2d7a3a;--blue:#1a5fa8;--red:#c0392b;--yellow:#a0720a;
+  --purple:#6b3fa0;--orange:#c45a10;--cyan:#1a7a8a;--accent:#c45a10;
+}
+
+/* ── BASE ── */
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh;transition:background .25s,color .25s;}
+a{color:var(--blue);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+body.light header{background:rgba(245,240,232,.97);}
+.hdr-logo{width:34px;height:34px;border:1.5px solid var(--accent);border-radius:7px;font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0;}
+.hdr-titles{flex:1;min-width:200px;}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);line-height:1.2;}
+.hdr-subtitle{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;}
+.hdr-badge{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);border:1px solid var(--accent);border-radius:20px;padding:3px 9px;white-space:nowrap;opacity:.85;}
+.hdr-disclaimer{font-size:10px;color:var(--text3);font-style:italic;max-width:300px;line-height:1.3;}
+.btn-theme{background:none;border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0;}
+.btn-theme:hover{background:var(--surface3);}
+
+/* ── CONTAINER ── */
+.container{max-width:980px;margin:0 auto;padding:28px 20px 80px;}
+
+/* ── LANDING ── */
+#landing{display:block;}
+.landing-intro{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px;max-width:720px;}
+.nav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:32px;}
+.nav-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;}
+.nav-card:hover{border-color:var(--accent);background:var(--surface2);}
+body.light .nav-card:hover{background:#f8f4ee;}
+.nav-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--nc-color,var(--accent));}
+.nc-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;}
+.nc-title{font-family:'DM Sans',sans-serif;font-weight:600;font-size:13.5px;color:var(--text);margin-bottom:5px;}
+.nc-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:8px;}
+.nc-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:10px;border:1px solid;}
+
+/* ── COMPARATIVE TABLE ── */
+.slabel{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;margin-top:32px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.slabel:first-child{margin-top:0;}
+.ct{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;}
+.ct thead th{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border2);text-align:left;background:var(--surface2);}
+.ct thead th:first-child{background:var(--surface3);}
+.ct tbody td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;line-height:1.45;}
+.ct tbody td:first-child{color:var(--text);font-weight:600;font-size:11px;font-family:'DM Mono',monospace;background:var(--surface2);}
+.ct tbody tr:last-child td{border-bottom:none;}
+.ct tbody tr:hover td{background:var(--surface2);}
+body.light .ct tbody tr:hover td{background:#ede8dc;}
+.val-g{color:var(--green);font-weight:600;}
+.val-o{color:var(--orange);font-weight:600;}
+.val-r{color:var(--red);font-weight:600;}
+.val-m{font-family:'DM Mono',monospace;font-size:11px;}
+
+/* ── PANELS ── */
+.panel{display:none;}
+.panel.active{display:block;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 14px;cursor:pointer;margin-bottom:20px;transition:all .2s;}
+.back-btn:hover{border-color:var(--accent);color:var(--accent);}
+.panel-header{margin-bottom:24px;}
+.panel-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:4px;}
+.panel-sub{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;}
+
+/* ── SIGNAL BOX ── */
+.signal-box{background:var(--surface2);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;border:1px solid var(--border);font-size:13px;line-height:1.65;color:var(--text);}
+body.light .signal-box{color:#3a2e1a;}
+.signal-hl{color:var(--orange);font-weight:600;}
+.signal-hl2{color:var(--blue);font-weight:600;}
+.signal-hl3{color:var(--green);font-weight:600;}
+.signal-hl4{color:var(--red);font-weight:600;}
+.signal-hl5{color:var(--yellow);font-weight:600;}
+
+/* ── INFO CARDS ── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px;}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+body.light .info-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.ic-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.ic-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--accent);margin-bottom:4px;}
+.ic-note{font-size:11.5px;color:var(--text2);line-height:1.45;}
+
+/* ── RT TABLE ── */
+.rt-table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12.5px;}
+.rt-table thead th{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border2);text-align:left;background:var(--surface2);}
+.rt-table tbody td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;line-height:1.45;}
+.rt-table tbody td:first-child{color:var(--text);font-weight:500;}
+.rt-table tbody tr:last-child td{border-bottom:none;}
+.rt-table tbody tr:hover td{background:var(--surface2);}
+body.light .rt-table tbody tr:hover td{background:#ede8dc;}
+.rt-dose{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--blue);}
+.rt-dose.esc{color:var(--orange);}
+
+/* ── RISK TABLE ── */
+.risk-table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12.5px;}
+.risk-table thead th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border2);background:var(--surface2);text-align:left;}
+.risk-table tbody td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
+.risk-table tbody tr:last-child td{border-bottom:none;}
+.risk-table tbody tr:hover td{background:var(--surface2);}
+.or-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.or-hi{color:var(--red);}
+.or-mid{color:var(--orange);}
+
+/* ── TIMELINE ── */
+.timeline{position:relative;padding-left:24px;margin-bottom:16px;}
+.timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--border2);}
+.tl-item{position:relative;margin-bottom:14px;}
+.tl-item::before{content:'';position:absolute;left:-20px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);}
+.tl-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);margin-bottom:2px;}
+.tl-text{font-size:12.5px;color:var(--text2);line-height:1.45;}
+.tl-text strong{color:var(--text);}
+
+/* ── STEP LIST ── */
+.step-list{list-style:none;padding:0;margin-bottom:16px;}
+.step-list li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.step-list li:last-child{border-bottom:none;}
+.step-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0;min-width:22px;padding-top:1px;}
+.step-body{font-size:13px;color:var(--text2);line-height:1.5;}
+.step-body strong{color:var(--text);}
+
+/* ── KEY MESSAGE ── */
+.key-msg{background:var(--surface2);border:1px solid var(--accent);border-left:4px solid var(--accent);border-radius:var(--radius);padding:14px 18px;font-size:13.5px;font-weight:500;color:var(--text);line-height:1.6;margin-top:8px;}
+.km-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;display:block;margin-bottom:8px;}
+
+/* ── NOTA BOX ── */
+.nota-box{background:var(--surface);border:1px solid var(--border2);border-left:3px solid var(--blue);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--text2);line-height:1.55;margin-top:12px;margin-bottom:12px;}
+.nota-box strong{color:var(--text);}
+
+/* ── TRIAL CARDS ── */
+.trials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-bottom:12px;}
+.trial-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+body.light .trial-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.tc-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tc-nct{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--blue);}
+.tc-status{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:10px;}
+.tc-status.active{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);}
+.tc-status.closed{background:rgba(110,118,129,.2);color:var(--text3);border:1px solid var(--border2);}
+.tc-title{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.35;}
+.tc-meta{font-size:11.5px;color:var(--text2);line-height:1.45;margin-bottom:8px;}
+.tc-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.th-rt,.th-sg,.th-ct,.th-ch{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:8px;}
+.th-rt{background:rgba(56,139,253,.15);color:var(--blue);border:1px solid rgba(56,139,253,.3);}
+.th-sg{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);}
+.th-ct{background:rgba(240,136,62,.15);color:var(--orange);border:1px solid rgba(240,136,62,.3);}
+.th-ch{background:rgba(163,113,247,.15);color:var(--purple);border:1px solid rgba(163,113,247,.3);}
+
+/* ── REFS LIST ── */
+.refs-list{list-style:none;padding:0;}
+.refs-list li{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);line-height:1.5;display:flex;gap:10px;}
+.refs-list li:last-child{border-bottom:none;}
+.ref-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);flex-shrink:0;min-width:22px;padding-top:2px;}
+.ref-body{flex:1;}
+.ref-note{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;color:var(--orange);margin-left:6px;vertical-align:middle;}
+
+/* ── LOE BADGE ── */
+.loe{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:10px;}
+.loe-r{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);}
+.loe-3{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3);}
+.loe-4{background:rgba(110,118,129,.2);color:var(--text3);border:1px solid var(--border2);}
+
+/* ── PRINT FOOTER ── */
+.print-footer{display:none;}
+
+/* ── PRINT ── */
+@media print{
+  body,body.light{background:#fff!important;color:#000!important;}
+  header,body.light header{position:static!important;background:#fff!important;border-bottom:1px solid #ccc!important;}
+  .btn-theme,.back-btn{display:none!important;}
+  #landing{display:none!important;}
+  .panel{display:block!important;}
+  .signal-box{background:#f8f8f8!important;}
+  .info-card,.trial-card,.nav-card{background:#fff!important;border:1px solid #ddd!important;}
+  .ct thead th,.rt-table thead th,.risk-table thead th{background:#f0f0f0!important;}
+  :root,body.light{--text:#000;--text2:#444;--text3:#888;--surface:#fff;--surface2:#f5f5f5;--border:#ddd;--blue:#1a5fa8;--orange:#b85500;--accent:#b85500;--green:#2d7a3a;}
+  .print-footer{display:block;font-size:8pt;color:#999;margin-top:22px;border-top:1px solid #ddd;padding-top:8px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">TSC</div>
+  <div class="hdr-titles">
+    <div class="hdr-title">Tératome sacro-coccygien de l'enfant</div>
+    <div class="hdr-subtitle">Prise en charge · Chirurgie · Oncologie · Radiothérapie · Suivi</div>
+  </div>
+  <span class="hdr-badge">MAKEI · UK CCSG · GPOH · 2026</span>
+  <span class="hdr-disclaimer">Outil de revue clinique RCP — ne substitue pas les recommandations institutionnelles</span>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Passer en mode clair">◑</button>
+</header>
+
+<div class="container">
+
+<!-- ════════════════════════ LANDING ════════════════════════ -->
+<div id="landing">
+  <p class="landing-intro">Tumeur des cellules germinales extragonadale la plus fréquente du nouveau-né (incidence 1/27 000–40 000 naissances). Ce tableau de bord couvre les 6 dimensions clés de la prise en charge, des données fœtales au traitement de sauvetage par radiothérapie.</p>
+
+  <div class="nav-grid">
+    <div class="nav-card" style="--nc-color:var(--cyan)" onclick="show('p1')">
+      <div class="nc-num">01</div>
+      <div class="nc-title">Classification &amp; Épidémiologie</div>
+      <div class="nc-meta">Altman I–IV · Histologie · Biologie</div>
+      <span class="nc-tag" style="color:var(--cyan);border-color:var(--cyan)">Fondations</span>
+    </div>
+    <div class="nav-card" style="--nc-color:var(--blue)" onclick="show('p2')">
+      <div class="nc-num">02</div>
+      <div class="nc-title">Prise en charge prénatale</div>
+      <div class="nc-meta">Diagnostic · Hydrops · Interventions fœtales</div>
+      <span class="nc-tag" style="color:var(--blue);border-color:var(--blue)">Périnatal</span>
+    </div>
+    <div class="nav-card" style="--nc-color:var(--green)" onclick="show('p3')">
+      <div class="nc-num">03</div>
+      <div class="nc-title">Chirurgie</div>
+      <div class="nc-meta">Coccygectomie · Voies d'abord · Timing</div>
+      <span class="nc-tag" style="color:var(--green);border-color:var(--green)">Standard of care</span>
+    </div>
+    <div class="nav-card" style="--nc-color:var(--yellow)" onclick="show('p4')">
+      <div class="nc-num">04</div>
+      <div class="nc-title">Surveillance &amp; Récidive</div>
+      <div class="nc-meta">AFP · Facteurs de risque · Upgrade histologique</div>
+      <span class="nc-tag" style="color:var(--yellow);border-color:var(--yellow)">Post-op</span>
+    </div>
+    <div class="nav-card" style="--nc-color:var(--purple)" onclick="show('p5')">
+      <div class="nc-num">05</div>
+      <div class="nc-title">Formes malignes — Chimiothérapie</div>
+      <div class="nc-meta">BEP · JEB · MAKEI · Résultats</div>
+      <span class="nc-tag" style="color:var(--purple);border-color:var(--purple)">Oncologie</span>
+    </div>
+    <div class="nav-card" style="--nc-color:var(--orange)" onclick="show('p6')">
+      <div class="nc-num">06</div>
+      <div class="nc-title">Radiothérapie de sauvetage</div>
+      <div class="nc-meta">&gt;45 Gy · R1/R2 · Protonthérapie</div>
+      <span class="nc-tag" style="color:var(--orange);border-color:var(--orange)">Niveau de preuve faible</span>
+    </div>
+  </div>
+
+  <div class="slabel">Tableau comparatif — formes histologiques</div>
+  <table class="ct">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Tératome mature (grade 0)</th>
+        <th>Tératome immature (grades 1–3)</th>
+        <th>Malin (TSV / éléments malins)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Fréquence</td>
+        <td>≈ 75–78 % des TSC</td>
+        <td>≈ 12–18 %</td>
+        <td>≈ 13–20 %</td>
+      </tr>
+      <tr>
+        <td>Âge typique</td>
+        <td>Néonatal (présent à la naissance)</td>
+        <td>Néonatal ou 1er mois</td>
+        <td><span class="val-o">Souvent &gt; 2 mois</span> — risque ↑ avec l'âge</td>
+      </tr>
+      <tr>
+        <td>AFP initiale</td>
+        <td>Normale (physiologique en période néonatale)</td>
+        <td>Modérément élevée ou normale</td>
+        <td><span class="val-r">Souvent très élevée</span> si TSV — seuil clinique ≈ 10 000 ng/mL</td>
+      </tr>
+      <tr>
+        <td>Traitement 1re ligne</td>
+        <td><span class="val-g">Chirurgie seule</span> (résection + coccygectomie)</td>
+        <td><span class="val-g">Chirurgie seule</span> si R0 complet</td>
+        <td><span class="val-r">Chimio cisplatine</span> ± chirurgie néo-adj / adj</td>
+      </tr>
+      <tr>
+        <td>Risque de récidive</td>
+        <td>Faible si R0 — mais upgrade possible<br><span class="val-m">OR 1 (référence)</span></td>
+        <td>Modéré — <span class="val-o">OR 5,7 vs mature</span></td>
+        <td>Élevé — <span class="val-r">OR 12,8 vs mature · HR 5,8</span></td>
+      </tr>
+      <tr>
+        <td>Surveillance (durée minimale)</td>
+        <td>3 ans — AFP + clinique + imagerie</td>
+        <td>3 ans — AFP + clinique + imagerie</td>
+        <td>3 ans minimum — AFP + imagerie rapprochée</td>
+      </tr>
+      <tr>
+        <td>Survie globale 5 ans</td>
+        <td><span class="val-g">~99 %</span> (UK CCSG 2008)</td>
+        <td><span class="val-g">~95 %</span> (UK CCSG 2008)</td>
+        <td><span class="val-o">~80–90 %</span> (MAKEI 2001 · JEB 1997)</td>
+      </tr>
+      <tr>
+        <td>Marqueur biologique clé</td>
+        <td>AFP (courbe normative par âge)</td>
+        <td>AFP — interprétation selon âge</td>
+        <td>AFP + éventuellement HCG · i(12p) à la biopsie</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Séquelles fonctionnelles à long terme (toutes formes)</div>
+  <div class="signal-box">
+    Indépendamment de l'histologie, la chirurgie pelvienne néonatale laisse des séquelles fonctionnelles significatives.
+    <span class="signal-hl4">Dysfonction urinaire</span> : 55 % des patients à long terme (Shalaby 2014), incluant incontinence (12 % vs 0 % chez témoins), difficultés de vidange vésicale (24 % vs 0 %) et pyélonéphrites récurrentes.
+    <span class="signal-hl5">Troubles anorectaux</span> : constipation chez 47 % vs 14 % dans la population générale (Hambraeus 2018). Les tumeurs volumineuses et d'histologie immature sont les plus à risque de dysfonction sphinctérienne (p &lt; 0,05). Un <span class="signal-hl2">suivi spécialisé urologique et colorectal</span> structuré est justifié pour tous les patients opérés.
+  </div>
+</div><!-- /landing -->
+
+<!-- ════════════════════════ PANEL 1 — CLASSIFICATION ════════════════════════ -->
+<div id="p1" class="panel">
+  <button class="back-btn" onclick="back()">← Retour</button>
+  <div class="panel-header">
+    <div class="panel-title">Classification &amp; Épidémiologie</div>
+    <div class="panel-sub">01 · Altman · Histologie · Biologie moléculaire</div>
+  </div>
+
+  <div class="slabel">Épidémiologie</div>
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="ic-label">Incidence</div>
+      <div class="ic-val">1 / 27 000 – 40 000</div>
+      <div class="ic-note">Naissances vivantes — prévalence la plus élevée parmi les tumeurs néonatales solides. Prédominance féminine marquée (sex-ratio 4F:1M).</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-label">Pic d'âge</div>
+      <div class="ic-val">Période néonatale</div>
+      <div class="ic-note">49 % détectés à la naissance (Tapper 1983). Diagnostic prénatal dans ~50 % des cas (Swamy 2008). Risque de malignité croissant avec l'âge au diagnostic.</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-label">Origine</div>
+      <div class="ic-val">Cellules totipotentes</div>
+      <div class="ic-note">Nœud de Hensen (face antérieure du coccyx). Différenciation selon les 3 feuillets embryonnaires. Deux voies histogénétiques distinctes identifiées (Emerson 2017).</div>
+    </div>
+  </div>
+
+  <div class="slabel">Classification d'Altman (anatomique)</div>
+  <table class="rt-table">
+    <thead><tr><th>Type</th><th>Description</th><th>Prévalence</th><th>Voie chirurgicale</th></tr></thead>
+    <tbody>
+      <tr><td>Type I</td><td>Tumeur entièrement externe — pas de composante intrapelvienne</td><td>~47 %</td><td>Voie postérieure (périnéale)</td></tr>
+      <tr><td>Type II</td><td>Prédominance externe, petite extension intrapelvienne</td><td>~35 %</td><td>Voie postérieure ± composante abdominale</td></tr>
+      <tr><td>Type III</td><td>Prédominance externe, extension intrapelvienne et intra-abdominale majeure</td><td>~9 %</td><td>Abord combiné abdominopérinéal</td></tr>
+      <tr><td>Type IV</td><td>Tumeur entièrement présacrée — absence de masse externe</td><td>~9 %</td><td>Abord combiné — diagnostic souvent tardif</td></tr>
+    </tbody>
+  </table>
+  <div class="nota-box">Le type Altman conditionne la voie chirurgicale mais <strong>ne prédit pas le risque de récidive</strong> (Derikx 2006, Srivatsa 2025). Le type IV, diagnostiqué plus tardivement, est associé à une prévalence de malignité plus élevée.</div>
+
+  <div class="slabel">Classification histologique (grading de maturité)</div>
+  <table class="rt-table">
+    <thead><tr><th>Grade</th><th>Définition</th><th>Comportement clinique</th><th>AFP</th></tr></thead>
+    <tbody>
+      <tr><td><span class="val-g">Grade 0</span> — Mature</td><td>Tissus différenciés exclusivement (3 feuillets)</td><td>Bénin — chirurgie seule si R0</td><td>Physiologique (courbe normative néonatale)</td></tr>
+      <tr><td><span class="val-o">Grade 1</span> — Immature faible</td><td>Faible proportion de tissus immatures (&lt; 10 %)</td><td>Chirurgie seule si R0 complet</td><td>Variable</td></tr>
+      <tr><td><span class="val-o">Grade 2–3</span> — Immature modéré/élevé</td><td>10–40 % (grade 2) ou &gt; 40 % (grade 3) de tissu immature, principalement neuroépithélial</td><td>Risque de récidive × 5,7 — surveillance renforcée</td><td>Élevée possible</td></tr>
+      <tr><td><span class="val-r">Malin (TSV/mixte)</span></td><td>Composante de tumeur du sac vitellin (TSV = yolk sac tumor), carcinome embryonnaire ou choriocarcinome</td><td>Chimiothérapie platine indispensable — cf. Panel 05</td><td>Souvent très élevée (&gt;10 000 ng/mL)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Biologie moléculaire</div>
+  <div class="signal-box">
+    Emerson et al. (2017) ont identifié <span class="signal-hl2">deux voies histogénétiques distinctes</span> par analyse FISH de l'isochromosome 12p (i(12p)) : (1) les <span class="signal-hl3">tératomes sans i(12p)</span> — bénins, pronostic excellent, tous cas pédiatriques dans cette série ; (2) les <span class="signal-hl4">tumeurs avec i(12p)</span> — systématiquement associées à une composante TSV, comportement malin. Ce marqueur cytogénétique est le même que celui des GCT de type II de l'adulte (testiculaires), suggérant une voie oncogénique convergente. <span class="signal-hl5">Implication pratique :</span> la présence de composante TSV à l'histologie initiale — même focale — doit alerter sur le risque de rechute maligne.
+  </div>
+
+  <div class="slabel">Références — Panel 01</div>
+  <ul class="refs-list">
+    <li><span class="ref-num">[1]</span><span class="ref-body">Emerson RE et al. Evidence of a dual histogenetic pathway of sacrococcygeal teratomas. <em>Histopathology.</em> 2017. <a href="https://consensus.app/papers/details/4f82a494992f55d59139daa0548466d7/" target="_blank">Consensus</a><span class="ref-note">▸ i(12p) = marqueur biologique malignité</span></span></li>
+    <li><span class="ref-num">[2]</span><span class="ref-body">Tapper D, Lack EE. Teratomas in infancy and childhood — 54-year experience. <em>Ann Surg.</em> 1983. <a href="https://consensus.app/papers/details/200e1c4d61ba5ea08aeb737f99a255b5/" target="_blank">Consensus</a><span class="ref-note">▸ 354 cit · référence fondatrice</span></span></li>
+    <li><span class="ref-num">[3]</span><span class="ref-body">Swamy R et al. Sacrococcygeal teratoma over two decades: birth prevalence. <em>Prenatal Diagnosis.</em> 2008. <a href="https://consensus.app/papers/details/1a1ff2b9c98253a1b222185572084c03/" target="_blank">Consensus</a><span class="ref-note">▸ Prévalence 1/27 000 — données populationnelles</span></span></li>
+  </ul>
+</div>
+
+<!-- ════════════════════════ PANEL 2 — PRÉNATAL ════════════════════════ -->
+<div id="p2" class="panel">
+  <button class="back-btn" onclick="back()">← Retour</button>
+  <div class="panel-header">
+    <div class="panel-title">Prise en charge prénatale &amp; périnatale</div>
+    <div class="panel-sub">02 · Diagnostic · Facteurs pronostiques · Interventions fœtales</div>
+  </div>
+
+  <div class="slabel">Signal clinique</div>
+  <div class="signal-box">
+    Le diagnostic prénatal est possible dès le T1–T2 et concerne environ <span class="signal-hl">50 % des cas</span>. La mortalité globale des TSC diagnostiqués en prénatal (IMG incluses) atteint <span class="signal-hl4">~35 %</span> (Heurn meta-analysis 2023, 11 études, 447 patients). Hors IMG, la mortalité tombe à 13 %. Le facteur pronostique le plus puissant est la <span class="signal-hl">vitesse de croissance tumorale ≥ 7 mm/semaine</span> (OR 25,7 pour mauvais pronostic périnatal ; Vinit 2024). Les interventions fœtales (laser, RFA, chirurgie ouverte) sont réservées aux formes avec hydrops menaçant, avec une survie de <span class="signal-hl5">30–55 %</span> dans cette population de très haut risque.
+  </div>
+
+  <div class="slabel">Facteurs de mauvais pronostic périnatal (meta-analyse Heurn 2023)</div>
+  <table class="risk-table">
+    <thead><tr><th>Facteur</th><th>OR (95 % CI)</th><th>Remarque</th></tr></thead>
+    <tbody>
+      <tr><td>Hydrops fœtal</td><td><span class="or-val or-hi">21,0 (2,6–275)</span></td><td>Signe de décompensation cardiaque — indicateur d'intervention fœtale</td></tr>
+      <tr><td>Cardiomégalie</td><td><span class="or-val or-hi">10,3 (1,9–55,8)</span></td><td>Reflet du vol vasculaire artério-veineux par la tumeur</td></tr>
+      <tr><td>Morphologie solide hypervasculaire</td><td><span class="or-val or-mid">Significatif</span></td><td>Doppler couleur indispensable — forte vascularisation = risque élevé</td></tr>
+      <tr><td>Placentomégalie</td><td><span class="or-val or-mid">Significatif</span></td><td>Signe indirect d'insuffisance cardiaque fœtale</td></tr>
+      <tr><td>TFR &gt; 0,12 avant 24 SA</td><td><span class="or-val or-hi">Prédictif</span></td><td>Ratio volume tumoral / poids fœtal estimé — seuil validé en méta-analyse</td></tr>
+      <tr><td>Vitesse de croissance ≥ 7 mm/sem</td><td><span class="or-val or-hi">25,7 (5,6–191)</span></td><td>Meilleur prédicteur indépendant (Vinit 2024) — seuil optimal en régression logistique</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Interventions fœtales — indications et résultats</div>
+  <table class="rt-table">
+    <thead><tr><th>Technique</th><th>Indication</th><th>Survie</th><th>Commentaire</th></tr></thead>
+    <tbody>
+      <tr><td>Chirurgie fœtale ouverte</td><td>Hydrops précoce (&lt; 28 SA), masse volumineuse solide</td><td>~56 %</td><td>Réservée aux centres experts; risque accouchement prématuré</td></tr>
+      <tr><td>RFA / Laser interstitiel</td><td>Hydrops ou décompensation cardiaque — interruption du flux nourricier</td><td>~45 %</td><td>Technique mini-invasive; RFA préférée si pédoncule artériel individualisable</td></tr>
+      <tr><td>Surveillance seule</td><td>Tumeur sans hydrops, TFR &lt; 0,12, croissance lente</td><td>~71 %</td><td>Majorité des cas — échographies bihebdomadaires si facteurs de risque présents</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Modalités d'accouchement</div>
+  <div class="signal-box">
+    La <span class="signal-hl2">césarienne programmée</span> est recommandée pour les TSC volumineux (risque d'hémorragie catastrophique par rupture en cas de présentation par le siège ou d'accouchement dystocique) avec une équipe chirurgicale pédiatrique disponible dès la naissance. L'accouchement voie basse peut être envisagé pour les types I à composante kystique prédominante de petite taille. <span class="signal-hl">L'âge gestationnel à l'accouchement est le principal prédicteur de survie</span> dans toutes les sous-populations (Konno 2024 systematic review) : la prématurité iatrogène liée aux interventions fœtales est un facteur de morbi-mortalité indépendant de la technique.
+  </div>
+
+  <div class="slabel">Références — Panel 02</div>
+  <ul class="refs-list">
+    <li><span class="ref-num">[4]</span><span class="ref-body">Heurn LW et al. Prognostic accuracy of factors in prenatally diagnosed SCT — SR &amp; meta-analysis. <em>Prenatal Diagnosis.</em> 2023. <a href="https://consensus.app/papers/details/18aa3065a019521293bf0ca3f1d6d2bf/" target="_blank">Consensus</a><span class="ref-note">▸ 447 patients · OR facteurs pronostiques</span></span></li>
+    <li><span class="ref-num">[5]</span><span class="ref-body">Vinit N et al. Growth velocity as predictor of perinatal morbidity. <em>Ultrasound Obstet Gynecol.</em> 2024. <a href="https://consensus.app/papers/details/f637f0b7814c5f59bea2a4038622f32d/" target="_blank">Consensus</a><span class="ref-note">▸ ≥7 mm/sem → OR 25,7 mauvais pronostic</span></span></li>
+    <li><span class="ref-num">[6]</span><span class="ref-body">Konno H et al. Perinatal outcomes of intrauterine interventions — systematic review. <em>J Clin Med.</em> 2024. <a href="https://consensus.app/papers/details/2c5d470824de5f7ba15209bfd03a50fe/" target="_blank">Consensus</a><span class="ref-note">▸ AG à l'accouchement = principal prédicteur</span></span></li>
+  </ul>
+</div>
+
+<!-- ════════════════════════ PANEL 3 — CHIRURGIE ════════════════════════ -->
+<div id="p3" class="panel">
+  <button class="back-btn" onclick="back()">← Retour</button>
+  <div class="panel-header">
+    <div class="panel-title">Chirurgie</div>
+    <div class="panel-sub">03 · Résection complète · Coccygectomie · Voies d'abord · Timing</div>
+  </div>
+
+  <div class="slabel">Signal clinique</div>
+  <div class="signal-box">
+    La <span class="signal-hl2">résection chirurgicale complète avec coccygectomie systématique</span> est le traitement de référence universel, quelle que soit l'histologie. La qualité de la résection est le facteur pronostique dominant (Tapper 1983, Göbel 2001). <span class="signal-hl4">L'omission de la coccygectomie multiplie le risque de récidive maligne</span> : les TSC récidivant sans coccygectomie donnent quasi-systématiquement une tumeur du sac vitellin (Hawkins 1986). Le timing idéal est la <span class="signal-hl">période néonatale précoce</span> — au-delà de 2 mois, le risque de malignité à la récidive augmente significativement.
+  </div>
+
+  <div class="slabel">Principes opératoires</div>
+  <ol class="step-list">
+    <li><span class="step-num">01</span><span class="step-body"><strong>Résection en bloc</strong> incluant systématiquement le coccyx — même en l'absence de tumeur résiduelle visible. Sans coccygectomie : OR de récidive × 6,54 (Derikx 2006).</span></li>
+    <li><span class="step-num">02</span><span class="step-body"><strong>Voie postérieure (périnéale)</strong> pour les types I–II. Abord semi-circulaire fessier, dissection en plan avasculaire du plan pré-coccygien. Ligature préalable de l'artère sacrée médiane conseillée.</span></li>
+    <li><span class="step-num">03</span><span class="step-body"><strong>Abord combiné abdominopérinéal</strong> pour les types III–IV : laparotomie ou cœlioscopie pour libérer la composante pelvienne/intra-abdominale avant le temps périnéal.</span></li>
+    <li><span class="step-num">04</span><span class="step-body"><strong>Embolisation préopératoire</strong> des pédicules artériels nourriciers envisageable pour les TSC très volumineux chez le grand prématuré — réduit le saignement peropératoire (recommandation guidelines japonaises 2017).</span></li>
+    <li><span class="step-num">05</span><span class="step-body"><strong>Préservation des nerfs sacrés S2–S4</strong> — essentielle pour la continence sphinctérienne. Les lésions bilatérales de S3 sont associées à une dysurie permanente (navigation chirurgicale documentée, Park 2025).</span></li>
+  </ol>
+
+  <div class="slabel">Complications chirurgicales</div>
+  <table class="rt-table">
+    <thead><tr><th>Complication</th><th>Fréquence</th><th>Facteur de risque principal</th></tr></thead>
+    <tbody>
+      <tr><td>Hémorragie peropératoire massive</td><td>Principale cause de décès chirurgical (séries historiques)</td><td>Type III–IV, néonatal, grande prématurité</td></tr>
+      <tr><td>Lésion du plexus sacré</td><td>Variable selon voie d'abord</td><td>Extension intrapelvienne, reprise chirurgicale</td></tr>
+      <tr><td>Lésion rectale</td><td>Rare si plan de dissection respecté</td><td>Type IV, tumeur volumineuse, récidive</td></tr>
+      <tr><td>Dysfonction vésico-sphinctérienne</td><td>24 % dysfonction mictionnelle (Hambraeus 2018)</td><td>Tumeur volumineuse, histologie immature</td></tr>
+    </tbody>
+  </table>
+
+  <div class="key-msg">
+    <span class="km-label">Message clé</span>
+    Résection R0 + coccygectomie = seul traitement curatif pour les formes bénignes et immatures. La qualité technique de la première chirurgie détermine le pronostic à long terme — le référer à un centre expert si la complexité anatomique ou l'âge gestationnel le justifie.
+  </div>
+
+  <div class="slabel">Références — Panel 03</div>
+  <ul class="refs-list">
+    <li><span class="ref-num">[2]</span><span class="ref-body">Tapper D, Lack EE. 54-year experience. <em>Ann Surg.</em> 1983. <a href="https://consensus.app/papers/details/200e1c4d61ba5ea08aeb737f99a255b5/" target="_blank">Consensus</a><span class="ref-note">▸ Résection R0 = facteur pronostique dominant</span></span></li>
+    <li><span class="ref-num">[7]</span><span class="ref-body">Derikx JP et al. Factors associated with recurrence and metastasis in SCT. <em>Br J Surg.</em> 2006. <a href="https://consensus.app/papers/details/e05a8e7181905fdba700d95a212cca22/" target="_blank">Consensus</a><span class="ref-note">▸ 173 patients · OR résection incomplète 6,54</span></span></li>
+    <li><span class="ref-num">[8]</span><span class="ref-body">Fumino S et al. Japanese clinical practice guidelines for SCT, 2017. <em>Pediatrics Int.</em> 2019. <a href="https://consensus.app/papers/details/612db0211c9f5942ac44424f7fac1fa0/" target="_blank">Consensus</a><span class="ref-note">▸ Seules guidelines formelles publiées</span></span></li>
+  </ul>
+</div>
+
+<!-- ════════════════════════ PANEL 4 — SURVEILLANCE ════════════════════════ -->
+<div id="p4" class="panel">
+  <button class="back-btn" onclick="back()">← Retour</button>
+  <div class="panel-header">
+    <div class="panel-title">Surveillance post-opératoire &amp; récidive</div>
+    <div class="panel-sub">04 · AFP · Facteurs de risque · Upgrade histologique · 3 ans</div>
+  </div>
+
+  <div class="slabel">Signal clinique</div>
+  <div class="signal-box">
+    Le taux de récidive global est de <span class="signal-hl">10–11 % à 3 ans</span> (Derikx 2006 : n=173 ; Srivatsa 2025 : n=178). <span class="signal-hl4">90 % des récidives surviennent dans les 3 premières années</span>, avec un délai médian de 10 mois post-chirurgie. La particularité biologique majeure est l'<span class="signal-hl5">upgrade histologique à la récidive</span> : un tiers des récidives présentent une histologie plus agressive que la tumeur initiale (Derikx 2006) — un tératome mature <em>peut devenir malin</em>. Il n'existe <span class="signal-hl4">aucun protocole de surveillance standardisé</span> à ce jour (lacune identifiée dans le projet COS-SCT 2026).
+  </div>
+
+  <div class="slabel">Facteurs de risque de récidive — données quantifiées</div>
+  <table class="risk-table">
+    <thead><tr><th>Facteur</th><th>OR / HR</th><th>Source</th><th>Commentaire</th></tr></thead>
+    <tbody>
+      <tr><td>Histologie maligne (TSV)</td><td><span class="or-val or-hi">OR 12,83 · HR 5,83</span></td><td>Derikx 2006 · Srivatsa 2025</td><td>Facteur pronostique dominant — indépendant dans les deux cohortes</td></tr>
+      <tr><td>Histologie immature (grade 1–3)</td><td><span class="or-val or-mid">OR 5,74</span></td><td>Derikx 2006</td><td>Risque intermédiaire — surveillance identique à la forme maligne</td></tr>
+      <tr><td>Résection incomplète (R1/R2)</td><td><span class="or-val or-hi">OR 6,54</span></td><td>Derikx 2006</td><td>Confirme que la qualité chirurgicale prime</td></tr>
+      <tr><td>Classification Altman</td><td><span class="or-val" style="color:var(--text3)">NS</span></td><td>Derikx 2006 · Srivatsa 2025</td><td>N'est pas un facteur de risque indépendant de récidive</td></tr>
+      <tr><td>Taille tumorale initiale</td><td><span class="or-val" style="color:var(--text3)">NS</span></td><td>Derikx 2006</td><td>Taille seule n'est pas prédictive — c'est l'histologie qui compte</td></tr>
+      <tr><td>Décennie de traitement</td><td><span class="or-val" style="color:var(--text3)">NS</span></td><td>Derikx 2006</td><td>L'ère thérapeutique n'influence pas le risque de récidive</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">AFP — Rôle dans la surveillance</div>
+  <div class="signal-box">
+    L'AFP est le marqueur de surveillance central dans les TSC : une <span class="signal-hl3">élévation de l'AFP précède la rechute clinique ou radiologique</span> dans la majorité des cas de TSV (Mann 2008, Misra 1997). <span class="signal-hl5">Point critique :</span> l'AFP est physiologiquement très élevée chez le nouveau-né et décroît progressivement jusqu'à l'âge de 12–18 mois selon une courbe normative. Toute interprétation doit utiliser les <strong>valeurs normatives pédiatriques</strong> par âge (curve par mois). Une AFP ne décroissant pas selon la courbe attendue ou remontant doit déclencher une imagerie urgente même en l'absence de symptômes. <span class="signal-hl4">Limite :</span> l'AFP est muette pour les tératomes purs (mature et immature) — son absence d'élévation n'exclut pas une récidive non sécrétante.
+  </div>
+
+  <div class="slabel">Proposition de surveillance (Srivatsa 2025 + pratique)</div>
+  <ol class="step-list">
+    <li><span class="step-num">J30</span><span class="step-body"><strong>AFP post-op</strong> (baseline après normalisation attendue selon âge) + examen clinique + toucher rectal.</span></li>
+    <li><span class="step-num">3 mois</span><span class="step-body">AFP + IRM pelvi-sacrée (ou échographie pelvienne selon âge) + examen clinique.</span></li>
+    <li><span class="step-num">6 mois</span><span class="step-body">AFP + imagerie + clinique. Fréquence à adapter selon histologie initiale (immature/maligne : rapprocher).</span></li>
+    <li><span class="step-num">1–3 ans</span><span class="step-body">Tous les 3 à 6 mois — <strong>minimum 3 ans de surveillance</strong> pour toutes les histologies. 90 % des récidives dans cette fenêtre.</span></li>
+    <li><span class="step-num">&gt; 3 ans</span><span class="step-body">Surveillance annuelle clinique pour les formes bénignes. Prolonger pour les formes immatures/malignes selon la pratique du centre. Absence de consensus — protocole à définir en MDT.</span></li>
+  </ol>
+
+  <div class="nota-box"><strong>Absence de protocole standardisé international :</strong> le projet COS-SCT (Van Dongen, Amsterdam UMC, 2026) vise à harmoniser les critères d'évaluation — résultats attendus 2027–2028. En attendant, la pratique varie significativement entre institutions (Srivatsa 2025).</div>
+
+  <div class="slabel">Références — Panel 04</div>
+  <ul class="refs-list">
+    <li><span class="ref-num">[9]</span><span class="ref-body">Srivatsa S et al. Optimizing surveillance strategies for SCT — Midwest consortium. <em>Int J Cancer.</em> 2025. <a href="https://consensus.app/papers/details/89df6fd7be00566b8c292df57b1fe312/" target="_blank">Consensus</a><span class="ref-note">▸ 178 patients, 11 centres · HR maligne 5,83</span></span></li>
+    <li><span class="ref-num">[7]</span><span class="ref-body">Derikx JP et al. Factors associated with recurrence — Dutch national cohort. <em>Br J Surg.</em> 2006. <a href="https://consensus.app/papers/details/e05a8e7181905fdba700d95a212cca22/" target="_blank">Consensus</a><span class="ref-note">▸ 1/3 des récidives = upgrade histologique</span></span></li>
+    <li><span class="ref-num">[10]</span><span class="ref-body">Mann JR et al. Mature and immature extracranial teratomas — UK CCSG. <em>J Clin Oncol.</em> 2008. <a href="https://consensus.app/papers/details/f655788148f553a28edcf91bfdf31147/" target="_blank">Consensus</a><span class="ref-note">▸ AFP = détection précoce de rechute TSV</span></span></li>
+  </ul>
+</div>
+
+<!-- ════════════════════════ PANEL 5 — CHIMIO ════════════════════════ -->
+<div id="p5" class="panel">
+  <button class="back-btn" onclick="back()">← Retour</button>
+  <div class="panel-header">
+    <div class="panel-title">Formes malignes — Chimiothérapie</div>
+    <div class="panel-sub">05 · BEP · JEB · MAKEI · Néo-adjuvant vs adjuvant</div>
+  </div>
+
+  <div class="slabel">Signal clinique</div>
+  <div class="signal-box">
+    L'introduction du cisplatine dans les années 1980 a transformé le pronostic des TSC malins : la survie est passée de <span class="signal-hl4">~21 %</span> à l'ère pré-platine (Flamant 1984, IGR) à <span class="signal-hl3">80–90 %</span> avec les protocoles platine modernes. Les schémas BEP, PEB et JEB ont des résultats comparables en survie globale (Jiang 2023, 1007 GCT pédiatriques à Shanghai). L'approche <span class="signal-hl2">néo-adjuvante</span> est supérieure à l'adjuvante pour les tumeurs avancées T2b M1 : SG 83 % vs 45 % (p=0,01, MAKEI Göbel 2001) — elle facilite la résection complète et évite la chirurgie de deuxième regard.
+  </div>
+
+  <div class="slabel">Protocoles de chimiothérapie — comparaison</div>
+  <table class="rt-table">
+    <thead><tr><th>Protocole</th><th>Drogues</th><th>Contexte d'usage</th><th>Résultats TSC</th></tr></thead>
+    <tbody>
+      <tr><td><strong>BEP</strong></td><td>Bléomycine + Étoposide + Cisplatine</td><td>Standard international adulte — utilisé en pédiatrie</td><td>SG ~80 % (MAKEI) — toxicité pulmonaire bléomycine à surveiller</td></tr>
+      <tr><td><strong>JEB</strong></td><td>Carboplatine + Étoposide + Bléomycine</td><td>Protocole UK CCSG / Great Ormond Street — privilégié en pédiatrie</td><td>SG &gt; 90 % (Misra 1997, n=12 patients JEB) — moins néphrotoxique que cisplatine</td></tr>
+      <tr><td><strong>PEB / PEI</strong></td><td>Cisplatine + Étoposide ± Ifosfamide</td><td>Protocoles MAKEI / GPOH-GCT</td><td>SG 81 %, 5y EFS 76 % (Göbel 2001, n=66)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Stratégie néo-adjuvante vs adjuvante (Göbel 2001 MAKEI)</div>
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="ic-label">Groupe A — Chirurgie première puis chimio adj.</div>
+      <div class="ic-val" style="color:var(--orange)">OS 81 % · mais R0 = 5/35 (14 %)</div>
+      <div class="ic-note">Tumeurs non métastatiques, accessibles d'emblée. Taux de résection R0 faible en situation localement avancée sans réduction tumorale préalable.</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-label">Groupe B — Chimio néo-adj puis chirurgie tardive</div>
+      <div class="ic-val" style="color:var(--green)">OS 83 % · R0 = 20/31 (65 %)</div>
+      <div class="ic-note">Inclut 19/31 tumeurs M1 → SG 83 % vs 45 % pour M1 en groupe A (p=0,01). Diminue le recours à la chirurgie de deuxième regard.</div>
+    </div>
+  </div>
+
+  <div class="slabel">Facteurs de mauvais pronostic (formes malignes)</div>
+  <table class="risk-table">
+    <thead><tr><th>Facteur</th><th>Impact</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>AFP initiale ≥ 10 000 ng/mL</td><td><span class="val-o">Pronostic ambigu</span> — très haute AFP = TSV répondant bien à la chimio (survie favorable), mais charge tumorale élevée</td><td>Büyükpamukçu 2013 · Hulsker 2021</td></tr>
+      <tr><td>Stade IV (M1 à distance)</td><td><span class="val-r">Survie inférieure</span> — OS ~70–75 % (vs 88 % M0)</td><td>Misra 1997 · MAKEI 2001</td></tr>
+      <tr><td>Site médiastinal</td><td><span class="val-r">Pire pronostic</span> que sacrococcygien ou gonadal (indépendant du stade)</td><td>Hulsker 2021 meta-analysis</td></tr>
+      <tr><td>Âge &gt; 11 ans</td><td><span class="val-r">Désavantage de survie</span> — transition vers biologie GCT de type II adulte</td><td>Hulsker 2021</td></tr>
+      <tr><td>Résection chirurgicale incomplète</td><td><span class="val-r">Facteur pronostique dominant</span> — aucun patient sans résection ne survivait à l'ère pré-platine</td><td>Tapper 1983 · Göbel 2001</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Essais actifs — GCT pédiatriques extracraniens</div>
+  <div class="trials-grid">
+    <div class="trial-card">
+      <div class="tc-head">
+        <a class="tc-nct" href="https://clinicaltrials.gov/study/NCT02015338" target="_blank">NCT02015338</a>
+        <span class="tc-status active">ACTIVE · NR</span>
+      </div>
+      <div class="tc-title">GPOH-GCT 2013 — Malignant extracranial GCT in children and adolescents</div>
+      <div class="tc-meta">Protocole multinational GPOH (Allemagne). Chimiothérapie risque-adaptée, platine. Inclut données RT comme modalité de sauvetage (non randomisée).</div>
+      <div class="tc-tags"><span class="th-ct">Chimio</span><span class="th-sg">Chirurgie</span><span class="th-rt">RT sauvetage</span></div>
+    </div>
+  </div>
+
+  <div class="slabel">Références — Panel 05</div>
+  <ul class="refs-list">
+    <li><span class="ref-num">[11]</span><span class="ref-body">Göbel U et al. Multimodal treatment — MAKEI 83/86 and 89. <em>J Clin Oncol.</em> 2001. <a href="https://consensus.app/papers/details/969719367918521e83bf1fee61c64709/" target="_blank">Consensus</a><span class="ref-note">▸ Néo-adj T2bM1 : OS 83 % vs 45 %</span></span></li>
+    <li><span class="ref-num">[12]</span><span class="ref-body">Misra D et al. Markedly improved survival — JEB protocol. <em>Eur J Pediatr Surg.</em> 1997. <a href="https://doi.org/10.1055/s-2008-1071078" target="_blank">DOI: 10.1055/s-2008-1071078</a><span class="ref-note">▸ JEB → SG &gt; 90 %</span></span></li>
+    <li><span class="ref-num">[13]</span><span class="ref-body">Hulsker CC et al. Treatment and survival — SR &amp; meta-analysis. <em>Cancers.</em> 2021. <a href="https://consensus.app/papers/details/485dc050f1035d9291eb59383e90dc40/" target="_blank">Consensus</a><span class="ref-note">▸ 5095 patients — facteurs pronostiques</span></span></li>
+    <li><span class="ref-num">[14]</span><span class="ref-body">Jiang S et al. Extracranial GCTs — 10 years, 3 centres Shanghai. <em>Cancers.</em> 2023. <a href="https://consensus.app/papers/details/ff8418aac83057ea8bff40f372322e48/" target="_blank">Consensus</a><span class="ref-note">▸ BEP=JEB=PEB en OS · AFP ≥10 000 = facteur indépendant</span></span></li>
+  </ul>
+</div>
+
+<!-- ════════════════════════ PANEL 6 — RT ════════════════════════ -->
+<div id="p6" class="panel">
+  <button class="back-btn" onclick="back()">← Retour</button>
+  <div class="panel-header">
+    <div class="panel-title">Radiothérapie de sauvetage</div>
+    <div class="panel-sub">06 · Indication R1/R2 · &gt;45 Gy · Protonthérapie · Niveau de preuve faible</div>
+  </div>
+
+  <div class="signal-box" style="border-left:3px solid var(--yellow);">
+    <span class="signal-hl5">⚠ Niveau de preuve très faible.</span> L'ensemble des données sur la RT provient d'analyses rétrospectives de faible effectif. Le seuil de dose de &gt;45 Gy repose sur un unique sous-groupe de 22 patients (Schneider 2001). <strong>41 patients seulement ont été irradiés</strong> dans le cadre du protocole MAKEI entre 1983 et 2021 (Schmidt 2022) — illustrant à quel point la RT est une intervention de dernier recours.
+  </div>
+
+  <div class="slabel">Indications reconnues en 2026</div>
+  <table class="rt-table">
+    <thead><tr><th>Indication</th><th>Niveau</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Résection chirurgicale de sauvetage R1/R2</strong> — marges microscopiquement positives après chirurgie de récidive, sans reprise possible</td><td><span class="loe loe-3">Reconnu</span></td><td>Schneider 2001</td></tr>
+      <tr><td><strong>Maladie localement non résécable en récidive</strong> — en association à la chimio de 2e ligne</td><td><span class="loe loe-3">Discuté</span></td><td>Schmidt 2022</td></tr>
+      <tr><td><strong>RT adjuvante après R0 complet</strong> — aucune indication quel que soit le contexte</td><td><span class="loe loe-3" style="color:var(--red);border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.1)">Contre-indiqué</span></td><td>Göbel 2000</td></tr>
+    </tbody>
+  </table>
+
+  <div class="slabel">Données dosimétriques disponibles</div>
+  <table class="rt-table">
+    <thead><tr><th>Paramètre</th><th>Valeur</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Dose minimale efficace</td><td><span class="rt-dose">&gt; 45 Gy</span></td><td>Schneider 2001 (MAKEI)</td></tr>
+      <tr><td>Plage observée</td><td><span class="rt-dose esc">20–60 Gy</span> · 1,5–4 Gy/fraction</td><td>Schmidt 2022 (n=41)</td></tr>
+      <tr><td>BED₁₀ (45 Gy, 1,8 Gy/f)</td><td><span class="rt-dose">53,1 Gy₁₀</span></td><td>Calcul LQ — α/β=10</td></tr>
+      <tr><td>BED₁₀ (50 Gy, 2 Gy/f)</td><td><span class="rt-dose">60 Gy₁₀</span></td><td>Calcul LQ — référence pratique</td></tr>
+      <tr><td>Protonthérapie</td><td><span class="rt-dose esc">34 % des cas irradiés</span> (14/41)</td><td>Schmidt 2022 — à privilégier chez l'enfant jeune</td></tr>
+      <tr><td>Contrôle local</td><td><span class="rt-dose esc">78 %</span> (32/41 patients)</td><td>Schmidt 2022 — tous contextes confondus</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nota-box"><strong>Volumes cibles :</strong> aucune recommandation formelle publiée pour les TSC malins. Par extrapolation des GCT extracraniens pédiatriques — GTV = résidu macroscopique IRM, CTV = GTV + lit opératoire + marges d'extension microscopique présumée, PTV = CTV +5–10 mm. Validation par le radiooncologiste référent GCT indispensable avant planification.</div>
+
+  <div class="key-msg">
+    <span class="km-label">Message clé — RT dans les TSC malins</span>
+    RT non standard — réservée à R1/R2 après chirurgie de sauvetage ou maladie localement non résécable en récidive. Dose ≥ 45 Gy en fractionnement conventionnel (1,8–2 Gy/fraction). Discussion MDT spécialisée obligatoire. Protonthérapie à privilégier chez l'enfant &lt; 5 ans si disponible.
+  </div>
+
+  <div class="slabel">Références — Panel 06</div>
+  <ul class="refs-list">
+    <li><span class="ref-num">[15]</span><span class="ref-body">Schneider DT et al. Treatment of recurrent malignant SCT — MAKEI 83/86, 89, 96. <em>J Clin Oncol.</em> 2001;19(7):1951. <a href="https://doi.org/10.1200/JCO.2001.19.7.1951" target="_blank">DOI: 10.1200/JCO.2001.19.7.1951</a><span class="ref-note">▸ &gt;45 Gy → CL favorable en R1</span></span></li>
+    <li><span class="ref-num">[16]</span><span class="ref-body">Schmidt L et al. Radiotherapy within interdisciplinary treatment for pediatric extracranial GCT. <em>IJROBP.</em> 2022. <a href="https://consensus.app/papers/details/141adeb51403589ebcb60e16c1fb4374/" target="_blank">Consensus</a><span class="ref-note">▸ 41 patients · 20–60 Gy · CL 78 % · PT 34 %</span></span></li>
+    <li><span class="ref-num">[17]</span><span class="ref-body">Göbel U et al. Germ-cell tumors in childhood and adolescence. <em>Ann Oncol.</em> 2000. <a href="https://consensus.app/papers/details/a12ea32655ad5f1c9719d49121846614/" target="_blank">Consensus</a><span class="ref-note">▸ R0 → pas de rôle pour RT adjuvante</span></span></li>
+  </ul>
+
+  <div class="print-footer">TSC Pédiatrie — Tableau de bord de revue clinique · ILB · Juin 2026 · Usage RCP — non substitutif d'une consultation spécialisée.</div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ═══ NAVIGATION ═══
+var _stack = [];
+function show(id) {
+  document.getElementById('landing').style.display = 'none';
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  _stack.push(id);
+  window.scrollTo(0,0);
+}
+function back() {
+  _stack.pop();
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  if (_stack.length > 0) {
+    document.getElementById(_stack[_stack.length-1]).classList.add('active');
+  } else {
+    document.getElementById('landing').style.display = 'block';
+  }
+  window.scrollTo(0,0);
+}
+
+// ═══ THÈME ═══
+function initTheme() {
+  try {
+    var t = localStorage.getItem('theme-tsc-revue');
+    if (t === 'light') { document.body.classList.add('light'); document.getElementById('btn-theme').textContent = '☀'; }
+    else { document.body.classList.remove('light'); document.getElementById('btn-theme').textContent = '◑'; }
+  } catch(e) {}
+}
+function toggleTheme() {
+  try {
+    var isLight = document.body.classList.toggle('light');
+    document.getElementById('btn-theme').textContent = isLight ? '☀' : '◑';
+    localStorage.setItem('theme-tsc-revue', isLight ? 'light' : 'dark');
+  } catch(e) {}
+}
+initTheme();
+</script>
+</body>
+</html>

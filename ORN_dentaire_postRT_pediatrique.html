@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORN post-RT — Soins dentaires et risque d'ostéoradionécrose</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #181c26;
+    --bg3: #1e2433;
+    --border: #2e3650;
+    --text: #e8eaf2;
+    --text2: #9ba3c2;
+    --text3: #5d6585;
+    --accent: #c8a96e;
+    --accent2: #e8c98a;
+    --red: #d9534f;
+    --green: #5cb85c;
+    --orange: #e8983a;
+    --blue: #5b9bd5;
+    --font: 'DM Sans', 'Segoe UI', sans-serif;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --mono: 'DM Mono', 'Courier New', monospace;
+  }
+  [data-theme="light"] {
+    --bg: #f5f0e8;
+    --bg2: #fffdf7;
+    --bg3: #ede8db;
+    --border: #d0c8b0;
+    --text: #1a1a2e;
+    --text2: #4a4a6a;
+    --text3: #8a8aa0;
+    --accent: #8b6914;
+    --accent2: #a07820;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+
+  /* Header */
+  .doc-header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .doc-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .doc-meta-left h1 {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    font-weight: 400;
+    color: var(--accent2);
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+  }
+  .doc-meta-left .subtitle {
+    color: var(--text2);
+    font-size: 0.88rem;
+  }
+  .meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+  }
+  .tag {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+    font-family: var(--mono);
+  }
+  .tag.accent { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: var(--font);
+    white-space: nowrap;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Sections */
+  section { margin-bottom: 2.5rem; }
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--accent);
+    border-left: 3px solid var(--accent);
+    padding-left: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  h3 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+    margin-top: 1.2rem;
+  }
+
+  /* PICO box */
+  .pico-grid {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 0;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .pico-letter {
+    background: var(--bg3);
+    color: var(--accent);
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border);
+    padding: 0.6rem 0;
+  }
+  .pico-row:not(:last-child) .pico-letter,
+  .pico-row:not(:last-child) .pico-content { border-bottom: 1px solid var(--border); }
+  .pico-content {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+  .pico-content strong { color: var(--text2); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.1rem; }
+  .pico-row { display: contents; }
+
+  /* Alert / callout */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: var(--bg2);
+    padding: 0.7rem 1rem;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.88rem;
+    color: var(--text2);
+    margin: 1rem 0;
+  }
+  .callout.info { border-color: var(--blue); }
+  .callout.red { border-color: var(--red); }
+  .callout.green { border-color: var(--green); }
+  .callout strong { color: var(--text); }
+
+  /* Key ref */
+  .recommended {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 0.8rem 1rem;
+    margin: 0.8rem 0;
+    font-size: 0.88rem;
+  }
+  .recommended::before {
+    content: '📖 Lecture recommandée — ';
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 0.5rem 0 1rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  th {
+    background: var(--bg3);
+    color: var(--accent);
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 2px solid var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+  }
+  td {
+    padding: 0.45rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  tr:hover td { background: var(--bg2); }
+  td strong { color: var(--text); }
+  td a { color: var(--accent); text-decoration: none; }
+  td a:hover { text-decoration: underline; }
+
+  /* Risk chips */
+  .chip {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-weight: 500;
+  }
+  .chip-high { background: rgba(217,83,79,0.15); color: var(--red); border: 1px solid var(--red); }
+  .chip-mod { background: rgba(232,152,58,0.15); color: var(--orange); border: 1px solid var(--orange); }
+  .chip-low { background: rgba(92,184,92,0.15); color: var(--green); border: 1px solid var(--green); }
+  .chip-unk { background: rgba(91,155,213,0.15); color: var(--blue); border: 1px solid var(--blue); }
+
+  /* Evidence level */
+  .evidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.8rem 1.2rem;
+    margin: 0.5rem 0;
+  }
+  .ev-icon {
+    font-family: var(--serif);
+    font-size: 2rem;
+    color: var(--accent);
+    min-width: 2rem;
+    text-align: center;
+  }
+  .ev-text strong { color: var(--text); display: block; font-size: 0.9rem; }
+  .ev-text span { color: var(--text2); font-size: 0.82rem; }
+
+  /* Timeline */
+  .timeline { border-left: 2px solid var(--border); padding-left: 1.5rem; margin: 1rem 0; }
+  .tl-item { position: relative; margin-bottom: 1rem; }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -1.85rem;
+    top: 0.35rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-item .tl-year {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .tl-item .tl-text { font-size: 0.88rem; color: var(--text2); }
+  .tl-item .tl-text strong { color: var(--text); }
+
+  /* Message final */
+  .message-final {
+    background: var(--bg2);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--accent2);
+    line-height: 1.6;
+  }
+
+  /* Refs */
+  .refs { font-size: 0.78rem; color: var(--text3); line-height: 1.6; }
+  .refs ol { padding-left: 1.2rem; }
+  .refs li { margin-bottom: 0.3rem; }
+  .refs a { color: var(--blue); text-decoration: none; }
+  .refs a:hover { text-decoration: underline; }
+
+  /* Lacunes */
+  .lacune-list { list-style: none; padding: 0; }
+  .lacune-list li {
+    padding: 0.3rem 0.5rem 0.3rem 1.5rem;
+    position: relative;
+    font-size: 0.88rem;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+  .lacune-list li::before {
+    content: '☐';
+    position: absolute;
+    left: 0;
+    color: var(--orange);
+    font-size: 0.85rem;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; color: #111; max-width: 100%; }
+    .theme-toggle { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-meta">
+    <div class="doc-meta-left">
+      <h1>ORN post-RT et soins dentaires</h1>
+      <div class="subtitle">Synthèse bibliographique — Mise à jour personnelle · 27/05/2026</div>
+      <div class="meta-tags">
+        <span class="tag accent">Pédiatrique</span>
+        <span class="tag">Ostéoradionécrose</span>
+        <span class="tag">Maxillaire / mandibule</span>
+        <span class="tag">Soins dentaires déclencheurs</span>
+        <span class="tag">Sources PubMed · 2024–2010</span>
+      </div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">◑ Thème</button>
+  </div>
+</div>
+
+<!-- 1. PICO -->
+<section>
+  <h2>1. Cadrage PICO</h2>
+  <div class="pico-grid">
+    <div class="pico-row">
+      <div class="pico-letter">P</div>
+      <div class="pico-content"><strong>Population</strong>Patients pédiatriques irradiés pour tumeur tête-cou (RMS paraminengé, médulloblastome, GCT, ATRT…) ayant reçu une dose significative au maxillaire ou à la mandibule</div>
+    </div>
+    <div class="pico-row">
+      <div class="pico-letter">I</div>
+      <div class="pico-content"><strong>Intervention</strong>Soins dentaires invasifs après RT : extraction, implants, chirurgie alvéolaire, soins parodontaux profonds</div>
+    </div>
+    <div class="pico-row">
+      <div class="pico-letter">C</div>
+      <div class="pico-content"><strong>Comparateur</strong>Abstention / soins conservateurs / soins avec protocole préventif (OHB, antibioprophylaxie, PENTO)</div>
+    </div>
+    <div class="pico-row">
+      <div class="pico-letter">O</div>
+      <div class="pico-content"><strong>Outcomes</strong>Survenue d'une ORN (principale) ; facteurs prédictifs, stratégies de prévention, prise en charge de l'ORN constituée (secondaires)</div>
+    </div>
+  </div>
+
+  <div class="callout info" style="margin-top:1rem;">
+    <strong>Note de périmètre :</strong> les données pédiatriques spécifiques sur l'ORN maxillaire sont rares (n=5 études sur PubMed). La littérature adulte VADS est intégrée pour les données dosimétriques et de prévention, applicables par extrapolation avec réserves.
+  </div>
+</section>
+
+<!-- 2. Signal clé pédiatrique -->
+<section>
+  <h2>2. Données pédiatriques spécifiques — Signal principal</h2>
+
+  <div class="recommended">
+    Grippin AJ et al. <em>Int J Radiat Oncol Biol Phys</em>, 2025 — <strong>Série pédiatrique la plus récente en protonthérapie.</strong> 117 patients, RMS dominant (46%), incidence ORN de seulement 1,7% — mais les 2 cas avaient des antécédents dentaires et des doses osseuses élevées (Dmax 64–68 Gy).
+    &nbsp;<a href="https://doi.org/10.1016/j.ijrobp.2024.12.001" target="_blank">[DOI]</a>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Étude</th>
+          <th>N</th>
+          <th>Histologie principale</th>
+          <th>Technique RT</th>
+          <th>Incidence ORN</th>
+          <th>Facteurs associés</th>
+          <th>Niveau preuve</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Grippin et al. 2025</strong><br><a href="https://doi.org/10.1016/j.ijrobp.2024.12.001" target="_blank">IJROBP</a></td>
+          <td>117</td>
+          <td>RMS 46%, orbite 32%, paraminengé 44%</td>
+          <td>Protonthérapie (passive scatter 69%, IMPT 31%)</td>
+          <td><span class="chip chip-low">1,7%</span> (2/117)</td>
+          <td>Antécédents dentaires + dose osseuse haute (Dmax 64–68 Gy, Dmoy 42–56 Gy)</td>
+          <td><span class="chip chip-mod">Rétro. monocentrique</span></td>
+        </tr>
+        <tr>
+          <td><strong>Mascard et al. 2025</strong><br><a href="https://doi.org/10.1016/j.otsr.2025.104441" target="_blank">Orthop Traumatol</a></td>
+          <td>Revue (pédiatrique inclus)</td>
+          <td>Sarcomes, tumeurs OS / parties molles</td>
+          <td>Tous</td>
+          <td>Variable selon site</td>
+          <td>Approche multidisciplinaire nécessaire ; ORN tête-cou/maxillofacial prédominante</td>
+          <td><span class="chip chip-unk">Revue d'experts (niveau V)</span></td>
+        </tr>
+        <tr>
+          <td><strong>COG guidelines (Effinger et al. 2014)</strong><br><a href="https://doi.org/10.1007/s00520-014-2260-x" target="_blank">Support Care Cancer</a></td>
+          <td>Revue COG (85 citations)</td>
+          <td>Toutes tumeurs pédiatriques</td>
+          <td>Tous</td>
+          <td>Non quantifiée spécifiquement</td>
+          <td>RT tête-cou + GCSH : risque de néoplasie secondaire orale, séquelles odontogènes, ORN</td>
+          <td><span class="chip chip-mod">Revue COG (consensus)</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Signal clé :</strong> l'ORN pédiatrique est rare en protonthérapie moderne (~1,7%) mais les deux cas documentés avaient en commun des antécédents de soins dentaires et une dose osseuse maximale ≥64 Gy. Ce signal reproduit ce qui est établi en adulte.
+  </div>
+</section>
+
+<!-- 3. Données adultes VADS — extrapolation -->
+<section>
+  <h2>3. Données adultes — Soins dentaires déclencheurs</h2>
+  <p style="font-size:0.88rem;color:var(--text2);margin-bottom:1rem;">Données de référence extrapolables, avec les limites habituelles de transposition adulte→enfant (os en croissance, doses cumulées plus basses, histologies différentes).</p>
+
+  <h3>3.1 Extraction post-RT : risque et timing</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Étude</th>
+          <th>N</th>
+          <th>Type</th>
+          <th>Incidence ORN globale</th>
+          <th>ORN si extraction post-RT</th>
+          <th>Facteur timing</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Kuo et al. 2016</strong><br><a href="https://doi.org/10.1016/j.oraloncology.2016.03.005" target="_blank">Oral Oncol</a><br><em>Taiwan, pop.-based</em></td>
+          <td>1 759</td>
+          <td>Rétro. cohorte</td>
+          <td><span class="chip chip-low">2,2%</span></td>
+          <td><span class="chip chip-high">5,2%</span> vs 1,0% (sans extraction)</td>
+          <td>Extraction &lt;6 mois après RT : risque significativement plus élevé (p=0,03)</td>
+        </tr>
+        <tr>
+          <td><strong>Slettvoll et al. 2023</strong><br><a href="https://doi.org/10.2334/josnusd.22-0392" target="_blank">J Oral Sci</a><br><em>Cancer oropharyngé</em></td>
+          <td>75</td>
+          <td>Rétro.</td>
+          <td>Non précisée</td>
+          <td>Extraction <strong>pré-RT</strong> des molaires en champ irradié : <span class="chip chip-high">risque ↑ significatif</span></td>
+          <td>L'extraction <em>avant</em> la RT augmente aussi le risque si la plaie est dans le champ</td>
+        </tr>
+        <tr>
+          <td><strong>Saenthaveesuk et al. 2022</strong><br><a href="https://doi.org/10.1177/23800844221089549" target="_blank">JDR Clin Trans Res</a></td>
+          <td>359</td>
+          <td>Rétro.</td>
+          <td>Non précisée</td>
+          <td>Extraction post-RT : OR 3,8 (IC95% 1,0–14,4)</td>
+          <td>Tabac (OR 9,0), stéroïdes (OR 6,4), mauvaise hygiène orale (OR 23,7) : facteurs dominants</td>
+        </tr>
+        <tr>
+          <td><strong>Nabil &amp; Samman 2011</strong><br><a href="https://doi.org/10.1016/j.ijom.2010.10.005" target="_blank">IJOMS</a><br><em>Revue systématique</em></td>
+          <td>19 études</td>
+          <td>Revue systématique</td>
+          <td><span class="chip chip-low">7%</span> (toutes extractions post-RT)</td>
+          <td>Mandibule dans champ &gt;60 Gy : <span class="chip chip-high">risque le plus élevé</span></td>
+          <td>OHB prophylactique → 4% ; antibio → 6%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.2 Impact de la technique RT</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Étude</th>
+          <th>N</th>
+          <th>Comparaison</th>
+          <th>Incidence ORN</th>
+          <th>Conclusion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Willaert et al. 2019</strong><br><a href="https://doi.org/10.1016/j.ijom.2019.04.018" target="_blank">IJOMS</a></td>
+          <td>238</td>
+          <td>IMRT (n=109) vs 3D-CRT (n=129)</td>
+          <td>IMRT : ~3,7% vs 3D-CRT : ~14%<br><em>(différence numérique, p=0,37 en MV)</em></td>
+          <td>L'IMRT réduit tendanciellement l'ORN mais l'extraction post-RT et la localisation oropharyngée restent les facteurs indépendants significatifs</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Point clé :</strong> en pédiatrie, la protonthérapie (profil de dose plus favorable) devrait théoriquement réduire encore le risque d'ORN par rapport à l'IMRT photons, mais les données restent limitées. Le cas Grippin 2025 confirme que même sous protons, l'ORN survient si le Dmax osseux est élevé.
+  </div>
+</section>
+
+<!-- 4. Prévention -->
+<section>
+  <h2>4. Stratégies de prévention</h2>
+
+  <h3>4.1 OHB (oxygénothérapie hyperbare)</h3>
+
+  <div class="recommended">
+    Shaw et al. 2019 — <strong>Essai HOPON (RCT phase III)</strong> — L'OHB prophylactique ne réduit pas l'incidence d'ORN à 6 mois après extraction/implant en mandibule irradiée ≥50 Gy (6,4% OHB vs 5,7% contrôle ; OR 1,13 ; p=1). Remet en question le standard établi depuis Marx.
+    &nbsp;<a href="https://doi.org/10.1016/j.ijrobp.2019.02.044" target="_blank">[DOI]</a>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Stratégie</th>
+          <th>Données</th>
+          <th>Efficacité</th>
+          <th>Recommandation actuelle</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OHB pré/post-extraction</strong><br>(protocole Marx : 20 plongées pré + 10 post)</td>
+          <td>HOPON RCT (2019), revue Nabil (2011) : 4% avec OHB</td>
+          <td><span class="chip chip-mod">Controversé</span></td>
+          <td>Non recommandé en routine (HOPON négatif) ; à considérer si dose &gt;60 Gy + facteurs de risque multiples</td>
+        </tr>
+        <tr>
+          <td><strong>Antibioprophylaxie péri-opératoire</strong></td>
+          <td>Revue Nabil 2011 : 6% avec antibio</td>
+          <td><span class="chip chip-mod">Modeste</span></td>
+          <td>Recommandée en pratique courante lors d'extractions en territoire irradié ; pas de protocole standardisé (pénicilline + métronidazole les plus utilisés)</td>
+        </tr>
+        <tr>
+          <td><strong>Bilan dentaire pré-RT + extractions prophylactiques</strong></td>
+          <td>Watson et al. 2023 (cohorte 2 743 pts)</td>
+          <td><span class="chip chip-green">Majeur</span></td>
+          <td><strong>Stratégie clé :</strong> éliminer toutes les dents en mauvais état dans le champ avant RT. Mais attention — Slettvoll 2023 montre que l'extraction <em>pré-RT</em> elle-même augmente le risque si la plaie est dans le champ irradié.</td>
+        </tr>
+        <tr>
+          <td><strong>Protocole PENTO</strong><br>(pentoxifylline + vitamine E ± clodronate)</td>
+          <td>Série rétrospectives, pas d'essai randomisé</td>
+          <td><span class="chip chip-unk">Prometteur, non prouvé</span></td>
+          <td>Utilisé pour traitement ORN constituée (phase fibroatrophique) ; peu de données en prévention</td>
+        </tr>
+        <tr>
+          <td><strong>IMRT / protonthérapie</strong><br>Réduction de la dose osseuse</td>
+          <td>Willaert 2019, Grippin 2025</td>
+          <td><span class="chip chip-low">Tendance favorable</span></td>
+          <td>La réduction du Dmax mandibulaire/maxillaire est le facteur dosimétrique le plus actionnable</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>4.2 Timing des soins dentaires après RT</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-year">Avant RT</div>
+      <div class="tl-text"><strong>Bilan odontostomatologique systématique.</strong> Extractions prophylactiques des dents en mauvais état dans le futur champ irradié. Délai minimum recommandé : 14–21 jours entre extraction et début RT pour permettre la cicatrisation (consensus d'experts, non randomisé).</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">0–6 mois post-RT</div>
+      <div class="tl-text"><strong>Période à haut risque.</strong> Kuo 2016 : extractions dans les 6 premiers mois → risque ORN significativement supérieur. <span class="chip chip-high">Éviter toute extraction non urgente.</span></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">6–12 mois post-RT</div>
+      <div class="tl-text">Risque intermédiaire. Si extraction inévitable : antibioprophylaxie systématique, brossage à la chlorhexidine, sutures atraumatiques.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">&gt;12 mois post-RT</div>
+      <div class="tl-text">Risque réduit mais persistant <em>à vie</em>. <strong>Le risque d'ORN ne disparaît pas.</strong> Chaque soin invasif en territoire irradié nécessite un protocole adapté indéfiniment.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">Implants</div>
+      <div class="tl-text">Pas de consensus sur délai minimal. La plupart des experts recommandent ≥12–18 mois post-RT et évitent les implants si dose &gt;50 Gy sur le site. Prosthèses amovibles préférées en territoire fortement irradié (Corrao et al. 2023).</div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Seuils dosimétriques -->
+<section>
+  <h2>5. Seuils dosimétriques — ORN mandibule/maxillaire</h2>
+
+  <div class="callout red">
+    <strong>⚠ Données dosimétriques spécifiques au maxillaire très limitées</strong> — La quasi-totalité de la littérature concerne la mandibule. Les seuils ci-dessous sont issus de séries adultes VADS et de recommandations d'experts.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Os / paramètre</th>
+          <th>Seuil de risque</th>
+          <th>Niveau de preuve</th>
+          <th>Source / commentaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Mandibule — Dmax</strong></td>
+          <td>&gt;60 Gy : <span class="chip chip-high">haut risque</span><br>50–60 Gy : <span class="chip chip-mod">risque modéré</span><br>&lt;50 Gy : <span class="chip chip-low">faible risque</span></td>
+          <td>Revue systématique (Nabil 2011)</td>
+          <td>Seuil de 60 Gy largement cité ; QUANTEC recommande Dmax mandibule &lt;70 Gy en normofractionné</td>
+        </tr>
+        <tr>
+          <td><strong>Mandibule — Dmoy</strong></td>
+          <td>&lt;35 Gy (objectif IMRT)</td>
+          <td>Consensus pratique</td>
+          <td>Objectif de contournement courant en IMRT tête-cou adulte ; non validé en pédiatrie</td>
+        </tr>
+        <tr>
+          <td><strong>Pédiatrique — Os irradié (Grippin 2025)</strong></td>
+          <td>Dmax 64–68 Gy / Dmoy 42–56 Gy dans les 2 cas d'ORN</td>
+          <td>Rétro. (n=2 cas seulement)</td>
+          <td>Données préliminaires ; Grippin suggère Dmax &lt;50 Gy comme objectif si possible en protonthérapie</td>
+        </tr>
+        <tr>
+          <td><strong>Maxillaire</strong></td>
+          <td>Pas de seuil validé</td>
+          <td>Avis d'experts</td>
+          <td>Os moins vascularisé ; comportement réputé plus favorable que la mandibule mais données insuffisantes. En pratique : mêmes précautions qu'à la mandibule si dose &gt;50 Gy</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 6. Analyse critique -->
+<section>
+  <h2>6. Signaux clés et analyse critique</h2>
+
+  <h3>Données positives (avec niveau de preuve)</h3>
+  <ul style="font-size:0.88rem;color:var(--text2);padding-left:1.2rem;margin-bottom:1rem;">
+    <li style="margin-bottom:0.4rem;">Le soin dentaire le plus à risque est <strong>l'extraction post-RT dans le champ irradié à dose &gt;50–60 Gy</strong> — données concordantes adultes et pédiatriques.</li>
+    <li style="margin-bottom:0.4rem;">L'ORN survient tardivement (médiane : plusieurs années) mais peut être déclenchée précocement si une extraction est réalisée.</li>
+    <li style="margin-bottom:0.4rem;">La protonthérapie réduit le risque global d'ORN en réduisant la dose osseuse, mais n'élimine pas le risque.</li>
+    <li style="margin-bottom:0.4rem;">L'antibioprophylaxie péri-opératoire est simple, peu coûteuse et cohérente avec les mécanismes physiopathologiques.</li>
+  </ul>
+
+  <h3>Données négatives</h3>
+  <ul style="font-size:0.88rem;color:var(--text2);padding-left:1.2rem;margin-bottom:1rem;">
+    <li style="margin-bottom:0.4rem;"><strong>HOPON (RCT 2019) :</strong> l'OHB ne réduit pas l'incidence d'ORN à 6 mois — résultat inattendu qui remet en cause 30 ans de pratique basée sur le protocole Marx.</li>
+    <li style="margin-bottom:0.4rem;"><strong>Slettvoll 2023 :</strong> l'extraction <em>pré-RT</em> augmente aussi le risque si la plaie est dans le champ — résultat contre-intuitif important à connaître.</li>
+  </ul>
+
+  <h3>Hypothèses expliquant les discordances</h3>
+  <ul style="font-size:0.88rem;color:var(--text2);padding-left:1.2rem;margin-bottom:1rem;">
+    <li>L'incidence d'ORN a diminué avec l'IMRT, rendant les essais préventifs difficiles à alimenter (événements trop rares).</li>
+    <li>Les définitions de l'ORN varient entre séries, rendant les comparaisons délicates.</li>
+    <li>Le protocole Marx d'OHB (30 plongées) peut être trop court ou inadapté à la physiopathologie réelle (modèle fibroatrophique de Marx vs modèle de Store).</li>
+  </ul>
+
+  <h3>Lacunes identifiées</h3>
+  <ul class="lacune-list">
+    <li>Absence totale d'essai randomisé ou de cohorte prospective en pédiatrie spécifiquement sur l'ORN et les soins dentaires</li>
+    <li>Données dosimétriques ORN maxillaire pédiatrique quasi-inexistantes (≤2 cas documentés dans la littérature publiée)</li>
+    <li>Absence de consensus sur le timing minimal des soins invasifs post-RT en pédiatrie</li>
+    <li>Pas de biomarqueur prédictif validé de la susceptibilité individuelle à l'ORN</li>
+    <li>Hétérogénéité des populations (âge, histologie, dose, technique) entre séries adultes et pédiatriques</li>
+  </ul>
+</section>
+
+<!-- 7. Niveau de preuve -->
+<section>
+  <h2>7. Niveau de preuve global</h2>
+  <div class="evidence-bar">
+    <div class="ev-icon">II</div>
+    <div class="ev-text">
+      <strong>Option raisonnable — données de phase II–III adultes extrapolées</strong>
+      <span>La prévention de l'ORN repose sur des pratiques cliniques consensuelles et une RCT adulte (HOPON). Les données pédiatriques restent de niveau rétrospectif monocentrique.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Implications pratiques -->
+<section>
+  <h2>8. Implications pratiques pour l'oncologue RT pédiatrique</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Moment</th>
+          <th>Action recommandée</th>
+          <th>Niveau</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Avant RT</strong></td>
+          <td>Consultation odontostomatologique systématique. Planifier l'extraction des dents à risque dans le champ. Délai cicatrisation : ≥14 jours. Débuter fluor topique.</td>
+          <td><span class="chip chip-mod">Consensus</span></td>
+        </tr>
+        <tr>
+          <td><strong>Planification dosimétrique</strong></td>
+          <td>Contourner la mandibule (et maxillaire si concerné) comme OAR. Objectif : Dmax &lt;60 Gy si possible, Dmoy &lt;35 Gy en IMRT/protons.</td>
+          <td><span class="chip chip-mod">Consensus QUANTEC</span></td>
+        </tr>
+        <tr>
+          <td><strong>Pendant le suivi</strong></td>
+          <td>Éducation du patient ET de ses chirurgiens-dentistes de ville : informer de l'irradiation reçue, du site et de la dose. Fournir une attestation de RT.</td>
+          <td><span class="chip chip-mod">Pratique courante</span></td>
+        </tr>
+        <tr>
+          <td><strong>Si soin invasif nécessaire post-RT</strong></td>
+          <td>Antibioprophylaxie systématique. Éviter &lt;6 mois post-RT si possible. L'OHB n'est plus recommandée en routine (HOPON négatif). Discussion collégiale si dose &gt;60 Gy sur le site.</td>
+          <td><span class="chip chip-low">RCT phase III (HOPON)</span></td>
+        </tr>
+        <tr>
+          <td><strong>Implants</strong></td>
+          <td>Prosthèses amovibles préférées en territoire irradié à dose significative. Si implants envisagés : délai ≥12–18 mois, discussion avec maxillo-facial spécialisé.</td>
+          <td><span class="chip chip-unk">Avis d'experts</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="message-final">
+    En 2025, l'ORN post-RT pédiatrique est rare mais non nulle, survient chez des patients ayant reçu des doses osseuses élevées avec antécédents de soins dentaires, et la prévention repose avant tout sur l'optimisation dosimétrique et la prise en charge dentaire pré-RT — l'OHB prophylactique n'ayant pas démontré son efficacité en RCT.
+  </div>
+</section>
+
+<!-- 9. Références -->
+<section>
+  <h2>9. Références (format Vancouver)</h2>
+  <div class="refs">
+    <ol>
+      <li>Grippin AJ et al. Osteoradionecrosis in Pediatric Patients Treated with Proton Therapy for Head and Neck Malignancies. <em>Int J Radiat Oncol Biol Phys.</em> 2025;122(1):159–163. <a href="https://doi.org/10.1016/j.ijrobp.2024.12.001" target="_blank">doi:10.1016/j.ijrobp.2024.12.001</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/39674326/" target="_blank">39674326</a></li>
+      <li>Mascard E et al. Prevention and treatment of post-irradiation fractures and other complications. <em>Orthop Traumatol Surg Res.</em> 2025;112(1S):104441. <a href="https://doi.org/10.1016/j.otsr.2025.104441" target="_blank">doi:10.1016/j.otsr.2025.104441</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/41005531/" target="_blank">41005531</a></li>
+      <li>Frankart AJ et al. Osteoradionecrosis: Exposing the Evidence Not the Bone. <em>Int J Radiat Oncol Biol Phys.</em> 2021;109(5):1206–1218. <a href="https://doi.org/10.1016/j.ijrobp.2020.12.043" target="_blank">doi:10.1016/j.ijrobp.2020.12.043</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/33412258/" target="_blank">33412258</a></li>
+      <li>Shaw RJ et al. HOPON (Hyperbaric Oxygen for the Prevention of Osteoradionecrosis): A Randomized Controlled Trial. <em>Int J Radiat Oncol Biol Phys.</em> 2019;104(3):530–539. <a href="https://doi.org/10.1016/j.ijrobp.2019.02.044" target="_blank">doi:10.1016/j.ijrobp.2019.02.044</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/30851351/" target="_blank">30851351</a></li>
+      <li>Kuo TJ et al. Jaw osteoradionecrosis and dental extraction after head and neck radiotherapy. <em>Oral Oncol.</em> 2016;56:71–77. <a href="https://doi.org/10.1016/j.oraloncology.2016.03.005" target="_blank">doi:10.1016/j.oraloncology.2016.03.005</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/27086489/" target="_blank">27086489</a></li>
+      <li>Slettvoll S et al. Tooth extraction prior to radiotherapy for oropharyngeal cancer increases the risk of osteoradionecrosis. <em>J Oral Sci.</em> 2023;65(2):87–89. <a href="https://doi.org/10.2334/josnusd.22-0392" target="_blank">doi:10.2334/josnusd.22-0392</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/36858604/" target="_blank">36858604</a></li>
+      <li>Saenthaveesuk P et al. Using Electronic Dental Records to Assess Osteoradionecrosis Risk in Irradiated Head and Neck Cancer. <em>JDR Clin Trans Res.</em> 2022;8(3):244–256. <a href="https://doi.org/10.1177/23800844221089549" target="_blank">doi:10.1177/23800844221089549</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/35426343/" target="_blank">35426343</a></li>
+      <li>Nabil S, Samman N. Incidence and prevention of osteoradionecrosis after dental extraction in irradiated patients: a systematic review. <em>Int J Oral Maxillofac Surg.</em> 2011;40(3):229–243. <a href="https://doi.org/10.1016/j.ijom.2010.10.005" target="_blank">doi:10.1016/j.ijom.2010.10.005</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/21115324/" target="_blank">21115324</a></li>
+      <li>Willaert R et al. Does IMRT lower the risk of osteoradionecrosis of the jaw? <em>Int J Oral Maxillofac Surg.</em> 2019;48(11):1387–1393. <a href="https://doi.org/10.1016/j.ijom.2019.04.018" target="_blank">doi:10.1016/j.ijom.2019.04.018</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/31230773/" target="_blank">31230773</a></li>
+      <li>Watson E et al. Dental insurance status, pre-radiation dental extraction and risk of osteoradionecrosis. <em>Oral Oncol.</em> 2023;145:106527. <a href="https://doi.org/10.1016/j.oraloncology.2023.106527" target="_blank">doi:10.1016/j.oraloncology.2023.106527</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/37499325/" target="_blank">37499325</a></li>
+      <li>Corrao G et al. Oral Surgery and Osteoradionecrosis in Patients Undergoing Head and Neck RT: An Update. <em>Biomedicines.</em> 2023;11(12). <a href="https://doi.org/10.3390/biomedicines11123339" target="_blank">doi:10.3390/biomedicines11123339</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/38137559/" target="_blank">38137559</a></li>
+      <li>Effinger KE et al. Oral and dental late effects in survivors of childhood cancer: a Children's Oncology Group report. <em>Support Care Cancer.</em> 2014;22(7):2009–2019. <a href="https://doi.org/10.1007/s00520-014-2260-x" target="_blank">doi:10.1007/s00520-014-2260-x</a> — PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/24781353/" target="_blank">24781353</a></li>
+    </ol>
+    <p style="margin-top:0.8rem;font-size:0.75rem;">Sources récupérées via PubMed (outils MCP PubMed). DOIs vérifiés.</p>
+  </div>
+</section>
+
+<script>
+function toggleTheme() {
+  var current = document.documentElement.getAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+  try { localStorage.setItem('orn-theme', document.documentElement.getAttribute('data-theme')); } catch(e) {}
+}
+try {
+  var saved = localStorage.getItem('orn-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+} catch(e) {}
+</script>
+</body>
+</html>

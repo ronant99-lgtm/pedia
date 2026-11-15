@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>TSC Maligne — Radiothérapie de sauvetage</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── THÈME (root = sombre, body.light = parchemin) ── */
+:root {
+  --bg:       #0d1117;
+  --surface:  #161b22;
+  --surface2: #1c2330;
+  --surface3: #21262d;
+  --border:   #2a3441;
+  --border2:  #30363d;
+  --text:     #e6edf3;
+  --text2:    #8b949e;
+  --text3:    #6e7681;
+  --green:    #3fb950;
+  --blue:     #388bfd;
+  --red:      #f85149;
+  --yellow:   #d29922;
+  --purple:   #a371f7;
+  --orange:   #f0883e;
+  --cyan:     #39c5cf;
+  --accent:   #f0883e;
+  --radius:   10px;
+}
+body.light {
+  --bg:       #f5f0e8;
+  --surface:  #ffffff;
+  --surface2: #ede8dc;
+  --surface3: #e6e0d2;
+  --border:   #c8bfaa;
+  --border2:  #d4ccba;
+  --text:     #1a1208;
+  --text2:    #5a4f3a;
+  --text3:    #9a8f7a;
+  --green:    #2d7a3a;
+  --blue:     #1a5fa8;
+  --red:      #c0392b;
+  --yellow:   #a0720a;
+  --purple:   #6b3fa0;
+  --orange:   #c45a10;
+  --cyan:     #1a7a8a;
+  --accent:   #c45a10;
+}
+
+/* ── BASE ── */
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background .25s, color .25s;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13,17,23,0.97);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+body.light header {
+  background: rgba(245,240,232,0.97);
+  backdrop-filter: blur(10px);
+}
+.hdr-logo {
+  width: 34px; height: 34px;
+  border: 1.5px solid var(--accent);
+  border-radius: 7px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.hdr-titles { flex: 1; min-width: 200px; }
+.hdr-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.2;
+}
+.hdr-subtitle {
+  font-size: 11px;
+  color: var(--text2);
+  font-family: 'DM Mono', monospace;
+}
+.hdr-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  opacity: .85;
+}
+.hdr-disclaimer {
+  font-size: 10px;
+  color: var(--text3);
+  font-style: italic;
+  max-width: 320px;
+  line-height: 1.3;
+}
+.btn-theme {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.btn-theme:hover { background: var(--surface3); }
+
+/* ── MAIN CONTAINER ── */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+
+/* ── SECTION LABELS ── */
+.slabel {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  margin-top: 32px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.slabel:first-child { margin-top: 0; }
+
+/* ── ALERT NIVEAU DE PREUVE ── */
+.evidence-alert {
+  background: var(--surface2);
+  border: 1px solid var(--yellow);
+  border-left: 4px solid var(--yellow);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.evidence-alert .ev-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.evidence-alert .ev-text { font-size: 13px; line-height: 1.5; color: var(--text2); }
+.evidence-alert strong { color: var(--yellow); }
+
+/* ── SIGNAL BOX ── */
+.signal-box {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text);
+}
+body.light .signal-box { color: #3a2e1a; }
+.signal-hl  { color: var(--orange); font-weight: 600; }
+.signal-hl2 { color: var(--blue);   font-weight: 600; }
+.signal-hl3 { color: var(--green);  font-weight: 600; }
+.signal-hl4 { color: var(--red);    font-weight: 600; }
+
+/* ── INDICATION CARDS ── */
+.indic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.indic-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+body.light .indic-card { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.indic-card .ic-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ic-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.ic-badge.green  { background: rgba(63,185,80,.15);  color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+.ic-badge.orange { background: rgba(240,136,62,.15); color: var(--orange); border: 1px solid rgba(240,136,62,.3); }
+.ic-badge.red    { background: rgba(248,81,73,.15);  color: var(--red);   border: 1px solid rgba(248,81,73,.3); }
+body.light .ic-badge.green  { background: rgba(45,122,58,.1);  color: var(--green); }
+body.light .ic-badge.orange { background: rgba(196,90,16,.1);  color: var(--orange); }
+body.light .ic-badge.red    { background: rgba(192,57,43,.1);  color: var(--red); }
+.ic-title {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+.ic-body {
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.55;
+}
+.ic-body strong { color: var(--text); }
+
+/* ── RT TABLE DOSIMÉTRIQUE ── */
+.rt-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+}
+.rt-table thead th {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text3);
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border2);
+  text-align: left;
+  background: var(--surface2);
+}
+.rt-table tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+}
+.rt-table tbody tr:last-child td { border-bottom: none; }
+.rt-table tbody tr:hover td { background: var(--surface2); }
+body.light .rt-table tbody tr:hover td { background: #ede8dc; }
+.rt-table tbody td:first-child { color: var(--text); font-weight: 500; }
+.rt-dose {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--blue);
+}
+.rt-dose.esc { color: var(--orange); }
+.rt-dose.highesc { color: var(--red); }
+.tag-nd {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  font-style: italic;
+}
+
+/* ── DATA TABLE PUBLICATIONS ── */
+.pubs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.pubs-table thead th {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text3);
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border2);
+  text-align: left;
+  background: var(--surface2);
+}
+.pubs-table tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+  line-height: 1.45;
+}
+.pubs-table tbody tr:last-child td { border-bottom: none; }
+.pubs-table tbody tr:hover td { background: var(--surface2); }
+body.light .pubs-table tbody tr:hover td { background: #ede8dc; }
+.pubs-table td:first-child { color: var(--text); font-weight: 500; white-space: nowrap; }
+
+.loe-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+.loe-3 { background: rgba(248,81,73,.15); color: var(--red); border: 1px solid rgba(248,81,73,.3); }
+.loe-4 { background: rgba(110,118,129,.2); color: var(--text3); border: 1px solid var(--border2); }
+
+/* ── NOTA BENE BOX ── */
+.nota-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.55;
+  margin-top: 12px;
+}
+.nota-box strong { color: var(--text); }
+
+/* ── VOLUMES BLOCK ── */
+.vol-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+body.light .vol-block { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.vol-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.vol-item {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+}
+.vol-item strong { color: var(--accent); }
+.vol-arrow { color: var(--text3); font-size: 14px; }
+.vol-notes { font-size: 12px; color: var(--text2); line-height: 1.55; }
+.vol-notes li { margin-left: 16px; margin-bottom: 4px; }
+
+/* ── KEY MESSAGE ── */
+.key-msg {
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.key-msg .km-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ── REFS LIST ── */
+.refs-list {
+  list-style: none;
+  padding: 0;
+}
+.refs-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+  display: flex;
+  gap: 10px;
+}
+.refs-list li:last-child { border-bottom: none; }
+.ref-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  flex-shrink: 0;
+  min-width: 22px;
+  padding-top: 1px;
+}
+.ref-body { flex: 1; }
+.ref-note {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--orange);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.ref-body a { color: var(--blue); text-decoration: none; }
+.ref-body a:hover { text-decoration: underline; }
+body.light .ref-body a { color: var(--blue); }
+
+/* ── PRINT FOOTER ── */
+.print-footer { display: none; }
+
+/* ── PRINT ── */
+@media print {
+  body, body.light { background: #fff !important; color: #000 !important; }
+  header, body.light header {
+    position: static !important; background: #fff !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+  .btn-theme { display: none !important; }
+  .evidence-alert { background: #fffbe6 !important; border-color: #e6a000 !important; }
+  .signal-box { background: #f8f8f8 !important; }
+  .indic-card, .vol-block { background: #fff !important; border: 1px solid #ddd !important; }
+  .rt-table thead th, .pubs-table thead th { background: #f0f0f0 !important; }
+  :root, body.light {
+    --text: #000; --text2: #444; --text3: #888;
+    --surface: #fff; --surface2: #f5f5f5; --surface3: #eee;
+    --border: #ddd; --border2: #eee; --blue: #1a5fa8;
+    --orange: #b85500; --red: #c0392b; --green: #2d7a3a;
+    --accent: #b85500;
+  }
+  .print-footer { display: block; font-size: 8pt; color: #999; margin-top: 22px; border-top: 1px solid #ddd; padding-top: 8px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-logo">TSC</div>
+  <div class="hdr-titles">
+    <div class="hdr-title">Tératome sacro-coccygien malin — Radiothérapie de sauvetage</div>
+    <div class="hdr-subtitle">PICO · RT adjuvante en situation de récidive · Enfant</div>
+  </div>
+  <span class="hdr-badge">MAKEI · GPOH-GCT · 2026</span>
+  <span class="hdr-disclaimer">Usage décisionnel RCP uniquement — ne substitue pas l'avis du radiooncologiste référent</span>
+  <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Passer en mode clair">◑</button>
+</header>
+
+<div class="container">
+
+  <!-- ALERTE NIVEAU DE PREUVE -->
+  <div class="evidence-alert">
+    <div class="ev-icon">⚠</div>
+    <div class="ev-text">
+      <strong>Niveau de preuve très faible — données de niche.</strong>
+      L'ensemble des données sur la RT dans ce contexte provient de séries rétrospectives de faible effectif (n &lt; 50 patients recevant de la RT) ou de mentions incidentes dans des protocoles multicentriques. Aucun essai randomisé, aucune étude prospective dédiée. La dose seuil de <strong>&gt;45 Gy</strong> citée dans toutes les recommandations repose sur un seul sous-groupe de l'analyse MAKEI (Schneider 2001, n = 22 rechutes tous traitements confondus).
+    </div>
+  </div>
+
+  <!-- CONTEXTE -->
+  <div class="slabel">Contexte — Place de la RT en 2026</div>
+  <div class="signal-box">
+    Dans l'ère platine, <span class="signal-hl2">la chimiothérapie cisplatine/carboplatine et la résection chirurgicale complète constituent le traitement de référence</span> des TSC malins, avec une survie globale de l'ordre de <strong>80–90 %</strong> en première ligne (MAKEI 83/86/89, JEB à Great Ormond Street). <span class="signal-hl4">La radiothérapie n'est pas un traitement standard</span> et son utilisation est exceptionnelle : la position de Misra et al. (GOS, 1997) — « <em>radiotherapy is hardly ever needed</em> » — reste représentative du consensus actuel. Dans la publication la plus récente sur le sujet (Schmidt et al., IJROBP 2022), <span class="signal-hl">41 patients seulement ont été irradiés dans le cadre du protocole MAKEI entre 1983 et 2021</span>, sur l'ensemble des centres allemands — illustrant à quel point la RT est une intervention de dernier recours. Son usage est néanmoins reconnu dans la situation de <span class="signal-hl">résection microscopiquement incomplète (R1/R2) après traitement de sauvetage</span>, comme modalité visant à compléter le contrôle local lorsqu'une nouvelle résection complète est impossible.
+  </div>
+
+  <!-- INDICATIONS -->
+  <div class="slabel">Indications — Quand envisager la RT ?</div>
+  <div class="indic-grid">
+    <div class="indic-card">
+      <div class="ic-header">
+        <span class="ic-badge orange">INDICATION RECONNUE</span>
+      </div>
+      <div class="ic-title">Résection R1/R2 après chirurgie de sauvetage</div>
+      <div class="ic-body">
+        Récidive locale de TSC malin, après chimiothérapie platine de 2e ligne + chirurgie de sauvetage, en cas de <strong>marge microscopiquement positive (R1) ou résection macroscopiquement incomplète (R2)</strong> non réopérable. La RT adjuvante vise alors à compléter le contrôle local. Données : Schneider 2001 <em>(&gt;45 Gy → favorable outcome dans ce sous-groupe)</em>.
+      </div>
+    </div>
+    <div class="indic-card">
+      <div class="ic-header">
+        <span class="ic-badge orange">INDICATION DISCUTÉE</span>
+      </div>
+      <div class="ic-title">Maladie localement avancée non résécable en récidive</div>
+      <div class="ic-body">
+        Tumeur localement évoluée ou récidivante sans option chirurgicale de sauvetage. La RT peut être envisagée <strong>en association à une chimiothérapie de 2e ligne</strong> après discussion multidisciplinaire spécialisée (centre de recours GCT pédiatrique). Données : Schmidt 2022 <em>(contrôle local 32/41 patients — tous contextes confondus)</em>.
+      </div>
+    </div>
+    <div class="indic-card">
+      <div class="ic-header">
+        <span class="ic-badge red">NON INDIQUÉ</span>
+      </div>
+      <div class="ic-title">RT adjuvante après résection complète R0</div>
+      <div class="ic-body">
+        <strong>Aucun rôle de la RT adjuvante</strong> si la résection est microscopiquement complète, quelle que soit la ligne de traitement. Göbel 2000 : <em>« In case of a microscopically complete tumor resection there is no role for adjuvant chemo- or radiotherapy. »</em> La chimiothérapie seule est recommandée après R0.
+      </div>
+    </div>
+  </div>
+
+  <!-- DONNÉES DOSIMÉTRIQUES -->
+  <div class="slabel">Données dosimétriques disponibles dans la littérature</div>
+  <table class="rt-table">
+    <thead>
+      <tr>
+        <th>Paramètre</th>
+        <th>Valeur publiée</th>
+        <th>Source</th>
+        <th>Remarque</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Dose totale — seuil minimal</td>
+        <td><span class="rt-dose">&gt; 45 Gy</span></td>
+        <td>[1] Schneider 2001</td>
+        <td>Seule valeur seuil explicite — sous-groupe R1</td>
+      </tr>
+      <tr>
+        <td>Dose totale — plage observée</td>
+        <td><span class="rt-dose esc">20–60 Gy</span></td>
+        <td>[2] Schmidt 2022</td>
+        <td>Grande hétérogénéité — 41 patients, 1983–2021</td>
+      </tr>
+      <tr>
+        <td>Dose par fraction observée</td>
+        <td><span class="rt-dose">1,5–4 Gy / fraction</span></td>
+        <td>[2] Schmidt 2022</td>
+        <td>Fourchette très large — pas de standard défini</td>
+      </tr>
+      <tr>
+        <td>Fractionnement conventionnel (extrapolé)</td>
+        <td><span class="rt-dose">1,8–2 Gy / fraction</span></td>
+        <td>[hors Consensus] pratique GCT</td>
+        <td>Analogie GCT pédiatriques — non spécifique TSC</td>
+      </tr>
+      <tr>
+        <td>BED₁₀ — dose seuil (45 Gy, 1,8 Gy/f)</td>
+        <td><span class="rt-dose">53,1 Gy₁₀</span></td>
+        <td>Calcul LQ : BED = D × (1 + d/α/β)</td>
+        <td>α/β = 10 Gy (tumeur GCT)</td>
+      </tr>
+      <tr>
+        <td>BED₁₀ — dose standard (50 Gy, 2 Gy/f)</td>
+        <td><span class="rt-dose">60 Gy₁₀</span></td>
+        <td>Calcul LQ</td>
+        <td>Analogue protocoles sarcomes pédiatriques</td>
+      </tr>
+      <tr>
+        <td>BED₁₀ — dose haute (54 Gy, 1,8 Gy/f)</td>
+        <td><span class="rt-dose esc">63,7 Gy₁₀</span></td>
+        <td>Calcul LQ</td>
+        <td>Limite haute envisageable si OAR permissifs</td>
+      </tr>
+      <tr>
+        <td>Protonthérapie</td>
+        <td><span class="rt-dose esc">14 / 41 patients</span></td>
+        <td>[2] Schmidt 2022</td>
+        <td>34 % des patients irradiés — à privilégier si disponible</td>
+      </tr>
+      <tr>
+        <td>Volumes cibles — standards définis</td>
+        <td><span class="tag-nd">Non définis dans la littérature</span></td>
+        <td>—</td>
+        <td>Extrapolation nécessaire (voir section volumes)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- VOLUMES CIBLES -->
+  <div class="slabel">Volumes cibles — Proposition par extrapolation</div>
+  <div class="nota-box" style="margin-bottom:14px;">
+    <strong>⚠ Aucune recommandation formelle de délinéation</strong> n'existe spécifiquement pour la RT dans le TSC malin. Les propositions ci-dessous sont extrapolées des pratiques GCT pédiatriques extracraniens (protocoles MAKEI/GPOH-GCT) et des principes généraux de RT pelvienne pédiatrique. Validation par le radiooncologiste référent GCT indispensable.
+  </div>
+  <div class="vol-block">
+    <div class="vol-chain">
+      <div class="vol-item"><strong>GTV</strong></div>
+      <span class="vol-arrow">→</span>
+      <div class="vol-item"><strong>CTV</strong></div>
+      <span class="vol-arrow">→</span>
+      <div class="vol-item"><strong>PTV</strong></div>
+    </div>
+    <ul class="vol-notes">
+      <li><strong>GTV :</strong> masse tumorale résiduelle macroscopique visible en IRM post-chimiothérapie (T2 + diffusion) ± rehaussement post-op — délimitation sur IRM de planification en position de traitement.</li>
+      <li><strong>CTV :</strong> GTV + marges d'extension microscopique présumée. Pas de consensus — pratique MAKEI : inclusion des marges chirurgicales positives, du lit opératoire, et extension à la loge pré-sacrée si envahissement antérieur documenté. Adapter aux barrières anatomiques (fascia, os). <em>Pas de drainage ganglionnaire électif systématique documenté pour TSC malins (données absentes).</em></li>
+      <li><strong>PTV :</strong> CTV + 5–10 mm selon technique (IGRT disponible) et site anatomique.</li>
+      <li><strong>OAR à contourner en priorité :</strong> rectum, moelle épinière / queue de cheval, têtes fémorales, intestin grêle, organes génitaux internes, reins si extension haute, foie si type III–IV.</li>
+    </ul>
+  </div>
+
+  <!-- RÉSULTATS ONCOLOGIQUES -->
+  <div class="slabel">Résultats oncologiques — Publications disponibles</div>
+  <table class="pubs-table">
+    <thead>
+      <tr>
+        <th>Référence</th>
+        <th>N (RT)</th>
+        <th>Contexte</th>
+        <th>Résultats RT</th>
+        <th>Niveau</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>[1] Schneider et al.<br><em>JCO 2001</em></td>
+        <td>≤ 22<br>(sous-groupe)</td>
+        <td>22 récidives TSC malins. RT après résection incomplète (R1). Protocoles MAKEI 83/86, 89, 96.</td>
+        <td>RT &gt; 45 Gy → évolution favorable dans ce sous-groupe. CL = pilier du traitement de sauvetage. RT réservée à R1.</td>
+        <td><span class="loe-badge loe-3">Rétro</span></td>
+      </tr>
+      <tr>
+        <td>[2] Schmidt et al.<br><em>IJROBP 2022</em></td>
+        <td>41</td>
+        <td>GCT extracraniens pédiatriques irradiés dans le cadre MAKEI-96 ou KiProReg, 1983–2021. Médiane d'âge 10,5 ans. Histologies : dysgerminomes et TSV principalement. Sites variés dont sacrococcygiens.</td>
+        <td>CL atteint chez 32/41 patients (78 %). Doses 20–60 Gy, 1,5–4 Gy/fr. Protonthérapie 14/41 (34 %). RT efficace mais séquelles potentielles → discussion MDT systématique.</td>
+        <td><span class="loe-badge loe-3">Rétro</span></td>
+      </tr>
+      <tr>
+        <td>[3] Misra et al.<br><em>Eur J Pediatr Surg 1997</em></td>
+        <td>0 (pour RT)</td>
+        <td>20 TSC malins, Great Ormond Street. Protocoles BEP puis JEB. Survie globale &gt; 90 % avec JEB.</td>
+        <td><em>« Radiotherapy is hardly ever needed. »</em> RT non utilisée dans cette cohorte avec JEB — position de principe.</td>
+        <td><span class="loe-badge loe-3">Rétro</span></td>
+      </tr>
+      <tr>
+        <td>[4] Büyükpamukçu et al.<br><em>Tumori 2013</em></td>
+        <td>Non précisé</td>
+        <td>58 TSC malins, 30 ans d'expérience (Ankara). OS 50,9 %, EFS 43,8 %. Données RT enregistrées mais non détaillées dans l'abstract. AFP ≥ 10 000 ng/mL = facteur pronostique favorable (TSV répondant à la chimio).</td>
+        <td>RT utilisée mais dose/fractions non publiées dans les sources accessibles. Résultats inférieurs aux séries MAKEI/JEB — biais de sélection (population plus défavorable).</td>
+        <td><span class="loe-badge loe-3">Rétro</span></td>
+      </tr>
+      <tr>
+        <td>[5] Pantoja &amp; Roswit<br><em>Cancer Letters 1975</em></td>
+        <td>19</td>
+        <td>27 tératomes malins toutes localisations — 19 irradiés. Ère pré-platine.</td>
+        <td>RT efficace en palliation des tératomes indifférenciés (embryonnaires) sacro-coccygiens en bas âge. Moins efficace chez l'adulte et dans les localisations médiastinales.</td>
+        <td><span class="loe-badge loe-4">Hist.</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PROTONTHÉRAPIE -->
+  <div class="slabel">Protonthérapie — Rationnel et données disponibles</div>
+  <div class="signal-box">
+    La protonthérapie présente un <span class="signal-hl2">rationnel dosimétrique fort</span> pour les TSC malins pédiatriques irradiés : (1) épargne du contenu rectal, de l'intestin grêle et des organes génitaux internes ; (2) réduction de la dose intégrale aux structures en développement (bassin, rachis sacré) ; (3) absence d'irradiation sortante en arrière du volume cible. <span class="signal-hl">34 % des patients irradiés dans la série MAKEI 2022 ont bénéficié de la protonthérapie</span>, sans analyse comparative publiée versus photons dans ce contexte spécifique. En l'absence de données comparatives, la protonthérapie doit être <span class="signal-hl3">discutée en priorité pour tout enfant jeune (&lt; 5 ans) nécessitant une RT pelvienne</span>, selon les recommandations générales de radiothérapie pédiatrique (SFRO, PTCOG).
+  </div>
+
+  <!-- ESSAIS EN COURS -->
+  <div class="slabel">Essais actifs — TSC malins / GCT pédiatriques extracraniens avec RT</div>
+  <div class="nota-box">
+    <strong>Aucun essai clinique actif dédié à la RT dans les TSC malins pédiatriques</strong> n'a été identifié sur ClinicalTrials.gov lors de cette revue (juin 2026). Le protocole <strong>GPOH-GCT 2013</strong> (NCT02015338) — protocole multinational allemand pour GCT extracraniens pédiatriques — inclut des recommandations sur la RT comme modalité de sauvetage mais ne comporte pas de bras RT randomisé. Le projet <strong>COS-SCT</strong> (Van Dongen, Amsterdam UMC, BMJ Open 2026) vise la standardisation des outcomes rapportés pour les TSC pédiatriques, sans composante RT dédiée. Une veille sur <a href="https://clinicaltrials.gov" target="_blank">clinicaltrials.gov</a> avec le terme « sacrococcygeal teratoma » ou « GPOH-GCT » est recommandée.
+  </div>
+
+  <!-- MESSAGE CLÉ -->
+  <div class="slabel">Message à retenir pour la RCP</div>
+  <div class="key-msg">
+    <span class="km-label">Message clé</span>
+    Dans les TSC malins pédiatriques en récidive, la RT n'est pas standard : elle est réservée aux situations de résection chirurgicale de sauvetage incomplète (R1/R2) ou à la maladie localement non résécable, avec une dose ≥ 45 Gy en fractionnement conventionnel (1,8–2 Gy/f). La décision doit être prise en réunion multidisciplinaire spécialisée (centre de référence GCT pédiatrique) ; la protonthérapie doit être discutée en priorité chez l'enfant jeune si disponible.
+  </div>
+
+  <!-- LACUNES IDENTIFIÉES -->
+  <div class="slabel">Lacunes — Ce que la littérature ne permet pas de répondre</div>
+  <div class="signal-box" style="font-size:13px;">
+    <ul style="padding-left:18px; line-height:1.8;">
+      <li><strong>Volumes cibles :</strong> aucun atlas de délinéation ni recommandation formelle publiée pour les TSC malins. Extrapolation depuis les GCT gonadaux ou les sarcomes pelviens.</li>
+      <li><strong>Dose optimale :</strong> le seuil de 45 Gy repose sur un seul sous-groupe de 22 patients (Schneider 2001) — la dose maximale tolérée et efficace n'est pas définie.</li>
+      <li><strong>Timing optimal :</strong> RT néo-adjuvante (avant chirurgie de sauvetage pour faciliter la résection) vs adjuvante (après R1) — aucune donnée comparative.</li>
+      <li><strong>Toxicité à long terme :</strong> les données sur les séquelles tardives de la RT dans ce contexte (dysfonction sphinctérienne sur terrain déjà chirurgical, toxicité osseuse, second cancer) sont absentes de la littérature.</li>
+      <li><strong>Protons vs photons :</strong> aucune comparaison dosimétrique ou clinique publiée pour ce site et ce contexte spécifiques.</li>
+    </ul>
+  </div>
+
+  <!-- RÉFÉRENCES -->
+  <div class="slabel">Références citées</div>
+  <ul class="refs-list">
+    <li>
+      <span class="ref-num">[1]</span>
+      <span class="ref-body">
+        Schneider DT, Wessalowski R, Calaminus G, et al. Treatment of recurrent malignant sacrococcygeal germ cell tumors: analysis of 22 patients registered in the German protocols MAKEI 83/86, 89, and 96. <em>J Clin Oncol.</em> 2001;19(7):1951–1960.
+        <a href="https://doi.org/10.1200/JCO.2001.19.7.1951" target="_blank">DOI: 10.1200/JCO.2001.19.7.1951</a>
+        <span class="ref-note">▸ RT &gt; 45 Gy → CL favorable en R1</span>
+      </span>
+    </li>
+    <li>
+      <span class="ref-num">[2]</span>
+      <span class="ref-body">
+        Schmidt L et al. Radiotherapy within the interdisciplinary treatment strategy for pediatric extracranial germ cell tumors. <em>Int J Radiat Oncol Biol Phys.</em> 2022.
+        <a href="https://consensus.app/papers/details/141adeb51403589ebcb60e16c1fb4374/" target="_blank">Consensus</a>
+        <span class="ref-note">▸ 41 patients irradiés, 20–60 Gy, CL 78 %, PT 34 %</span>
+      </span>
+    </li>
+    <li>
+      <span class="ref-num">[3]</span>
+      <span class="ref-body">
+        Misra D, Pritchard J, Drake DP, et al. Markedly improved survival in malignant sacro-coccygeal teratomas — 16 years experience. <em>Eur J Pediatr Surg.</em> 1997;7(3):152–155.
+        <a href="https://doi.org/10.1055/s-2008-1071078" target="_blank">DOI: 10.1055/s-2008-1071078</a>
+        <span class="ref-note">▸ JEB → SG &gt; 90 % · « RT hardly ever needed »</span>
+      </span>
+    </li>
+    <li>
+      <span class="ref-num">[4]</span>
+      <span class="ref-body">
+        Büyükpamukçu M, Varan A, Küpeli S, et al. Malignant sacrococcygeal germ cell tumors in children: a 30-year experience from a single institution. <em>Tumori.</em> 2013;99(1):51–56.
+        <a href="https://doi.org/10.1177/030089161309900109" target="_blank">DOI: 10.1177/030089161309900109</a>
+        <span class="ref-note">▸ 58 patients, OS 50,9 %, RT utilisée (détails non publiés)</span>
+      </span>
+    </li>
+    <li>
+      <span class="ref-num">[5]</span>
+      <span class="ref-body">
+        Pantoja E, Roswit B. Radiotherapy in malignant teratomas. <em>Cancer Letters.</em> 1975;1(2):103–107.
+        <a href="https://doi.org/10.1016/s0304-3835(75)95697-9" target="_blank">DOI: 10.1016/s0304-3835(75)95697-9</a>
+        <span class="ref-note">▸ Ère pré-platine — radiosensibilité, données historiques</span>
+      </span>
+    </li>
+    <li>
+      <span class="ref-num">[6]</span>
+      <span class="ref-body">
+        Göbel U, et al. Germ-cell tumors in childhood and adolescence. <em>Ann Oncol.</em> 2000;11(3):263–271.
+        <a href="https://consensus.app/papers/details/a12ea32655ad5f1c9719d49121846614/" target="_blank">Consensus</a>
+        <span class="ref-note">▸ Résection R0 → pas de rôle pour RT ou chimio adjuvante</span>
+      </span>
+    </li>
+    <li>
+      <span class="ref-num">[7]</span>
+      <span class="ref-body">
+        Göbel U, et al. Multimodal treatment of malignant sacrococcygeal GCT: MAKEI 83/86 and 89. <em>J Clin Oncol.</em> 2001;19(7):1943–1950.
+        <a href="https://consensus.app/papers/details/969719367918521e83bf1fee61c64709/" target="_blank">Consensus</a>
+        <span class="ref-note">▸ Chimio néo-adj → R0 facilité — SG 81 % · pas de RT dans l'analyse</span>
+      </span>
+    </li>
+    <li>
+      <span class="ref-num">[8]</span>
+      <span class="ref-body">
+        Hulsker CC, et al. Treatment and survival of malignant extracranial GCTs in the paediatric population: SR &amp; meta-analysis. <em>Cancers.</em> 2021;13(12):2937.
+        <a href="https://consensus.app/papers/details/485dc050f1035d9291eb59383e90dc40/" target="_blank">Consensus</a>
+        <span class="ref-note">▸ 5095 patients — survie hétérogène pour TSC vs gonadaux</span>
+      </span>
+    </li>
+  </ul>
+
+  <div class="print-footer">
+    TSC Maligne — RT de sauvetage · Revue bibliographique PICO · ILB · Juin 2026 · Usage RCP uniquement — non substitutif d'une consultation spécialisée.
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══ THÈME ═══
+function initTheme() {
+  try {
+    var t = localStorage.getItem('theme-tsc-rt');
+    if (t === 'light') { document.body.classList.add('light'); document.getElementById('btn-theme').textContent = '☀'; }
+    else { document.body.classList.remove('light'); document.getElementById('btn-theme').textContent = '◑'; }
+  } catch(e) {}
+}
+function toggleTheme() {
+  try {
+    var isLight = document.body.classList.toggle('light');
+    document.getElementById('btn-theme').textContent = isLight ? '☀' : '◑';
+    localStorage.setItem('theme-tsc-rt', isLight ? 'light' : 'dark');
+  } catch(e) {}
+}
+initTheme();
+</script>
+</body>
+</html>
